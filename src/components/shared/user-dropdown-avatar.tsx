@@ -49,7 +49,7 @@ export function DropdownMenuAvatar() {
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem style={{ color: "red" }}>
+                <DropdownMenuItem className="text-red-500">
                     <LogOutIcon />
                     Đăng xuất
                 </DropdownMenuItem>
