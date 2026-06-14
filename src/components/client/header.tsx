@@ -19,8 +19,9 @@ import {
 } from "@/components/ui/navigation-menu"
 import { DropdownMenuAvatar } from "../shared/user-dropdown-avatar";
 import LoginButton from "../shared/login-button";
-
+import { useSession } from "next-auth/react"
 export default function Header() {
+    const { data: session } = useSession()
     const menuItems = [
         {
             title: "Trang chủ",
@@ -84,8 +85,7 @@ export default function Header() {
                 </div>
                 <div className="flex items-center gap-2">
                     <ModeToggle />
-                    <LoginButton />
-                    {/* <DropdownMenuAvatar /> */}
+                    {session?.user ? <DropdownMenuAvatar /> : <LoginButton />}
                     <MobileNavigation />
                 </div>
 

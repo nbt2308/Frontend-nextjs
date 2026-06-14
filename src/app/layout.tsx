@@ -5,6 +5,8 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import Header from "@/components/client/header";
 import Footer from "@/components/client/footer";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SessionProvider } from "next-auth/react"
+import Providers from "./providers";
 const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],
@@ -26,20 +28,24 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html
-            suppressHydrationWarning
-            lang="en"
-            className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-        >
+        <SessionProvider>
+            <html
+                suppressHydrationWarning
+                lang="en"
+                className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+            >
 
-            <body className="min-h-full flex flex-col">
-                <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                    <Header />
-                    {children}
-                    <Footer />
-                </ThemeProvider>
-            </body>
+                <body className="min-h-full flex flex-col">
+                    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                        <Header />
+                        <Providers>
+                            {children}
+                        </Providers>
+                        <Footer />
+                    </ThemeProvider>
+                </body>
 
-        </html>
+            </html>
+        </SessionProvider>
     );
 }
