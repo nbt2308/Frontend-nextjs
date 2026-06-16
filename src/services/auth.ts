@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { InActiveAccountError, InvalidEmailPasswordError } from "@/types/errors";
+import { ConflictAccountError, InActiveAccountError, InvalidEmailPasswordError, InvalidParameters } from "@/types/errors";
 
 const authAxios = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -9,7 +9,6 @@ const authAxios = axios.create({
 export const authService = {
     login: async (credentials: Record<string, string>) => {
         try {
-            // Nếu API trả về 2xx, code sẽ chạy trơn tru và trả về data
             const res = await authAxios.post('/auth/login', {
                 username: credentials.email,
                 password: credentials.password,
@@ -18,22 +17,44 @@ export const authService = {
             return res.data;
 
         } catch (error: any) {
-            // Khi API trả về 401, 403..., code sẽ nhảy thẳng vào đây
             if (error.response) {
-                const status = error.response.status;
+                console.log('check res', error.response);
 
-                // Bây giờ bạn mới check status từ object error của Axios
+                const status = error.response.data.statusCode;
                 if (status === 401) {
                     throw new InvalidEmailPasswordError();
                 }
                 if (status === 403) {
                     throw new InActiveAccountError();
                 }
+                if (status === 409) {
+                    throw new ConflictAccountError(error.response.data.message);
+                }
             }
-
-            // Nếu là lỗi khác (như 500 server sập, mất mạng...), quăng lỗi gốc ra
             throw error;
         }
 
     },
+    handleOAuthLogin: async (user: any, account: any) => {
+        try {
+            const res = await authAxios.post('/auth/oauth', {
+                email: user.email,
+                name: user.name,
+                avatar: user.image,
+                provider: account.provider,
+                providerId: account.providerAccountId
+            });
+            return res.data;
+        }
+        catch (error: any) {
+            if (error.response) {
+                const status = error.response.status;
+                if (status === 400) {
+                    throw new InvalidParameters();
+                }
+            }
+            throw error;
+        }
+
+    }
 };

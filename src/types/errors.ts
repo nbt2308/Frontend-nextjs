@@ -17,3 +17,11 @@ export class InvalidEmailPasswordError extends CredentialsSignin {
 export class InActiveAccountError extends CredentialsSignin {
     code = "INACTIVE_ACCOUNT";
 }
+
+export class InvalidParameters extends CredentialsSignin {
+    code = "BAD_REQUEST";
+}
+export class ConflictAccountError extends CredentialsSignin {
+    code = "ACCOUNT_CONFLICT";
+}
+

@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google"
 import Github from "next-auth/providers/github"
 import { authService } from "@/services/auth";
 
-import { InActiveAccountError, InvalidEmailPasswordError } from "@/types/errors";
+import { InActiveAccountError, InvalidEmailPasswordError, InvalidParameters } from "@/types/errors";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Github,
@@ -29,13 +29,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             accessToken: data.access_token,
           }
         }
-        if (res.statusCode === 401) {
-          throw new InvalidEmailPasswordError()
-        }
-        if (res.statusCode === 403) {
-          throw new InActiveAccountError()
-        }
-        throw new Error("Internal server error")
+        return null;
       },
     }),
 
@@ -45,15 +39,41 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/error",
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+
+      if (account?.provider === "github" || account?.provider === "google") {
+        try {
+          const res = await authService.handleOAuthLogin(user, account);
+          if (res.data) {
+            (user as any).access_token = res.data.access_token;
+            (user as any).user = res.data.user;
+            return true;
+          }
+          return false;
+        }
+        catch (error: any) {
+          console.log(error);
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (user) {
-        token.access_token = (user as any).access_token;
         token.id = user.id;
+      }
+      if (account) {
+        if (account.provider === "credentials") {
+          token.access_token = (user as any).access_token;
+        } else {
+          token.access_token = (user as any).access_token;
+          token.id = (user as any).user?.id;
+        }
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if (token && session.user) {
         session.user.id = token.id as string;
         (session as any).access_token = token.access_token;
       }

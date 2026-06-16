@@ -59,6 +59,10 @@ export default function Login() {
                 return {
                     text: 'Tài khoản của bạn chưa được kích hoạt!',
                 };
+            case 'ACCOUNT_CONFLICT':
+                return {
+                    text: 'Email này đã được đăng ký bằng Google hoặc GitHub. Vui lòng chọn đúng phương thức đăng nhập!',
+                };
             default:
                 return {
                     text: 'Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.',
