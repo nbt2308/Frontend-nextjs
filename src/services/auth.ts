@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { ConflictAccountError, InActiveAccountError, InvalidEmailPasswordError, InvalidParameters } from "@/types/errors";
+import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidEmailPasswordError, InvalidParameters } from "@/types/errors";
+import { IRegister, IVerifyOtp } from '@/schemas/auth.schema';
 
 const authAxios = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -18,7 +19,7 @@ export const authService = {
 
         } catch (error: any) {
             if (error.response) {
-                console.log('check res', error.response);
+                // console.log('check res', error.response);
 
                 const status = error.response.data.statusCode;
                 if (status === 401) {
@@ -56,5 +57,63 @@ export const authService = {
             throw error;
         }
 
+    },
+    register: async (data: IRegister) => {
+        try {
+            const { confirmPassword, ...body } = data;
+            const res = await authAxios.post('/auth/register', body);
+
+            return res.data;
+        } catch (error: any) {
+            if (error.response) {
+
+                const status = error.response.data.statusCode;
+                if (status === 409) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+                if (status === 400) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+            }
+            throw error;
+        }
+    },
+    verifyOtp: async (data: IVerifyOtp) => {
+        try {
+            const res = await authAxios.post('/auth/verify-otp', data);
+            return res.data;
+        } catch (error: any) {
+            if (error.response) {
+
+                const status = error.response.data.statusCode;
+                if (status === 400) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+                if (status === 404) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+
+            }
+            throw error;
+        }
+    },
+    resendOtp: async (id: number) => {
+        try {
+            const res = await authAxios.post('/auth/resend-otp', { id });
+            console.log('resendOtp res', res.data);
+
+            return res.data;
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.data.statusCode;
+                if (status === 404) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+                if (status === 400) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+            }
+            throw error;
+        }
     }
 };

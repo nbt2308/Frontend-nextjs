@@ -10,7 +10,7 @@ export default auth((req) => {
     const isLoggedIn = !!req.auth
     const { pathname } = req.nextUrl
 
-    const isAuthPage = pathname === "/auth/login" || pathname === "/auth/register"
+    const isAuthPage = pathname.startsWith("/auth")
 
     if (isLoggedIn && isAuthPage) {
         return Response.redirect(new URL("/", req.nextUrl.origin))
