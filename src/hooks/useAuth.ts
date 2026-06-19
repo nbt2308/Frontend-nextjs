@@ -20,6 +20,7 @@ export const useLogin = () => {
             return result;
         },
         onSuccess: () => {
+            toast.success("Đăng nhập thành công");
             router.push('/');
             router.refresh();
         }
@@ -39,6 +40,7 @@ export const useRegister = () => {
             return result;
         },
         onSuccess: (result) => {
+            toast.success("Đăng ký thành công, vui lòng kiểm tra email để xác thực tài khoản");
             router.push(`/auth/verify-otp/${result?.data?.id}`);
             router.refresh();
         }
