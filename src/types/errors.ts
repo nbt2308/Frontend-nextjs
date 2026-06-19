@@ -15,8 +15,19 @@ export class InvalidEmailPasswordError extends CredentialsSignin {
 }
 
 export class InActiveAccountError extends CredentialsSignin {
-    code = "INACTIVE_ACCOUNT";
+    code: string;
+    verifyToken?: string;
+
+    constructor(verifyToken?: string) {
+        super();
+        this.verifyToken = verifyToken;
+        this.code = JSON.stringify({
+            code: "INACTIVE_ACCOUNT",
+            verifyToken: verifyToken,
+        });
+    }
 }
+
 
 export class InvalidParameters extends CredentialsSignin {
     code = "BAD_REQUEST";

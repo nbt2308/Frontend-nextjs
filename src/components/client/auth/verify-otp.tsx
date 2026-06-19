@@ -19,11 +19,11 @@ import { IVerifyOtp, verifyOtpSchema } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useResendOtp, useVerifyOtp } from "@/hooks/useAuth";
 import { useCountdown } from "@/hooks/useCountdown";
-export default function VerifyOtp({ id }: { id: number }) {
+export default function VerifyOtp({ token }: { token: string }) {
     const form = useForm<IVerifyOtp>({
         resolver: zodResolver(verifyOtpSchema),
         defaultValues: {
-            id: id,
+            verifyToken: token,
             codeId: ""
         },
     })
@@ -37,8 +37,10 @@ export default function VerifyOtp({ id }: { id: number }) {
     const { mutate: resendMutate, isPending: resendIsPending, error: resendError } = useResendOtp();
     const { isActive: isCountdownActive, formatted: countdownFormatted, start: startCountdown } = useCountdown(120);
     const handleResendOTP = () => {
-        resendMutate(id);
-        startCountdown();
+        resendMutate(token);
+        if (!resendError) {
+            startCountdown();
+        }
     }
 
     const getErrorMessage = () => {
@@ -63,6 +65,10 @@ export default function VerifyOtp({ id }: { id: number }) {
         if (resendErrorArr) {
             switch (resendErrorArr.statusCode) {
                 case 404:
+                    return {
+                        text: resendErrorArr.message,
+                    };
+                case 400:
                     return {
                         text: resendErrorArr.message,
                     };

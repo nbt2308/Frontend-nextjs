@@ -26,7 +26,7 @@ export const authService = {
                     throw new InvalidEmailPasswordError();
                 }
                 if (status === 403) {
-                    throw new InActiveAccountError();
+                    throw new InActiveAccountError(error.response.data.verifyToken);
                 }
                 if (status === 409) {
                     throw new ConflictAccountError(error.response.data.message);
@@ -97,10 +97,9 @@ export const authService = {
             throw error;
         }
     },
-    resendOtp: async (id: number) => {
+    resendOtp: async (verifyToken: string) => {
         try {
-            const res = await authAxios.post('/auth/resend-otp', { id });
-            console.log('resendOtp res', res.data);
+            const res = await authAxios.post('/auth/resend-otp', { verifyToken });
 
             return res.data;
         } catch (error: any) {

@@ -53,13 +53,13 @@ export const registerSchema = UserSchema.pick({
     });
 
 export const verifyOtpSchema = UserSchema.pick({
-    id: true,
+    verifyToken: true,
     codeId: true,
 })
     .extend({
-        id: z
-            .number()
-            .min(1, { message: "id không tồn tại" }),
+        verifyToken: z
+            .string()
+            .min(1, { message: "Token không tồn tại" }),
         codeId: z
             .string()
             .min(1, { message: "Vui lòng nhập mã OTP" })

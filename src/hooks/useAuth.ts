@@ -23,6 +23,20 @@ export const useLogin = () => {
             toast.success("Đăng nhập thành công");
             router.push('/');
             router.refresh();
+        },
+        onError: async (error) => {
+            try {
+                const parsed = JSON.parse(decodeURIComponent(error.message));
+
+                if (parsed.code === 'INACTIVE_ACCOUNT' && parsed.verifyToken) {
+                    toast.warning("Tài khoản chưa được kích hoạt, vui lòng xác thực email");
+                    router.push(`/auth/verify-otp?token=${parsed.verifyToken}`);
+                    return;
+                }
+            } catch {
+                // error.message không phải JSON, xử lý bình thường
+            }
+            toast.error(error.message || "Đăng nhập thất bại");
         }
     })
 }
@@ -41,7 +55,7 @@ export const useRegister = () => {
         },
         onSuccess: (result) => {
             toast.success("Đăng ký thành công, vui lòng kiểm tra email để xác thực tài khoản");
-            router.push(`/auth/verify-otp/${result?.data?.id}`);
+            router.push(`/auth/verify-otp?token${result?.data?.verifyToken}`);
             router.refresh();
         }
     })
@@ -52,8 +66,6 @@ export const useVerifyOtp = () => {
     return useMutation({
         mutationFn: async (data: IVerifyOtp) => {
             const result = await authService.verifyOtp(data);
-
-            console.log('verifyOtp result', result);
 
             if (result?.error) {
                 throw new Error(result?.error);
@@ -71,8 +83,8 @@ export const useVerifyOtp = () => {
 
 export const useResendOtp = () => {
     return useMutation({
-        mutationFn: async (id: number) => {
-            const result = await authService.resendOtp(id);
+        mutationFn: async (verifyToken: string) => {
+            const result = await authService.resendOtp(verifyToken);
 
             if (result?.error) {
                 throw new Error(result?.error);
