@@ -150,7 +150,7 @@ export default function Login() {
 
                         {isPending ?
                             <>
-                                <Skeleton className="w-full h-10 py-2 px-3.5 text-sm rounded-md font-semibold flex items-center justify-center gap-2.5 bg-black dark:bg-white text-white dark:text-black">
+                                <Skeleton className="w-full h-10 mt-3 py-2 px-3.5 text-sm rounded-md font-semibold flex items-center justify-center gap-2.5 bg-black dark:bg-white text-white dark:text-black">
                                     <Loader2 className="animate-spin h-4 w-4" />
                                     Đang xử lý...
                                 </Skeleton>
