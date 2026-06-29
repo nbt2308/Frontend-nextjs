@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { authService } from '@/services/auth';
 import { IRegister, IVerifyOtp } from '@/schemas/auth.schema';
 import { toast } from 'sonner';
+import { useState } from 'react';
 export const useLogin = () => {
     const router = useRouter();
     return useMutation({
@@ -36,7 +37,7 @@ export const useLogin = () => {
             } catch {
                 // error.message không phải JSON, xử lý bình thường
             }
-            toast.error(error.message || "Đăng nhập thất bại");
+            toast.error("Đăng nhập thất bại");
         }
     })
 }
@@ -96,4 +97,75 @@ export const useResendOtp = () => {
             toast.success("Gửi lại mã OTP thành công");
         }
     })
+}
+
+export const useForgotPassword = () => {
+    /*
+     * 1: Email
+     * 2: Code ID
+     * 3: Password
+     */
+    const [email, setEmail] = useState<string>("");
+    const [step, setStep] = useState<number>(1);
+    const sendForgotPasswordOtp = useMutation({
+        mutationFn: async (submitEmail: string) => {
+            const result = await authService.sendForgotPasswordOtp(submitEmail);
+
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+
+            return result;
+
+        },
+        onSuccess: (result, submittedEmail) => {
+            toast.success(result?.message);
+            setEmail(submittedEmail);
+            setStep(2);
+        }
+    })
+    const verifyForgotPasswordOtp = useMutation({
+        mutationFn: async (codeId: string) => {
+            const result = await authService.verifyForgotPasswordOtp(email, codeId);
+
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+
+            return result;
+        },
+        onSuccess: () => {
+            toast.success("Xác thực thành công");
+            setStep(3);
+        }
+    })
+    const resetPassword = useMutation({
+        mutationFn: async (password: string) => {
+            const result = await authService.resetPassword(email, password);
+
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+
+            return result;
+
+        },
+        onSuccess: () => {
+            toast.success("Đặt lại mật khẩu thành công");
+            setStep(4);
+        }
+    })
+    const prevStep = () => {
+        if (step > 1 && step < 4) setStep((prev) => prev - 1);
+    };
+    return {
+        sendForgotPasswordOtp: sendForgotPasswordOtp.mutate,
+        verifyForgotPasswordOtp: verifyForgotPasswordOtp.mutate,
+        resetPassword: resetPassword.mutate,
+        step,
+        isPending: sendForgotPasswordOtp.isPending || verifyForgotPasswordOtp.isPending || resetPassword.isPending,
+        error: sendForgotPasswordOtp.error || verifyForgotPasswordOtp.error || resetPassword.error,
+        prevStep,
+        email
+    }
 }

@@ -1,6 +1,6 @@
 "use client"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import Logo from "@/components/ui/logo";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -12,13 +12,12 @@ import { Controller, useForm } from "react-hook-form";
 import { ISignIn, signInSchema } from "@/schemas/auth.schema";
 import {
     Field,
-    FieldDescription,
     FieldError,
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field"
 import { useLogin } from '@/hooks/useAuth';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Skeleton } from "@/components/ui/skeleton";
 import {
     Alert,
@@ -26,8 +25,10 @@ import {
     AlertTitle,
 } from "@/components/ui/alert"
 import { AlertCircleIcon } from "lucide-react"
+import { ForgotPassword } from "./forgot-password";
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
     const togglePassword = () => {
         setShowPassword(!showPassword);
@@ -93,7 +94,7 @@ export default function Login() {
                     <form id="login-form" onSubmit={(e) => {
                         e.preventDefault();
                         form.handleSubmit(handleSubmit)(e);
-                    }} className="space-y-6 mt-5">
+                    }} className="mt-5">
                         <FieldGroup>
                             <Controller
                                 name="email"
@@ -146,6 +147,7 @@ export default function Login() {
                                 )}
                             />
                         </FieldGroup>
+
                         {isPending ?
                             <>
                                 <Skeleton className="w-full h-10 py-2 px-3.5 text-sm rounded-md font-semibold flex items-center justify-center gap-2.5 bg-black dark:bg-white text-white dark:text-black">
@@ -155,11 +157,22 @@ export default function Login() {
 
                             </>
                             :
-                            <Button type="submit" className="w-full h-10 py-2 px-3.5 text-sm rounded-md font-semibold cursor-pointer tracking-wide">
+                            <Button type="submit" className="w-full h-10 mt-3 py-2 px-3.5 text-sm rounded-md font-semibold cursor-pointer tracking-wide">
                                 Đăng nhập
                             </Button>
                         }
                     </form>
+
+                    <Button variant="outline" type="button" onClick={() => setIsModalOpen(true)} className="mt-3 w-full cursor-pointer">Quên mật khẩu?</Button>
+                    {
+                        isModalOpen && (
+                            <>
+                                <ForgotPassword open={isModalOpen} onOpenChange={setIsModalOpen} />
+                                <div className=" fixed inset-0 bg-black/20" />
+                            </>
+                        )
+                    }
+
                     <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
                         <div className="flex items-center gap-4 my-6">
                             <hr className="w-full border-slate-300 dark:border-neutral-700" />

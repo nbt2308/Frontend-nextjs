@@ -75,12 +75,12 @@ export const authService = {
                     throw new Error(JSON.stringify(error.response.data));
                 }
             }
-            throw error;
+            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
         }
     },
     verifyOtp: async (data: IVerifyOtp) => {
         try {
-            const res = await authAxios.post('/auth/verify-otp', data);
+            const res = await authAxios.post('/auth/activate', data);
             return res.data;
         } catch (error: any) {
             if (error.response) {
@@ -94,7 +94,7 @@ export const authService = {
                 }
 
             }
-            throw error;
+            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
         }
     },
     resendOtp: async (verifyToken: string) => {
@@ -112,7 +112,58 @@ export const authService = {
                     throw new Error(JSON.stringify(error.response.data));
                 }
             }
-            throw error;
+            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+        }
+    },
+    sendForgotPasswordOtp: async (email: string) => {
+        try {
+            const res = await authAxios.post('/auth/send-reset-password-otp', { email });
+            return res.data;
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.data.statusCode;
+                if (status === 404) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+                if (status === 400) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+            }
+            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+        }
+    },
+    verifyForgotPasswordOtp: async (email: string, codeId: string) => {
+        try {
+            const res = await authAxios.post('/auth/verify-reset-password-otp', { email, codeId });
+            return res.data;
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.data.statusCode;
+                if (status === 404) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+                if (status === 400) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+            }
+            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+        }
+    },
+    resetPassword: async (email: string, password: string) => {
+        try {
+            const res = await authAxios.post('/auth/reset-password', { email, password });
+            return res.data;
+        } catch (error: any) {
+            if (error.response) {
+                const status = error.response.data.statusCode;
+                if (status === 404) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+                if (status === 400) {
+                    throw new Error(JSON.stringify(error.response.data));
+                }
+            }
+            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
         }
     }
 };
