@@ -5,11 +5,13 @@ import Github from "next-auth/providers/github"
 import { authService } from "@/services/auth";
 
 import { InActiveAccountError, InvalidEmailPasswordError, InvalidParameters } from "@/types/errors";
+import { ISignIn } from "./schemas/auth.schema";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Github,
     Google,
     Credentials({
+      id: "credentials",
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
@@ -32,7 +34,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return null;
       },
     }),
+    Credentials({
+      id: "admin-login",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials) => {
+        if (!credentials?.email || !credentials?.password) return null
+        const dataSignIn = {
+          email: credentials.email,
+          password: credentials.password
+        }
+        const res = await authService.adminLogin(dataSignIn as ISignIn);
 
+        const data = res.data ?? res; // Depending on how adminLogin response is wrapped
+
+        if (data && data.user) {
+          return {
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            accessToken: data.access_token,
+            role: data.user.role,
+          }
+        }
+        return null;
+      },
+    }),
   ],
   pages: {
     signIn: "/auth/login",
@@ -63,11 +92,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
       }
       if (account) {
-        if (account.provider === "credentials") {
-          token.access_token = (user as any).access_token;
+        if (account.provider === "credentials" || account.provider === "admin-login") {
+          token.access_token = (user as any).accessToken;
+          token.role = (user as any).role; // Add role support for credentials as well
         } else {
           token.access_token = (user as any).access_token;
           token.id = (user as any).user?.id;
+          token.role = (user as any).user?.role;
         }
       }
       return token;
@@ -76,6 +107,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token && session.user) {
         session.user.id = token.id as string;
         (session as any).access_token = token.access_token;
+        (session as any).role = token.role;
       }
       return session;
     },

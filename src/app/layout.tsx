@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import Header from "@/components/client/header";
-import Footer from "@/components/client/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "next-auth/react"
 import Providers from "./providers";
@@ -39,11 +37,9 @@ export default function RootLayout({
             <body className={`${geistSans.className} min-h-full flex flex-col`} >
                 <SessionProvider>
                     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                        <Header />
                         <Providers>
                             {children}
                         </Providers>
-                        <Footer />
                         <Toaster position="top-right" richColors />
                     </ThemeProvider>
                 </SessionProvider>

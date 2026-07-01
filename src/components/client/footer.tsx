@@ -58,7 +58,7 @@ export default function Footer() {
         },
     ]
     return (
-        <footer className="w-full z-50 bg-white/80 backdrop-blur-md transition-colors duration-300 dark:bg-zinc-950/80">
+        <footer className="w-full z-50 transition-colors duration-300">
             <div className="container mx-auto my-8 px-6 md:px-10">
                 <hr className="border-slate-200 dark:border-slate-800" />
             </div>

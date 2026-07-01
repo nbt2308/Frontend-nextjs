@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidEmailPasswordError, InvalidParameters } from "@/types/errors";
-import { IRegister, IVerifyOtp } from '@/schemas/auth.schema';
+import { IRegister, ISignIn, IVerifyOtp } from '@/schemas/auth.schema';
 
 const authAxios = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -164,6 +164,27 @@ export const authService = {
                 }
             }
             throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+        }
+    },
+    adminLogin: async (data: ISignIn) => {
+        try {
+            const res = await authAxios.post('/auth/admin-login', data);
+            console.log('check res', res.data);
+
+            return res.data;
+        } catch (error: any) {
+            if (error.response) {
+                console.log('check res', error.response.data);
+
+                const status = error.response.data.statusCode;
+                if (status === 401) {
+                    throw new InvalidEmailPasswordError();
+                }
+                if (status === 403) {
+                    throw new InActiveAccountError();
+                }
+            }
+            throw error;
         }
     }
 };

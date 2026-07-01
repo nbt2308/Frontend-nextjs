@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { authService } from '@/services/auth';
-import { IRegister, IVerifyOtp } from '@/schemas/auth.schema';
+import { IRegister, ISignIn, IVerifyOtp } from '@/schemas/auth.schema';
 import { toast } from 'sonner';
 import { useState } from 'react';
 export const useLogin = () => {
@@ -168,4 +168,30 @@ export const useForgotPassword = () => {
         prevStep,
         email
     }
+}
+
+export const useAdminLogin = () => {
+    const router = useRouter();
+    return useMutation({
+        mutationFn: async (credentials: ISignIn) => {
+            const result = await signIn("admin-login", {
+                email: credentials.email,
+                password: credentials.password,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                throw new Error(result?.code as string || result?.error);
+            }
+            return result;
+        },
+        onSuccess: () => {
+            toast.success("Đăng nhập thành công");
+            router.push('/dashboard');
+            router.refresh();
+        },
+        onError: (error) => {
+            toast.error("Đăng nhập thất bại");
+        }
+    })
 }
