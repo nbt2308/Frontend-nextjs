@@ -1,26 +1,81 @@
-import React from "react";
-import Link from "next/link";
+"use client"
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarHeader,
+    SidebarGroupLabel,
+    SidebarGroupContent,
+    SidebarMenu,
+    SidebarMenuItem,
+    SidebarMenuButton,
+} from "@/components/ui/sidebar"
+import { Home, Users, Settings, BookOpen, LayoutDashboard, User2 } from "lucide-react"
 
-export default function AdminSidebar() {
+// Sample menu items
+const items = [
+    {
+        title: "Tổng quan",
+        url: "/dashboard",
+        icon: LayoutDashboard,
+    },
+    {
+        title: "Khoá học",
+        url: "/courses",
+        icon: BookOpen,
+    },
+    {
+        title: "Người dùng",
+        url: "/users",
+        icon: Users,
+    },
+    {
+        title: "Cài đặt",
+        url: "/settings",
+        icon: Settings,
+    },
+]
+
+import Link from "next/link"
+import { NavUser } from "../shared/nav-user-admin"
+import { useSession } from "next-auth/react"
+import Logo from "../ui/logo"
+
+export function AdminSidebar() {
+    const { data: session } = useSession()
+    const user = {
+        name: session?.user?.name as string,
+        email: session?.user?.email as string,
+        avatar: session?.user?.image as string,
+    }
     return (
-        <aside className="w-64 bg-gray-800 text-white flex flex-col min-h-screen">
-            <div className="p-4 border-b border-gray-700">
-                <Link href="/admin">
-                    <h2 className="text-2xl font-bold">Admin Panel</h2>
-                </Link>
-            </div>
-            <nav className="flex-1 p-4 space-y-2">
-                <Link href="/admin/dashboard" className="block px-4 py-2 rounded hover:bg-gray-700">
-                    Dashboard
-                </Link>
-                <Link href="/admin/users" className="block px-4 py-2 rounded hover:bg-gray-700">
-                    Users
-                </Link>
-                <Link href="/admin/settings" className="block px-4 py-2 rounded hover:bg-gray-700">
-                    Settings
-                </Link>
-                {/* Add more admin links here */}
-            </nav>
-        </aside>
-    );
+        <Sidebar>
+            <SidebarHeader className="h-16 flex items-center justify-center border-b px-4">
+                <span className="font-bold text-lg flex gap-2"><Logo size="sm" />Admin Panel</span>
+            </SidebarHeader>
+            <SidebarContent>
+                <SidebarGroup>
+                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {items.map((item) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton asChild>
+                                        <Link href={item.url}>
+                                            <item.icon />
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            </SidebarContent>
+            <SidebarFooter>
+                <NavUser user={user} />
+            </SidebarFooter>
+        </Sidebar>
+    )
 }

@@ -17,7 +17,9 @@ const errorMap = {
     ),
 }
 
-export default function AuthErrorPage() {
+import { Suspense } from "react"
+
+function AuthErrorContent() {
     const search = useSearchParams()
     const error = search.get("error") as Error
 
@@ -35,5 +37,13 @@ export default function AuthErrorPage() {
                 </div>
             </a>
         </div>
+    )
+}
+
+export default function AuthErrorPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <AuthErrorContent />
+        </Suspense>
     )
 }

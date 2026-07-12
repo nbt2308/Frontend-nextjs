@@ -1,12 +1,19 @@
+"use client"
 import React from "react";
-
+import { ModeToggle } from "../shared/theme-toggle";
+import { SidebarTrigger } from "@/components/ui/sidebar"
 export default function AdminHeader() {
     return (
-        <header className="bg-white shadow-sm px-6 py-4 flex items-center justify-between border-b">
-            <h1 className="text-xl font-bold">Admin Dashboard</h1>
+        <header className="shadow-sm px-6 py-4 flex items-center justify-between border-b">
             <div>
-                {/* Add admin profile/logout here */}
-                Admin User
+                <SidebarTrigger />
+            </div>
+
+            <div>
+                <div>
+                    <ModeToggle />
+                </div>
+
             </div>
         </header>
     );

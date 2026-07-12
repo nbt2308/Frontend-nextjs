@@ -1,6 +1,7 @@
 
 import axios from 'axios';
-
+import { getSession } from 'next-auth/react';
+import { signOut } from "next-auth/react"
 const axiosClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     headers: {
@@ -10,8 +11,10 @@ const axiosClient = axios.create({
 });
 
 axiosClient.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('access_token');
+    async (config) => {
+        const session = await getSession();
+
+        const token = (session as any)?.access_token;
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -27,6 +30,7 @@ axiosClient.interceptors.response.use(
         // Ví dụ: Nếu BE trả về 401 (Hết hạn token) -> Tự động logout hoặc refresh token
         if (error.response?.status === 401) {
             // Xử lý logout hoặc gọi API Refresh Token tại đây
+            signOut();
         }
         return Promise.reject(error.response?.data || 'Có lỗi xảy ra');
     }
