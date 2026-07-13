@@ -1,5 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "@/services/user";
+import { toast } from "sonner";
+import { BulkDeleteDto, BulkStatusDto } from "@/schemas/user.schema";
 export interface UserQueryParams {
     page?: number;
     limit?: number;
@@ -31,3 +33,57 @@ export function useUsers(params: UserQueryParams) {
     })
     return queryInfo;
 }
+
+// export function useCreateUser() {
+//     const queryClient = useQueryClient();
+
+//     return useMutation({
+//         mutationFn: (newUserData: any) => {
+//             return UserService.createUser(newUserData);
+//         },
+//     onSuccess: () => {
+//       // Báo cho TanStack Query biết danh sách 'users' đã cũ, cần fetch lại dữ liệu mới
+//       queryClient.invalidateQueries({ queryKey: ['users'] });
+//     },
+//   });
+// }
+
+export function useBulkUpdateStatus() {
+    return useMutation({
+        mutationFn: async (data: BulkStatusDto) => {
+            const result = await UserService.bulkUpdateStatus(data);
+
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+
+            return result;
+        },
+        onSuccess: (result) => {
+            toast.success(`Đổi trạng thái ${result?.count} người dùng thành công`);
+        },
+        onError: (error: any) => {
+            toast.error(`${error?.message}`);
+        }
+    })
+}
+export function useBulkDelete() {
+    return useMutation({
+        mutationFn: async (data: BulkDeleteDto) => {
+            const result = await UserService.bulkDeleteUser(data);
+
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+
+            return result;
+        },
+        onSuccess: (result) => {
+            toast.success(`Xoá ${result?.count} người dùng thành công`);
+        },
+        onError: (error: any) => {
+            toast.error(`${error?.message}`);
+        }
+    })
+}
+

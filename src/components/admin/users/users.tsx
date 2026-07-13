@@ -3,7 +3,7 @@
 import { DataTable, DataTableSelectedActionConfig } from "../../ui/data-table";
 import { columns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
-import { useUsers } from "@/hooks/useUser";
+import { useBulkDelete, useBulkUpdateStatus, useUsers } from "@/hooks/useUser";
 import { useState } from "react";
 import { UserQueryParams } from '@/hooks/useUser';
 
@@ -18,10 +18,11 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator";
-import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2 } from "lucide-react";
+import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2, CircleCheck, ShieldX } from "lucide-react";
 import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
+import { toast } from "sonner";
 export default function User() {
     const [filters, setFilters] = useState<UserQueryParams>({
         page: 1,
@@ -59,19 +60,37 @@ export default function User() {
         },
         {
             columnId: "isActive",
-            title: "Trạng thái",
+            title: "Kích hoạt",
             options: [
                 {
-                    label: "Hoạt động",
+                    label: "Đã kích hoạt",
                     value: "true",
                     icon: ShieldCheck,
                     count: users?.filter((user: any) => user.isActive === true).length
                 },
                 {
+                    label: "Chưa kích hoạt",
+                    value: "false",
+                    icon: ShieldX,
+                    count: users?.filter((user: any) => user.isActive === false).length
+                },
+            ],
+        },
+        {
+            columnId: "status",
+            title: "Trạng thái",
+            options: [
+                {
+                    label: "Hoạt động",
+                    value: "true",
+                    icon: CircleCheck,
+                    count: users?.filter((user: any) => user.status === true).length
+                },
+                {
                     label: "Bị khoá",
                     value: "false",
                     icon: Lock,
-                    count: users?.filter((user: any) => user.isActive === false).length
+                    count: users?.filter((user: any) => user.status === false).length
                 },
             ],
         },
@@ -97,20 +116,20 @@ export default function User() {
             label: "Hoạt động",
             icon: ShieldCheck,
             variant: "outline" as const,
-            onClick: (selectedUsers: any) => handleBulkChangeStatus(selectedUsers),
+            onClick: (selectedUsers: any, table: any) => handleBulkChangeStatus(selectedUsers, true, table),
         },
         {
             label: "Khoá",
             icon: Lock,
             variant: "outline" as const,
-            onClick: () => handleBulkChangeStatus(false),
+            onClick: (selectedUsers: any, table: any) => handleBulkChangeStatus(selectedUsers, false, table),
         },
-        // {
-        //     label: "Xóa",
-        //     icon: Trash2,
-        //     variant: "destructive" as const,
-        //     onClick: () => true,
-        // },
+        {
+            label: "Xóa",
+            icon: Trash2,
+            variant: "destructive" as const,
+            onClick: (selectedUsers: any, table: any) => handleBulkDelete(selectedUsers, table),
+        },
     ]
     if (isError) {
         return (
@@ -119,11 +138,34 @@ export default function User() {
             </div>
         )
     }
-    const handleBulkChangeStatus = (selectedUsers: any) => {
+
+    const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
+    const handleBulkChangeStatus = (selectedUsers: any, status: boolean, table: any) => {
         const ids = selectedUsers.map((u: any) => u.id)
-        console.log("Kích hoạt tài khoản loạt ID:", selectedUsers)
-        // mutation.mutate({ ids, status: "Hoạt động" })
-        console.log("data", users)
+        bulkUpdateStatus({ ids, status }, {
+            onSuccess: () => {
+                refetch();
+                if (table) {
+                    table.resetRowSelection();
+                }
+            }
+        });
+    }
+    const { mutate: bulkDelete } = useBulkDelete();
+    const handleBulkDelete = (selectedUsers: any, table: any) => {
+        const ids = selectedUsers.map((u: any) => u.id)
+        if (selectedUsers.some((user: any) => user.role === "ADMIN")) {
+            toast.error("Không thể xóa admin");
+            return;
+        }
+        bulkDelete({ ids }, {
+            onSuccess: () => {
+                refetch();
+                if (table) {
+                    table.resetRowSelection();
+                }
+            }
+        });
     }
     return (
 
@@ -168,12 +210,12 @@ export default function User() {
                         />
                         <KpiCard
                             label="Đang hoạt động"
-                            value={users?.filter((user: any) => user.isActive === true).length.toString()}
+                            value={users?.filter((user: any) => user.status === true).length.toString()}
                             icon={House}
                         />
                         <KpiCard
                             label="Bị khoá"
-                            value={users?.filter((user: any) => user.isActive === false).length.toString()}
+                            value={users?.filter((user: any) => user.status === false).length.toString()}
                             icon={House}
                         />
                     </>

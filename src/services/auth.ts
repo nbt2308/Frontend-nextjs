@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidEmailPasswordError, InvalidParameters } from "@/types/errors";
+import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidParameters, UnauthorizedError } from "@/types/errors";
 import { IRegister, ISignIn, IVerifyOtp } from '@/schemas/auth.schema';
 
 const authAxios = axios.create({
@@ -22,8 +22,11 @@ export const authService = {
                 // console.log('check res', error.response);
 
                 const status = error.response.data.statusCode;
+                if (status === 400) {
+                    throw new InvalidParameters();
+                }
                 if (status === 401) {
-                    throw new InvalidEmailPasswordError();
+                    throw new UnauthorizedError();
                 }
                 if (status === 403) {
                     throw new InActiveAccountError(error.response.data.verifyToken);
@@ -177,8 +180,11 @@ export const authService = {
                 console.log('check res', error.response.data);
 
                 const status = error.response.data.statusCode;
+                if (status === 400) {
+                    throw new InvalidParameters();
+                }
                 if (status === 401) {
-                    throw new InvalidEmailPasswordError();
+                    throw new UnauthorizedError();
                 }
                 if (status === 403) {
                     throw new InActiveAccountError();

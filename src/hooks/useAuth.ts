@@ -56,8 +56,7 @@ export const useRegister = () => {
         },
         onSuccess: (result) => {
             toast.success("Đăng ký thành công, vui lòng kiểm tra email để xác thực tài khoản");
-            router.push(`/auth/verify-otp?token${result?.data?.verifyToken}`);
-            router.refresh();
+            router.push(`/auth/verify-otp?token=${result?.data?.verifyToken}`);
         }
     })
 }

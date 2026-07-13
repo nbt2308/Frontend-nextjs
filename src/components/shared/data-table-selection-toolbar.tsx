@@ -57,7 +57,7 @@ export function DataTableSelectedToolbar<TData>({
                             variant={action.variant || "outline"}
                             size="sm"
                             className="h-8 gap-1.5 text-xs font-medium"
-                            onClick={() => action.onClick(selectedData)}
+                            onClick={() => action.onClick(selectedData, table)}
                         >
                             {Icon && <Icon className="h-3.5 w-3.5" />}
                             {action.label}

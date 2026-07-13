@@ -2,7 +2,7 @@
 
 import React from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown, BadgeCheck, Ban, Edit, Info, Lock, ShieldCheck, Trash2, Unlock } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, BadgeCheck, Ban, CircleCheck, Edit, Info, Lock, ShieldCheck, ShieldX, Trash2, Unlock } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -24,6 +24,7 @@ export type User = {
     phone: string
     role: "ADMIN" | "INSTRUCTOR" | "STUDENT"
     status: "ACTIVE" | "INACTIVE"
+    isActive: boolean
     createdAt: Date
 }
 
@@ -190,11 +191,11 @@ export const columns: ColumnDef<User>[] = [
         enableGlobalFilter: false
     },
     {
-        id: "isActive",
+        id: "status",
         meta: {
             label: "Trạng thái",
         },
-        accessorKey: "isActive",
+        accessorKey: "status",
         header: ({ column }) => {
             const isSorted = column.getIsSorted();
             return (
@@ -218,21 +219,78 @@ export const columns: ColumnDef<User>[] = [
             )
         },
         cell: ({ row }) => {
-            const isActive = row.getValue("isActive") as boolean
+            const status = row.getValue("status") as boolean
             return (
                 <Badge className={
-                    isActive ?
+                    status ?
                         "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
                         :
                         "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
                 }>
                     {
-                        isActive ?
-                            <ShieldCheck data-icon="inline-start" className="h-4 w-4" color="green" />
+                        status ?
+                            <CircleCheck data-icon="inline-start" className="h-4 w-4" color="green" />
                             :
                             <Lock data-icon="inline-start" className="h-4 w-4" color="red" />
                     }
-                    {isActive ? "Hoạt động" : "Bị khoá"}
+                    {status ? "Hoạt động" : "Bị khoá"}
+                </Badge>
+            )
+        },
+        filterFn: (row, id, filterValue) => {
+            if (!filterValue || filterValue.length === 0) return true;
+
+            // Chuyển giá trị boolean của hàng thành string: true -> "true"
+            const rowValueString = String(row.getValue(id));
+
+            return filterValue.includes(rowValueString);
+        },
+        enableGlobalFilter: false
+    },
+    {
+        id: "isActive",
+        meta: {
+            label: "Kích hoạt",
+        },
+        accessorKey: "isActive",
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted();
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => {
+                        if (isSorted === "asc") {
+                            column.toggleSorting(true);
+                        } else if (isSorted === "desc") {
+                            column.clearSorting();
+                        } else {
+                            column.toggleSorting(false);
+                        }
+                    }}
+                >
+                    Kích hoạt
+                    {isSorted === "asc" && <ArrowUp className="ml-2 h-4 w-4" />}
+                    {isSorted === "desc" && <ArrowDown className="ml-2 h-4 w-4" />}
+                    {!isSorted && <ArrowUpDown className="ml-2 h-4 w-4" />}
+                </Button>
+            )
+        },
+        cell: ({ row }) => {
+            const status = row.getValue("isActive") as boolean
+            return (
+                <Badge className={
+                    status ?
+                        "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                        :
+                        "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+                }>
+                    {
+                        status ?
+                            <ShieldCheck data-icon="inline-start" className="h-4 w-4" color="green" />
+                            :
+                            <ShieldX data-icon="inline-start" className="h-4 w-4" color="red" />
+                    }
+                    {status ? "Đã kích hoạt" : "Chưa kích hoạt"}
                 </Badge>
             )
         },
@@ -250,7 +308,7 @@ export const columns: ColumnDef<User>[] = [
         id: "actions",
         cell: ({ row }) => {
             const user = row.original
-            const isActive = row.getValue("isActive") as boolean
+            const status = row.getValue("status") as boolean
             return (
                 <DropdownMenu >
                     <DropdownMenuTrigger asChild>
@@ -273,12 +331,12 @@ export const columns: ColumnDef<User>[] = [
                             <Edit className="h-4 w-4 mr-2" /> Cập nhật vai trò</DropdownMenuItem>
                         <DropdownMenuItem>
                             {
-                                isActive ?
+                                status ?
                                     <Ban className="h-4 w-4 mr-2" />
                                     :
                                     <Unlock className="h-4 w-4 mr-2" />
                             }
-                            {isActive ? "Vô hiệu hóa" : "Kích hoạt"}
+                            {status ? "Vô hiệu hóa" : "Kích hoạt"}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem variant="destructive"><Trash2 /> Xóa tài khoản</DropdownMenuItem>

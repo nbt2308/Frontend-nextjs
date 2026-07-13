@@ -57,7 +57,7 @@ export interface DataTableSelectedActionConfig<TData> {
     label: string
     icon?: LucideIcon
     variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
-    onClick: (selectedData: TData[]) => void | Promise<void>
+    onClick: (selectedData: TData[], table: TanstackTable<TData>) => void | Promise<void>
 }
 export function DataTable<TData, TValue>({
     columns,

@@ -10,8 +10,8 @@ export class CustomAuthError extends AuthError {
     }
 }
 
-export class InvalidEmailPasswordError extends CredentialsSignin {
-    code = "INVALID_EMAIL_PASSWORD";
+export class UnauthorizedError extends CredentialsSignin {
+    code = "UNAUTHORIZED";
 }
 
 export class InActiveAccountError extends CredentialsSignin {

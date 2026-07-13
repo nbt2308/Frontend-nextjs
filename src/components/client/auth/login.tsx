@@ -52,9 +52,13 @@ export default function Login() {
     const getErrorMessage = () => {
         if (!error) return null;
         switch (error.message) {
-            case 'INVALID_EMAIL_PASSWORD':
+            case 'BAD_REQUEST':
                 return {
                     text: 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.',
+                };
+            case 'UNAUTHORIZED':
+                return {
+                    text: 'Tài khoản của bạn đã bị khoá',
                 };
             case 'INACTIVE_ACCOUNT':
                 return {
