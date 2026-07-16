@@ -15,6 +15,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { UserCellAction } from "./user-cell-actions"
 // Định nghĩa kiểu dữ liệu cho User
 export type User = {
     avatar: string
@@ -108,8 +109,6 @@ export const columns: ColumnDef<User>[] = [
                     <div className="leading-tight">
                         <div className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1">
                             <span>{user.name}</span>
-                            {/* Icon thông tin nhỏ đi kèm */}
-                            <Info className="h-3.5 w-3.5 text-zinc-400 cursor-pointer hover:text-zinc-600 transition-colors" />
                         </div>
                         <span className="text-xs font-mono text-zinc-400">{user.id}</span>
                     </div>
@@ -193,7 +192,7 @@ export const columns: ColumnDef<User>[] = [
     {
         id: "status",
         meta: {
-            label: "Trạng thái",
+            label: "Trạng thái tài khoản",
         },
         accessorKey: "status",
         header: ({ column }) => {
@@ -211,7 +210,7 @@ export const columns: ColumnDef<User>[] = [
                         }
                     }}
                 >
-                    Trạng thái
+                    Trạng thái tài khoản
                     {isSorted === "asc" && <ArrowUp className="ml-2 h-4 w-4" />}
                     {isSorted === "desc" && <ArrowDown className="ml-2 h-4 w-4" />}
                     {!isSorted && <ArrowUpDown className="ml-2 h-4 w-4" />}
@@ -250,7 +249,7 @@ export const columns: ColumnDef<User>[] = [
     {
         id: "isActive",
         meta: {
-            label: "Kích hoạt",
+            label: "Xác thực",
         },
         accessorKey: "isActive",
         header: ({ column }) => {
@@ -268,7 +267,7 @@ export const columns: ColumnDef<User>[] = [
                         }
                     }}
                 >
-                    Kích hoạt
+                    Xác thực
                     {isSorted === "asc" && <ArrowUp className="ml-2 h-4 w-4" />}
                     {isSorted === "desc" && <ArrowDown className="ml-2 h-4 w-4" />}
                     {!isSorted && <ArrowUpDown className="ml-2 h-4 w-4" />}
@@ -310,38 +309,7 @@ export const columns: ColumnDef<User>[] = [
             const user = row.original
             const status = row.getValue("status") as boolean
             return (
-                <DropdownMenu >
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={() => {
-                                // Logic xử lý hành động
-                            }}
-                        >
-                            <Info className="h-4 w-4 mr-2" /> Xem chi tiết
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" /> Cập nhật vai trò</DropdownMenuItem>
-                        <DropdownMenuItem>
-                            {
-                                status ?
-                                    <Ban className="h-4 w-4 mr-2" />
-                                    :
-                                    <Unlock className="h-4 w-4 mr-2" />
-                            }
-                            {status ? "Vô hiệu hóa" : "Kích hoạt"}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive"><Trash2 /> Xóa tài khoản</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <UserCellAction user={user} status={status} />
             )
         },
         enableGlobalFilter: false

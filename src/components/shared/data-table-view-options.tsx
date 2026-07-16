@@ -32,7 +32,7 @@ export function DataTableViewOptions<TData>({
           Hiển thị
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={isMobile ? "center" : "start"} className="sm:w-[150px] w-[200px]">
+      <DropdownMenuContent align={isMobile ? "center" : "start"} className="sm:w-[200px] w-[250px]">
         <DropdownMenuLabel>Hiển thị cột</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {table

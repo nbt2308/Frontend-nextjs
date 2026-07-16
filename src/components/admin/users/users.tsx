@@ -78,7 +78,7 @@ export default function User() {
         },
         {
             columnId: "status",
-            title: "Trạng thái",
+            title: "Trạng thái tài khoản",
             options: [
                 {
                     label: "Hoạt động",
