@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "@/services/user";
 import { toast } from "sonner";
-import { BulkDeleteDto, BulkStatusDto } from "@/schemas/user.schema";
+import { IBulkDelete, IBulkStatus, IUpdateUser } from "@/schemas/user.schema";
 export interface UserQueryParams {
     page?: number;
     limit?: number;
@@ -48,9 +48,28 @@ export function useUsers(params: UserQueryParams) {
 //   });
 // }
 
+export function useUpdateUser() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data: IUpdateUser) => {
+            const result = await UserService.updateUser(data)
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+            toast.success("Cập nhật người dùng thành công");
+        },
+        onError: (error: any) => {
+            toast.error(error?.message);
+        }
+    })
+}
 export function useBulkUpdateStatus() {
     return useMutation({
-        mutationFn: async (data: BulkStatusDto) => {
+        mutationFn: async (data: IBulkStatus) => {
             const result = await UserService.bulkUpdateStatus(data);
 
             if (result?.error) {
@@ -69,7 +88,7 @@ export function useBulkUpdateStatus() {
 }
 export function useBulkDelete() {
     return useMutation({
-        mutationFn: async (data: BulkDeleteDto) => {
+        mutationFn: async (data: IBulkDelete) => {
             const result = await UserService.bulkDeleteUser(data);
 
             if (result?.error) {

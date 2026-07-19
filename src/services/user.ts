@@ -1,7 +1,7 @@
 import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidParameters } from "@/types/errors";
 import { UserQueryParams } from '@/hooks/useUser';
 import axiosClient from './axiosClient';
-import { BulkDeleteDto, BulkStatusDto } from "@/schemas/user.schema";
+import { IBulkDelete, IBulkStatus, IUpdateUser } from "@/schemas/user.schema";
 
 export const UserService = {
 
@@ -25,7 +25,16 @@ export const UserService = {
     //     }
     // }
 
-    bulkUpdateStatus: async (data: BulkStatusDto) => {
+    updateUser: async (data: IUpdateUser) => {
+        try {
+            const response = await axiosClient.patch(`/users`, data);
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message)
+        }
+    },
+
+    bulkUpdateStatus: async (data: IBulkStatus) => {
         try {
             const response = await axiosClient.post(`/users/bulk-update-status`, data);
             return response.data;
@@ -33,7 +42,7 @@ export const UserService = {
             throw new Error(error.message)
         }
     },
-    bulkDeleteUser: async (data: BulkDeleteDto) => {
+    bulkDeleteUser: async (data: IBulkDelete) => {
         try {
             const response = await axiosClient.post(`/users/bulk-delete`, data);
             return response.data;

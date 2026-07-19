@@ -11,12 +11,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { Ban, Edit, Info, MoreHorizontal, Trash2, Unlock } from "lucide-react"
 import ModalViewUser from "./modal-view-user"
+import ModalEditUser from "./modal-update-user"
 
 
 
 export const UserCellAction = ({ user, status }: { user: any, status: boolean }) => {
+    const [isViewOpen, setIsViewOpen] = useState(false)
     const [isEditOpen, setIsEditOpen] = useState(false)
-
     return (
         <>
             <DropdownMenu >
@@ -32,13 +33,18 @@ export const UserCellAction = ({ user, status }: { user: any, status: boolean })
                     <DropdownMenuItem
                         onSelect={() => {
                             // Logic xử lý hành động
-                            setIsEditOpen(true)
+                            setIsViewOpen(true)
 
                         }}
                     >
                         <Info className="h-4 w-4 mr-2" /> Xem chi tiết
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                        onSelect={() => {
+                            // Logic xử lý hành động
+                            setIsEditOpen(true)
+
+                        }}>
                         <Edit className="h-4 w-4 mr-2" /> Cập nhật vai trò</DropdownMenuItem>
                     <DropdownMenuItem>
                         {
@@ -53,8 +59,8 @@ export const UserCellAction = ({ user, status }: { user: any, status: boolean })
                     <DropdownMenuItem variant="destructive"><Trash2 /> Xóa tài khoản</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <ModalViewUser open={isEditOpen} closeDialog={() => setIsEditOpen(false)} data={user} />
-
+            <ModalViewUser open={isViewOpen} closeDialog={() => setIsViewOpen(false)} data={user} />
+            <ModalEditUser open={isEditOpen} closeDialog={() => setIsEditOpen(false)} data={user} />
         </>
     )
 }

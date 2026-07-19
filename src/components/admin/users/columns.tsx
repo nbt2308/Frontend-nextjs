@@ -16,6 +16,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { UserCellAction } from "./user-cell-actions"
+import { UserType } from "@/types/generated-zod/schemas/models/User.schema"
 // Định nghĩa kiểu dữ liệu cho User
 export type User = {
     avatar: string
@@ -24,12 +25,12 @@ export type User = {
     email: string
     phone: string
     role: "ADMIN" | "INSTRUCTOR" | "STUDENT"
-    status: "ACTIVE" | "INACTIVE"
+    status: boolean
     isActive: boolean
     createdAt: Date
 }
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<UserType>[] = [
     {
         id: "select",
         header: ({ table }) => (

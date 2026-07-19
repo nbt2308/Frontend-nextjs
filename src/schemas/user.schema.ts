@@ -54,5 +54,26 @@ export const BulkDeleteSchema = z.object({
         .array(z.string().min(1, "ID không được để trống"))
         .min(1, "Danh sách ID phải có ít nhất 1 phần tử")
 });
-export type BulkStatusDto = z.infer<typeof BulkStatusSchema>;
-export type BulkDeleteDto = z.infer<typeof BulkDeleteSchema>;
+
+export const UpdateUserSchema = UserSchema.pick({
+    id: true,
+    name: true,
+    phone: true,
+    address: true,
+    status: true,
+    role: true
+}).extend({
+    id: z.string().min(1, "ID không được để trống"),
+    role: z.nativeEnum(Role).optional(),
+    name: z.string().min(1, "Vui lòng nhập tên").optional(),
+    address: z.string().optional(),
+    phone: z
+        .string()
+        .min(1, { message: "Vui lòng nhập số điện thoại" })
+        .regex(phoneRegex, { message: "Số điện thoại Việt Nam không hợp lệ" })
+        .optional(),
+    status: z.boolean().optional(),
+})
+export type IBulkStatus = z.infer<typeof BulkStatusSchema>;
+export type IBulkDelete = z.infer<typeof BulkDeleteSchema>;
+export type IUpdateUser = z.infer<typeof UpdateUserSchema>;
