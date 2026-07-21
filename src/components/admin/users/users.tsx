@@ -222,15 +222,17 @@ export default function User() {
                 )}
             </div>
             <div>
-                <DataTable columns={columns} data={users || []} isPending={isPending} >
+                <DataTable
+                    columns={columns}
+                    data={users || []}
+                    isPending={isPending}>
                     {(table) => (
                         <div className="space-y-4">
 
                             <DataTableToolbar
                                 table={table}
                                 searchConfig={{
-                                    columnId: "email",
-                                    placeholder: "Tìm kiếm theo email user...",
+                                    placeholder: "Tìm kiếm người dùng theo tên, email...",
                                 }}
                                 filters={userFilters}
                                 actions={userActions}

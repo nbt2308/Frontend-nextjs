@@ -15,7 +15,6 @@ import { DataTableActionConfig, DataTableFilterConfig } from "../ui/data-table"
 interface DataTableToolbarProps<TData> {
     table: Table<TData>
     searchConfig?: {
-        columnId: string
         placeholder: string
     }
     filters?: DataTableFilterConfig[]
@@ -35,13 +34,11 @@ export function DataTableToolbar<TData>({
     return (
         <div className="flex flex-col gap-3 sm:flex-row md:items-center md:justify-between px-3 py-3 border rounded-md">
             <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                {searchConfig && table.getColumn(searchConfig.columnId) && (
+                {searchConfig && (
                     <Input
                         placeholder={searchConfig.placeholder}
-                        value={(table.getColumn(searchConfig.columnId)?.getFilterValue() as string) ?? ""}
-                        onChange={(event) =>
-                            table.getColumn(searchConfig.columnId)?.setFilterValue(event.target.value)
-                        }
+                        value={table.getState().globalFilter ?? ""}
+                        onChange={(event) => table.setGlobalFilter(event.target.value)}
                         className="h-8 w-full sm:w-[260px] md:w-[260px] lg:w-[260px]"
                     />
                 )}

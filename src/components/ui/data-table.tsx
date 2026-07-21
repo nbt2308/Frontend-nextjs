@@ -13,7 +13,8 @@ import {
     getFilteredRowModel,
     getFacetedRowModel,
     getFacetedUniqueValues,
-    Table as TanstackTable
+    Table as TanstackTable,
+    RowData
 } from "@tanstack/react-table"
 import {
     Table,
@@ -27,6 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { removeVietnameseTones } from "@/lib/utils"
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { LucideIcon } from "lucide-react";
+import "@tanstack/react-table"
+
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -67,7 +70,6 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [rowSelection, setRowSelection] = React.useState({})
-    const [selectedIds, setSelectedIds] = React.useState<any[]>([])
     const [globalFilter, setGlobalFilter] = React.useState<any>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const table = useReactTable({
@@ -88,22 +90,7 @@ export function DataTable<TData, TValue>({
             rowSelection,
             globalFilter,
             columnFilters,
-        },
-        globalFilterFn: (row, columnId, filterValue) => {
-            const searchValue = removeVietnameseTones(String(filterValue ?? ""))
-                .toLowerCase()
-                .trim();
-
-            if (!searchValue) return true;
-
-            // Chuyển dữ liệu trong bảng về dạng chữ thường và không dấu
-            const name = removeVietnameseTones(String(row.getValue("name") ?? "")).toLowerCase();
-            const email = removeVietnameseTones(String(row.getValue("email") ?? "")).toLowerCase();
-
-            return name.includes(searchValue) || email.includes(searchValue);
-        },
-
-
+        }
     })
 
 

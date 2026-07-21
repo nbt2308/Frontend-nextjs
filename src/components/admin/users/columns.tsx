@@ -58,7 +58,7 @@ export const columns: ColumnDef<UserType>[] = [
         meta: {
             label: "Thành viên",
         },
-        accessorKey: "name",
+        accessorFn: (row) => `${row.name} ${row.id}`,
         header: ({ column }) => {
             const isSorted = column.getIsSorted();
             return (
