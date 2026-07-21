@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "@/services/user";
 import { toast } from "sonner";
-import { IBulkDelete, IBulkStatus, IUpdateUser } from "@/schemas/user.schema";
+import { IBulkDelete, IBulkStatus, IChangeStatus, IUpdateUser } from "@/schemas/user.schema";
 export interface UserQueryParams {
     page?: number;
     limit?: number;
@@ -104,5 +104,28 @@ export function useBulkDelete() {
             toast.error(`${error?.message}`);
         }
     })
+}
+
+export function useChangeStatus() {
+    const queryClient = useQueryClient();
+    const handleChangeStatus = useMutation({
+        mutationFn: async (data: IChangeStatus) => {
+            const result = await UserService.changeStatus(data);
+
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+
+            return result;
+        },
+        onSuccess: (result) => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+            toast.success(`Đổi trạng thái của tài khoản ${result?.email} thành công`);
+        },
+        onError: (error: any) => {
+            toast.error(`${error?.message}`);
+        }
+    })
+    return handleChangeStatus;
 }
 

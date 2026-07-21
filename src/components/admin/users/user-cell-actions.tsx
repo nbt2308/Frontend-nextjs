@@ -9,15 +9,17 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Ban, Edit, Info, MoreHorizontal, Trash2, Unlock } from "lucide-react"
+import { Ban, Edit, Info, Lock, MoreHorizontal, Trash2, Unlock } from "lucide-react"
 import ModalViewUser from "./modal-view-user"
 import ModalEditUser from "./modal-update-user"
+import { useChangeStatus } from "@/hooks/useUser"
 
 
 
 export const UserCellAction = ({ user, status }: { user: any, status: boolean }) => {
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [isEditOpen, setIsEditOpen] = useState(false)
+    const { mutate: handleChangeStatus, isPending } = useChangeStatus();
     return (
         <>
             <DropdownMenu >
@@ -46,17 +48,25 @@ export const UserCellAction = ({ user, status }: { user: any, status: boolean })
 
                         }}>
                         <Edit className="h-4 w-4 mr-2" /> Cập nhật vai trò</DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                        onSelect={() => {
+                            handleChangeStatus({
+                                id: user?.id,
+                                status: !status
+                            })
+                        }}
+                        disabled={isPending}
+                    >
                         {
                             status ?
-                                <Ban className="h-4 w-4 mr-2" />
+                                <Lock className="h-4 w-4 mr-2" />
                                 :
                                 <Unlock className="h-4 w-4 mr-2" />
                         }
-                        {status ? "Vô hiệu hóa" : "Kích hoạt"}
+                        {status ? "Khóa" : "Mở khóa"}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive"><Trash2 /> Xóa tài khoản</DropdownMenuItem>
+                    <DropdownMenuItem variant="destructive" title="Tính năng này không khả dụng" disabled><Trash2 /> Xóa tài khoản</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
             <ModalViewUser open={isViewOpen} closeDialog={() => setIsViewOpen(false)} data={user} />

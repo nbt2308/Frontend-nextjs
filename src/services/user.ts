@@ -1,7 +1,7 @@
 import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidParameters } from "@/types/errors";
 import { UserQueryParams } from '@/hooks/useUser';
 import axiosClient from './axiosClient';
-import { IBulkDelete, IBulkStatus, IUpdateUser } from "@/schemas/user.schema";
+import { IBulkDelete, IBulkStatus, IChangeStatus, IUpdateUser } from "@/schemas/user.schema";
 
 export const UserService = {
 
@@ -49,5 +49,14 @@ export const UserService = {
         } catch (error: any) {
             throw new Error(error.message)
         }
-    }
+    },
+    changeStatus: async (data: IChangeStatus) => {
+        try {
+            const response = await axiosClient.post(`/users/change-status`, data);
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message)
+        }
+    },
+
 }

@@ -74,6 +74,15 @@ export const UpdateUserSchema = UserSchema.pick({
         .optional(),
     status: z.boolean().optional(),
 })
+export const ChangeStatusSchema = UserSchema.pick({
+    id: true,
+    status: true,
+}).extend({
+    id: z.string().min(1, "ID không được để trống"),
+    status: z.boolean(),
+})
+
 export type IBulkStatus = z.infer<typeof BulkStatusSchema>;
 export type IBulkDelete = z.infer<typeof BulkDeleteSchema>;
 export type IUpdateUser = z.infer<typeof UpdateUserSchema>;
+export type IChangeStatus = z.infer<typeof ChangeStatusSchema>;
