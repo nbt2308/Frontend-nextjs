@@ -17,22 +17,22 @@ import { Home, Users, Settings, BookOpen, LayoutDashboard, User2 } from "lucide-
 const items = [
     {
         title: "Tổng quan",
-        url: "/dashboard",
+        url: "/admin/dashboard",
         icon: LayoutDashboard,
     },
     {
         title: "Khoá học",
-        url: "/courses",
+        url: "/admin/courses",
         icon: BookOpen,
     },
     {
         title: "Người dùng",
-        url: "/users",
+        url: "/admin/users",
         icon: Users,
     },
     {
         title: "Cài đặt",
-        url: "/settings",
+        url: "/admin/settings",
         icon: Settings,
     },
 ]

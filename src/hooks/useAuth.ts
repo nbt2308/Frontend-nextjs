@@ -186,7 +186,7 @@ export const useAdminLogin = () => {
         },
         onSuccess: () => {
             toast.success("Đăng nhập thành công");
-            router.push('/dashboard');
+            router.push('/admin/dashboard');
             router.refresh();
         },
         onError: (error) => {

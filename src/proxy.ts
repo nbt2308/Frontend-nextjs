@@ -15,14 +15,14 @@ export default auth(async (req) => {
     const { pathname } = req.nextUrl
 
     const isAuthPage = pathname.startsWith("/auth")
-    const isAdminRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/users');
+    const isAdminRoute = pathname.startsWith('/admin/dashboard') || pathname.startsWith('/admin/users');
     const isAdminLogin = pathname === '/admin-login';
     if (isLoggedIn) {
         if (isAuthPage) {
             return Response.redirect(new URL("/", req.nextUrl.origin))
         }
         if (isAdminLogin && token?.role === "ADMIN") {
-            return Response.redirect(new URL("/dashboard", req.nextUrl.origin));
+            return Response.redirect(new URL("/admin/dashboard", req.nextUrl.origin));
         }
     }
     if (isAdminRoute) {

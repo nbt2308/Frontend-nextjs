@@ -172,12 +172,10 @@ export const authService = {
     adminLogin: async (data: ISignIn) => {
         try {
             const res = await authAxios.post('/auth/admin-login', data);
-            console.log('check res', res.data);
 
             return res.data;
         } catch (error: any) {
             if (error.response) {
-                console.log('check res', error.response.data);
 
                 const status = error.response.data.statusCode;
                 if (status === 400) {
