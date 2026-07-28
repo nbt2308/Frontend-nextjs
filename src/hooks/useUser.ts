@@ -2,21 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "@/services/user";
 import { toast } from "sonner";
 import { IBulkDelete, IBulkStatus, IChangeStatus, IUpdateUser } from "@/schemas/user.schema";
-export interface UserQueryParams {
-    page?: number;
-    limit?: number;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
-    search?: string; // Dễ dàng thêm các trường mới sau này (ví dụ: tìm kiếm)
-}
-interface DefaultQueryParams {
-    page: number;
-    limit: number;
-    sortBy: string;
-    sortOrder: 'asc' | 'desc';
-}
-export function useUsers(params: UserQueryParams) {
-    const defaultParams: DefaultQueryParams = {
+
+
+export function useUsers(params: FindAllQueryParams) {
+    const defaultParams: DefaultFindAllQueryParams = {
         page: 1,
         limit: 10,
         sortBy: 'createdAt',
@@ -26,10 +15,22 @@ export function useUsers(params: UserQueryParams) {
     const queryInfo = useQuery({
         queryKey: ['users', queryParams],
         queryFn: async () => {
-            const result = await UserService.getAllUsers(queryParams)
+            const result = await UserService.getAllUsersWithPagination(queryParams)
             return result;
         },
         staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
+    })
+    return queryInfo;
+}
+
+export function useAllInstructors() {
+    const queryInfo = useQuery({
+        queryKey: ['instructors'],
+        queryFn: async () => {
+            const result = await UserService.getAllInstructors();
+            return result;
+        },
+        staleTime: 1000 * 60 * 5,
     })
     return queryInfo;
 }

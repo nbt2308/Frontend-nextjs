@@ -4,7 +4,6 @@ import Google from "next-auth/providers/google"
 import Github from "next-auth/providers/github"
 import { authService } from "@/services/auth";
 
-import { InActiveAccountError, InvalidEmailPasswordError, InvalidParameters } from "@/types/errors";
 import { ISignIn } from "./schemas/auth.schema";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [

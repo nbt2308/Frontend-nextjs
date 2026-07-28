@@ -3,10 +3,11 @@ import React from 'react';
 interface LogoProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     label?: string;      // Ký tự hiển thị (mặc định là 'N')
     size?: 'sm' | 'md' | 'lg'; // Các kích thước định sẵn
+    asDiv?: boolean;
 }
 
 const Logo = React.forwardRef<HTMLAnchorElement, LogoProps>(
-    ({ label = 'N', size = 'md', className = '', ...props }, ref) => {
+    ({ label = 'N', size = 'md', className = '', asDiv = false, ...props }, ref) => {
 
         // Mapping kích thước cho container bên ngoài và box bên trong
         const sizeClasses = {
@@ -16,7 +17,20 @@ const Logo = React.forwardRef<HTMLAnchorElement, LogoProps>(
         };
 
         const currentSize = sizeClasses[size];
+        const content = (
+            <div
+                className={`flex items-center justify-center rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-md ${currentSize.box} shrink-0`}
+            >
+                <span className="font-mono font-bold leading-none">
+                    {label}
+                </span>
+            </div>
+        );
 
+        // Nếu truyền asDiv=true, chỉ render phần Box Logo để lồng vào các nút khác
+        if (asDiv) {
+            return <div className={`inline-flex items-center justify-center ${className}`}>{content}</div>;
+        }
         return (
             <a
                 ref={ref}
@@ -25,12 +39,7 @@ const Logo = React.forwardRef<HTMLAnchorElement, LogoProps>(
                 className={`inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded transition-opacity hover:opacity-90 ${currentSize.container} ${className}`}
                 {...props}
             >
-                {/* Thêm lớp shadow vào div bọc ngoài logo */}
-                <div className={`flex items-center justify-center rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-xl/20 dark:shadow-white/30 ${currentSize.box}`}>
-                    <span className="font-mono font-bold leading-none">
-                        {label}
-                    </span>
-                </div>
+                {content}
             </a>
         );
     }

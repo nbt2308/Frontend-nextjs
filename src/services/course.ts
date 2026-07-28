@@ -1,13 +1,14 @@
 import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidParameters } from "@/types/errors";
 import axiosClient from './axiosClient';
 import { IBulkDelete, IBulkStatus, IChangeStatus, IUpdateUser } from "@/schemas/user.schema";
+import { ICreateCourse } from "@/schemas/course.schema";
 
-export const UserService = {
+export const CourseService = {
 
-    getAllUsersWithPagination: async (queryParams: FindAllQueryParams) => {
+    getAllCoursesWithPagination: async (queryParams: FindAllQueryParams) => {
         try {
-            const response = await axiosClient.get(`/users`, { params: queryParams });
-            return response.data.users;
+            const response = await axiosClient.get(`/courses`, { params: queryParams });
+            return response.data.courses;
 
         } catch (error: any) {
 
@@ -15,23 +16,14 @@ export const UserService = {
         }
     },
 
-    getAllInstructors: async () => {
+    createCourse: async (courseData: ICreateCourse) => {
         try {
-            const response = await axiosClient.get(`/users/instructor`);
+            const response = await axiosClient.post(`/courses`, courseData);
             return response.data;
         } catch (error: any) {
             throw new Error(error.message)
         }
     },
-
-    // createUser: async (userData: CreateUserDto) => {
-    //     try {
-    //         const response = await axiosClient.post(`/users`, userData);
-    //         return response.data;
-    //     } catch (error: any) {
-    //         throw new Error(error.message)
-    //     }
-    // }
 
     updateUser: async (data: IUpdateUser) => {
         try {

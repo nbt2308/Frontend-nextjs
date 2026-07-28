@@ -5,7 +5,6 @@ import { columns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
 import { useBulkDelete, useBulkUpdateStatus, useUsers } from "@/hooks/useUser";
 import { useState } from "react";
-import { UserQueryParams } from '@/hooks/useUser';
 
 import { Button } from "@/components/ui/button";
 import { DataTableError } from "@/components/shared/data-table-error";
@@ -18,18 +17,17 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator";
-import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2, CircleCheck, ShieldX } from "lucide-react";
+import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2, CircleCheck, ShieldX, Users, UserPen } from "lucide-react";
 import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
 export default function User() {
-    const [filters, setFilters] = useState<UserQueryParams>({
+    const [filters, setFilters] = useState<FindAllQueryParams>({
         page: 1,
         limit: 10,
         sortBy: "createdAt",
-        sortOrder: "desc",
-        search: ""
+        sortOrder: "desc"
     });
     const { data: users, isPending, isError, error, refetch } = useUsers(filters)
 
@@ -178,7 +176,7 @@ export default function User() {
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
-                            <BreadcrumbLink href="/dashboard">Tổng quan</BreadcrumbLink>
+                            <BreadcrumbLink href="/dashboard">Admin Panel</BreadcrumbLink>
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
@@ -191,12 +189,17 @@ export default function User() {
             <div className="space-y-4 mb-6">
                 <div>
                     <span className="text-2xl font-bold">Quản lý người dùng</span>
-                    <p className="text-muted-foreground text-sm">Quản lý phân quyền, trạng thái và thông tin của các thành viên trong hệ thống.</p>
+                    <p className="text-muted-foreground text-sm">Quản lý phân quyền, trạng thái và thông tin người dùng trong hệ thống.</p>
                 </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 mb-6 gap-4 justify-between">
+            <div className="grid grid-cols-2 md:grid-cols-4 mb-6 gap-4 justify-between">
                 {isPending ? (
                     <>
+                        <KpiCard.Skeleton />
+                        <KpiCard.Skeleton />
+                        <KpiCard.Skeleton />
+                        <KpiCard.Skeleton />
+                        <KpiCard.Skeleton />
                         <KpiCard.Skeleton />
                         <KpiCard.Skeleton />
                         <KpiCard.Skeleton />
@@ -206,17 +209,82 @@ export default function User() {
                         <KpiCard
                             label="Tổng số người dùng"
                             value={users?.length.toString()}
-                            icon={House}
+                            icon={Users}
+                            iconColor="text-blue-500"
+                            glowColor="bg-blue-500/15 border-blue-500/30"
+                            valueColor="text-blue-500"
+                            hoverBorderColor="hover:border-blue-500/60"
+                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]"
                         />
                         <KpiCard
                             label="Đang hoạt động"
                             value={users?.filter((user: any) => user.status === true).length.toString()}
-                            icon={House}
+                            icon={CircleCheck}
+                            iconColor="text-emerald-500"
+                            glowColor="bg-emerald-500/15 border-emerald-500/30"
+                            valueColor="text-emerald-500"
+                            hoverBorderColor="hover:border-emerald-500/60"
+                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"
                         />
                         <KpiCard
                             label="Bị khoá"
                             value={users?.filter((user: any) => user.status === false).length.toString()}
-                            icon={House}
+                            icon={Lock}
+                            iconColor="text-red-500"
+                            glowColor="bg-red-500/15 border-red-500/30"
+                            valueColor="text-red-500"
+                            hoverBorderColor="hover:border-red-500/60"
+                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(239,68,68,0.25)]"
+                        />
+                        <KpiCard
+                            label="Đã kích hoạt"
+                            value={users?.filter((user: any) => user.isActive === true).length.toString()}
+                            icon={ShieldCheck}
+                            iconColor="text-green-500"
+                            glowColor="bg-green-500/15 border-green-500/30"
+                            valueColor="text-green-500"
+                            hoverBorderColor="hover:border-green-500/60"
+                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"
+                        />
+                        <KpiCard
+                            label="Chưa kích hoạt"
+                            value={users?.filter((user: any) => user.isActive === false).length.toString()}
+                            icon={ShieldX}
+                            iconColor="text-red-500"
+                            glowColor="bg-red-500/15 border-red-500/30"
+                            valueColor="text-red-500"
+                            hoverBorderColor="hover:border-red-500/60"
+                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(239,68,68,0.25)]"
+                        />
+                        <KpiCard
+                            label="Quản trị viên"
+                            value={users?.filter((user: any) => user.role === "ADMIN").length.toString()}
+                            icon={UserCog}
+                            iconColor="text-purple-500"
+                            glowColor="bg-purple-500/15 border-purple-500/30"
+                            valueColor="text-purple-500"
+                            hoverBorderColor="hover:border-purple-500/60"
+                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(168,85,247,0.25)]"
+                        />
+                        <KpiCard
+                            label="Giảng viên"
+                            value={users?.filter((user: any) => user.role === "INSTRUCTOR").length.toString()}
+                            icon={UserPen}
+                            iconColor="text-orange-500"
+                            glowColor="bg-orange-500/15 border-orange-500/30"
+                            valueColor="text-orange-500"
+                            hoverBorderColor="hover:border-orange-500/60"
+                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(249,115,22,0.25)]"
+                        />
+                        <KpiCard
+                            label="Học viên"
+                            value={users?.filter((user: any) => user.role === "STUDENT").length.toString()}
+                            icon={UserStar}
+                            iconColor="text-amber-500"
+                            glowColor="bg-amber-500/15 border-amber-500/30"
+                            valueColor="text-amber-500"
+                            hoverBorderColor="hover:border-amber-500/60"
+                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(245,158,11,0.25)]"
                         />
                     </>
                 )}

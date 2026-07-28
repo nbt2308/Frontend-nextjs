@@ -41,8 +41,9 @@ import Link from "next/link"
 import { NavUser } from "../shared/nav-user-admin"
 import { useSession } from "next-auth/react"
 import Logo from "../ui/logo"
+import { Label } from "../ui/label"
 
-export function AdminSidebar() {
+export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { data: session } = useSession()
     const user = {
         name: session?.user?.name as string,
@@ -50,18 +51,29 @@ export function AdminSidebar() {
         avatar: session?.user?.image as string,
     }
     return (
-        <Sidebar>
-            <SidebarHeader className="h-16 flex items-center justify-center border-b px-4">
-                <span className="font-bold text-lg flex gap-2"><Logo size="sm" />Admin Panel</span>
+        <Sidebar collapsible="icon" {...props}>
+            <SidebarHeader>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton size="lg" asChild>
+                            <a href="/" className="flex justify-center gap-3">
+                                <Logo size="sm" asDiv />
+                                <span className="font-bold text-lg truncate group-data-[collapsible=icon]:hidden">
+                                    Admin Panel
+                                </span>
+                            </a>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarGroupLabel>Mục Quản lý</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild>
+                                    <SidebarMenuButton asChild tooltip={item.title}>
                                         <Link href={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>

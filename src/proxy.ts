@@ -15,8 +15,8 @@ export default auth(async (req) => {
     const { pathname } = req.nextUrl
 
     const isAuthPage = pathname.startsWith("/auth")
-    const isAdminRoute = pathname.startsWith('/admin/dashboard') || pathname.startsWith('/admin/users');
     const isAdminLogin = pathname === '/admin-login';
+    const isAdminRoute = pathname.startsWith('/admin') && !isAdminLogin;
     if (isLoggedIn) {
         if (isAuthPage) {
             return Response.redirect(new URL("/", req.nextUrl.origin))
