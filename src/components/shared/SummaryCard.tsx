@@ -1,5 +1,6 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
+import { Skeleton } from '../ui/skeleton';
 
 interface KpiCardProps {
     label: string;
@@ -82,15 +83,15 @@ function KpiCardSkeleton() {
         <div className="border rounded-2xl p-5 flex flex-col justify-between h-full space-y-4">
             <div>
                 <div className="flex items-center justify-between mb-3">
-                    <div className="h-4 w-28 bg-zinc-800 rounded-md animate-pulse" />
-                    <div className="h-10 w-10 bg-zinc-800 rounded-xl shrink-0 animate-pulse" />
+                    <Skeleton className="h-4 w-28 rounded-md animate-pulse" />
+                    <Skeleton className="h-10 w-10 rounded-xl shrink-0 animate-pulse" />
                 </div>
                 <div className="flex items-baseline gap-2 mt-1">
-                    <div className="h-8 w-16 bg-zinc-800 rounded-md animate-pulse" />
-                    <div className="h-4 w-10 bg-zinc-800 rounded-full animate-pulse" />
+                    <Skeleton className="h-8 w-16 rounded-md animate-pulse" />
+                    <Skeleton className="h-4 w-10 rounded-full animate-pulse" />
                 </div>
             </div>
-            <div className="h-3 w-32 bg-zinc-800 rounded-md animate-pulse" />
+            <Skeleton className="h-3 w-32 rounded-md animate-pulse" />
         </div>
     );
 }

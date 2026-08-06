@@ -1,9 +1,9 @@
 import { auth } from "@/auth"
 import { getToken } from "next-auth/jwt";
-
+import { NextResponse } from "next/server";
 export const config = {
     matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|verify|$).*)',
+        '/((?!api/auth|_next/static|_next/image|favicon.ico|verify|$).*)',
     ],
 }
 export default auth(async (req) => {
@@ -17,20 +17,30 @@ export default auth(async (req) => {
     const isAuthPage = pathname.startsWith("/auth")
     const isAdminLogin = pathname === '/admin-login';
     const isAdminRoute = pathname.startsWith('/admin') && !isAdminLogin;
-    if (isLoggedIn) {
-        if (isAuthPage) {
-            return Response.redirect(new URL("/", req.nextUrl.origin))
+    if (!isLoggedIn) {
+        if (isAdminRoute) {
+            return NextResponse.redirect(new URL("/admin-login", req.nextUrl.origin))
         }
-        if (isAdminLogin && token?.role === "ADMIN") {
-            return Response.redirect(new URL("/admin/dashboard", req.nextUrl.origin));
+        if (isAuthPage || isAdminLogin) {
+            return NextResponse.next();
         }
+        return NextResponse.redirect(new URL("/auth/login", req.nextUrl));
     }
-    if (isAdminRoute) {
-        if (!token || token.role !== "ADMIN") {
-            return Response.redirect(new URL("/admin-login", req.nextUrl.origin));
+
+    if (isAdminRoute && token?.role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/", req.nextUrl));
+    }
+
+    if (isAdminLogin) {
+        if (token?.role === "ADMIN") {
+            return NextResponse.redirect(new URL("/admin/dashboard", req.nextUrl));
         }
+        return NextResponse.redirect(new URL("/", req.nextUrl));
     }
-    if (!isLoggedIn && !isAuthPage && !isAdminLogin && !isAdminRoute) {
-        return Response.redirect(new URL("/auth/login", req.nextUrl.origin))
+
+    if (isAuthPage && token) {
+        return NextResponse.redirect(new URL("/", req.nextUrl));
     }
+
+    return NextResponse.next();
 })

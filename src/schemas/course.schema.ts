@@ -2,7 +2,7 @@ import { CourseSchema } from "@/types/generated-zod/schemas/models";
 import { CourseType, Level } from "@prisma/client";
 import * as z from "zod";
 
-export const createCourseSchema = z.object({
+export const BaseCourseSchema = z.object({
     title: z
         .string()
         .trim()
@@ -49,43 +49,75 @@ export const createCourseSchema = z.object({
         .string({ message: "Thiếu public_id của ảnh" })
         .min(1, { message: "Thiếu public_id của ảnh" }),
 })
-    // Refine ràng buộc logic giá tiền dựa theo loại khóa học (Sync với NestJS DTO)
-    .superRefine((data, ctx) => {
-        // Nếu khóa học FREE
-        if (data.courseType === CourseType.FREE) {
-            if (data.price > 0) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Khóa học miễn phí không được nhập giá lớn hơn 0",
-                    path: ["price"],
-                });
-            }
-            if (data.discount > 0) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Khóa học miễn phí không được nhập giảm giá lớn hơn 0",
-                    path: ["discount"],
-                });
-            }
+const courseRefineLogic = (data: any, ctx: z.RefinementCtx) => {
+    // Nếu khóa học FREE
+    if (data.courseType === CourseType.FREE) {
+        if (data.price !== undefined && data.price > 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Khóa học miễn phí không được nhập giá lớn hơn 0",
+                path: ["price"],
+            });
         }
-
-        // Nếu khóa học PAID
-        if (data.courseType === CourseType.PAID) {
-            if (data.price <= 0) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Khóa học trả phí phải có giá lớn hơn 0",
-                    path: ["price"],
-                });
-            }
-            if (data.discount > data.price) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Giá giảm không được lớn hơn giá gốc",
-                    path: ["discount"],
-                });
-            }
+        if (data.discount !== undefined && data.discount > 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Khóa học miễn phí không được nhập giảm giá lớn hơn 0",
+                path: ["discount"],
+            });
         }
-    });
+    }
+    // Nếu khóa học PAID
+    if (data.courseType === CourseType.PAID) {
+        if (data.price !== undefined && data.price <= 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Khóa học trả phí phải có giá lớn hơn 0",
+                path: ["price"],
+            });
+        }
+    }
+    if (data.discount !== undefined && data.price !== undefined && data.discount > data.price) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Giá giảm không được lớn hơn giá gốc",
+            path: ["discount"],
+        });
+    }
+}
+export const CreateCourseSchema = BaseCourseSchema.superRefine(courseRefineLogic);
+export const UpdateCourseSchema = BaseCourseSchema
+    .partial()
+    .omit({ instructorId: true })
+    .superRefine(courseRefineLogic);
 
-export type ICreateCourse = z.infer<typeof createCourseSchema>;
+export const CreateUpdateCourseSchema = CreateCourseSchema;
+
+export const ChangeStatusSchema = CourseSchema.pick({
+    id: true,
+    status: true,
+}).extend({
+    id: z.string().min(1, "ID không được để trống"),
+    status: z.boolean(),
+})
+
+export const BulkStatusSchema = CourseSchema.pick({
+    status: true
+}).extend({
+    ids: z
+        .array(z.string().min(1, "ID không được để trống"))
+        .min(1, "Danh sách ID phải có ít nhất 1 phần tử"),
+    status: z.boolean("Trạng thái không hợp lệ"),
+});
+
+export const BulkDeleteSchema = z.object({
+    ids: z
+        .array(z.string().min(1, "ID không được để trống"))
+        .min(1, "Danh sách ID phải có ít nhất 1 phần tử")
+});
+export type ICreateCourse = z.infer<typeof CreateCourseSchema>;
+export type IUpdateCourse = z.infer<typeof UpdateCourseSchema>;
+export type ICourse = z.infer<typeof CreateUpdateCourseSchema>;
+export type IChangeStatus = z.infer<typeof ChangeStatusSchema>;
+export type IBulkStatus = z.infer<typeof BulkStatusSchema>;
+export type IBulkDelete = z.infer<typeof BulkDeleteSchema>;

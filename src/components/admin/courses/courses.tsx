@@ -21,7 +21,7 @@ import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
-import { useCourses } from "@/hooks/useCourse";
+import { useBulkDelete, useBulkUpdateStatus, useCourses } from "@/hooks/useCourse";
 import { CourseType, Level } from "@prisma/client";
 import ModalCreateCourse from "./modal-create-course";
 import { useAllTags, useTags } from "@/hooks/useTag";
@@ -117,26 +117,41 @@ export default function Course() {
     ]
     const { data: tags, isLoading: isLoadingTags } = useAllTags();
     const { data: instructors, isLoading: isLoadingInstructors } = useAllInstructors();
-    // const courseSelectedActions: DataTableSelectedActionConfig<any>[] = [
-    //     {
-    //         label: "Hoạt động",
-    //         icon: ShieldCheck,
-    //         variant: "outline" as const,
-    //         onClick: (selectedCourses: any, table: any) => handleBulkChangeStatus(selectedCourses, true, table),
-    //     },
-    //     {
-    //         label: "Khoá",
-    //         icon: Lock,
-    //         variant: "outline" as const,
-    //         onClick: (selectedUsers: any, table: any) => handleBulkChangeStatus(selectedUsers, false, table),
-    //     },
-    //     {
-    //         label: "Xóa",
-    //         icon: Trash2,
-    //         variant: "destructive" as const,
-    //         onClick: (selectedUsers: any, table: any) => handleBulkDelete(selectedUsers, table),
-    //     },
-    // ]
+    const courseSelectedActions: DataTableSelectedActionConfig<any>[] = [
+        {
+            label: "Hoạt động",
+            icon: ShieldCheck,
+            variant: "outline" as const,
+            confirm: {
+                title: "Kích hoạt các mục đã chọn?",
+                description: `Bạn có chắc chắn muốn kích hoạt các khóa học này không?`,
+                confirmText: "Kích hoạt",
+            },
+            onClick: (selectedCourses: any, table: any) => handleBulkChangeStatus(selectedCourses, true, table),
+        },
+        {
+            label: "Khoá",
+            icon: Lock,
+            variant: "outline" as const,
+            confirm: {
+                title: "Khoá các mục đã chọn?",
+                description: `Bạn có chắc chắn muốn khoá các khóa học này không?`,
+                confirmText: "Khoá",
+            },
+            onClick: (selectedCourses: any, table: any) => handleBulkChangeStatus(selectedCourses, false, table),
+        },
+        {
+            label: "Xóa",
+            icon: Trash2,
+            variant: "destructive" as const,
+            confirm: {
+                title: "Xóa vĩnh viễn",
+                description: `Bạn có chắc chắn muốn xóa các khóa học này không?`,
+                confirmText: "Xóa vĩnh viễn",
+            },
+            onClick: (selectedCourses: any, table: any) => handleBulkDelete(selectedCourses, table),
+        },
+    ]
 
     if (isError) {
         return (
@@ -146,34 +161,30 @@ export default function Course() {
         )
     }
 
-    // const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
-    // const handleBulkChangeStatus = (selectedUsers: any, status: boolean, table: any) => {
-    //     const ids = selectedUsers.map((u: any) => u.id)
-    //     bulkUpdateStatus({ ids, status }, {
-    //         onSuccess: () => {
-    //             refetch();
-    //             if (table) {
-    //                 table.resetRowSelection();
-    //             }
-    //         }
-    //     });
-    // }
-    // const { mutate: bulkDelete } = useBulkDelete();
-    // const handleBulkDelete = (selectedUsers: any, table: any) => {
-    //     const ids = selectedUsers.map((u: any) => u.id)
-    //     if (selectedUsers.some((user: any) => user.role === "ADMIN")) {
-    //         toast.error("Không thể xóa admin");
-    //         return;
-    //     }
-    //     bulkDelete({ ids }, {
-    //         onSuccess: () => {
-    //             refetch();
-    //             if (table) {
-    //                 table.resetRowSelection();
-    //             }
-    //         }
-    //     });
-    // }
+    const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
+    const handleBulkChangeStatus = (selectedCourses: any, status: boolean, table: any) => {
+        const ids = selectedCourses.map((course: any) => course.id)
+        bulkUpdateStatus({ ids, status }, {
+            onSuccess: () => {
+                refetch();
+                if (table) {
+                    table.resetRowSelection();
+                }
+            }
+        });
+    }
+    const { mutate: bulkDelete } = useBulkDelete();
+    const handleBulkDelete = (selectedCourses: any, table: any) => {
+        const ids = selectedCourses.map((u: any) => u.id)
+        bulkDelete({ ids }, {
+            onSuccess: () => {
+                refetch();
+                if (table) {
+                    table.resetRowSelection();
+                }
+            }
+        });
+    }
     return (
 
         <div>
@@ -314,14 +325,14 @@ export default function Course() {
                                 filters={courseFilters}
                                 actions={courseActions}
                             />
-                            {/* {
+                            {
                                 !isPending &&
                                 <DataTableSelectedToolbar
                                     table={table}
                                     label="khoá học"
                                     actions={courseSelectedActions}
                                 />
-                            } */}
+                            }
                         </div>
                     )}
                 </DataTable>

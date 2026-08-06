@@ -12,3 +12,20 @@ export const removeVietnameseTones = (str: string) => {
     .replace(/đ/g, "d")
     .replace(/Đ/g, "D");
 };
+
+export function formatDuration(seconds: number | null | undefined): string {
+  if (!seconds || seconds <= 0) return '00:00';
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  // Thêm số 0 phía trước nếu chữ số hàng đơn vị (< 10)
+  const pad = (num: number) => num.toString().padStart(2, '0');
+
+  if (hours > 0) {
+    return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+  }
+
+  return `${pad(minutes)}:${pad(secs)}`;
+}

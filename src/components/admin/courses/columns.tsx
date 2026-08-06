@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 // import { UserCellAction } from "./user-cell-actions"
 import { CourseType as ZodCourseType } from "@/types/generated-zod/schemas/models/Course.schema"
 import { CourseType, Level } from "@prisma/client"
+import { CourseCellAction } from "./course-cell-actions"
 
 
 export const columns: ColumnDef<ZodCourseType>[] = [
@@ -130,7 +131,7 @@ export const columns: ColumnDef<ZodCourseType>[] = [
             const courseType = row.getValue("courseType") as string
             const courseTypeBadgeClass = courseType === "FREE" ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300" :
                 courseType === "PAID" ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300" : ""
-            const courseTypeText = courseType === "FREE" ? "Miễn phí" : "Có phí"
+            const courseTypeText = courseType === "FREE" ? "Miễn phí" : "Trả phí"
             return (
                 <Badge className={`text-xs font-medium px-2 py-1 rounded ${courseTypeBadgeClass}`}>
                     {courseTypeText}
@@ -244,7 +245,7 @@ export const columns: ColumnDef<ZodCourseType>[] = [
                 )
 
                 return (
-                    <div className="flex flex-col items-end gap-0.5">
+                    <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-1.5">
                             <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-950/50 dark:text-red-400">
                                 -{discountPercent}%
@@ -261,7 +262,7 @@ export const columns: ColumnDef<ZodCourseType>[] = [
             }
 
             return (
-                <Badge variant={"default"} className="font-medium">
+                <Badge variant="default" className="text-md">
                     {formatter.format(originalPrice)}
                 </Badge>
             )
@@ -328,11 +329,10 @@ export const columns: ColumnDef<ZodCourseType>[] = [
     {
         id: "actions",
         cell: ({ row }) => {
-            const user = row.original
+            const course = row.original
             const status = row.getValue("status") as boolean
             return (
-                // <UserCellAction user={user} status={status} />
-                <div>...</div>
+                <CourseCellAction course={course} status={status} />
             )
         },
         enableGlobalFilter: false

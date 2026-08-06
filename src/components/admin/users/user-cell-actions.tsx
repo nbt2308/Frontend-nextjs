@@ -47,7 +47,7 @@ export const UserCellAction = ({ user, status }: { user: any, status: boolean })
                             setIsEditOpen(true)
 
                         }}>
-                        <Edit className="h-4 w-4 mr-2" /> Cập nhật vai trò</DropdownMenuItem>
+                        <Edit className="h-4 w-4 mr-2" /> Cập nhật người dùng</DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={() => {
                             handleChangeStatus({

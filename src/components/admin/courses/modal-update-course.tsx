@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateCourseSchema, ICreateCourse } from "@/schemas/course.schema";
+import { UpdateCourseSchema, IUpdateCourse } from "@/schemas/course.schema";
 import { CourseType, Level } from "@prisma/client";
-import { useCreateCourse } from "@/hooks/useCourse";
 
 // Components UI
 import {
@@ -28,26 +27,30 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Upload, X, ImagePlus, FileText, CircleDollarSign, Settings } from "lucide-react";
+import { Loader2, X, ImagePlus, FileText, CircleDollarSign, Settings } from "lucide-react";
 import Image from "next/image";
 import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema";
 import { toast } from "sonner";
 import { CloudinaryService } from "@/services/cloudinary";
+import { useUpdateCourse } from "@/hooks/useCourse";
 
-interface ModalCreateCourseProps {
+interface ModalUpdateCourseProps {
     open: boolean;
     closeDialog: () => void;
-    tags: TagType[]
-    instructors: UserType[]
+    tags: TagType[];
+    instructors: UserType[];
+    course: any;
 }
 
-export default function ModalCreateCourse({ open, closeDialog, tags, instructors }: ModalCreateCourseProps) {
+export default function ModalUpdateCourse({ open, closeDialog, tags, instructors, course }: ModalUpdateCourseProps) {
     const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const form = useForm<ICreateCourse>({
-        resolver: zodResolver(CreateCourseSchema),
+
+
+    const form = useForm<IUpdateCourse>({
+        resolver: zodResolver(UpdateCourseSchema),
         defaultValues: {
             title: "",
             description: "",
@@ -56,16 +59,31 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
             price: 0,
             discount: 0,
             status: true,
-            instructorId: undefined,
             tagId: undefined,
-            thumbnail: "",
-            thumbnail_publicID: "",
+            thumbnail: undefined,
+            thumbnail_publicID: undefined,
         },
     });
 
+    useEffect(() => {
+        if (course && open) {
+            form.reset({
+                title: course.title || "",
+                description: course.description || "",
+                courseType: course.courseType || CourseType.FREE,
+                level: course.level || Level.BEGINNER,
+                price: course.price ? Number(course.price) : 0,
+                discount: course.discount ? Number(course.discount) : 0,
+                status: course.status !== undefined ? Boolean(course.status) : true,
+                tagId: course.tagId ? Number(course.tagId) : undefined,
+                thumbnail: course.thumbnail || undefined,
+                thumbnail_publicID: course.thumbnail_publicID || undefined,
+            });
+            setImagePreview(course.thumbnail || null);
+            setSelectedFile(null);
+        }
+    }, [course, open, form]);
 
-
-    // Theo dõi giá trị courseType để ẩn/hiện ô nhập giá
     const watchCourseType = form.watch("courseType");
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,8 +108,10 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
         form.setValue("thumbnail_publicID", "", { shouldValidate: true });
     };
 
-    const { mutate: createCourse, isPending } = useCreateCourse();
-    const handleSubmit = async (data: ICreateCourse) => {
+    const { mutate: updateCourse, isPending: isUpdatePending } = useUpdateCourse();
+    const handleSubmit = async (data: IUpdateCourse) => {
+        console.log("Update Data:", data, course);
+
         try {
 
             if (selectedFile) {
@@ -106,14 +126,23 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                 formData.append("signature", signature);
 
                 setIsImageLoading(true);
-                const uploadResponse = await CloudinaryService.postImageToCloudinary(formData);
-                data.thumbnail = uploadResponse.secure_url;
-                data.thumbnail_publicID = uploadResponse.public_id;
-                if (uploadResponse.secure_url && uploadResponse.public_id) {
+                try {
+                    const uploadResponse = await CloudinaryService.postImageToCloudinary(formData);
+                    data.thumbnail = uploadResponse.secure_url;
+                    data.thumbnail_publicID = uploadResponse.public_id;
+                }
+                catch (uploadErr) {
+                    toast.error("Lỗi khi tải ảnh lên Cloudinary!");
+                    return;
+                }
+                finally {
                     setIsImageLoading(false);
                 }
             }
-            createCourse(data, {
+            updateCourse({
+                id: course?.id,
+                courseData: data
+            }, {
                 onSuccess: () => {
                     form.reset();
                     setImagePreview(null);
@@ -124,24 +153,24 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
         } catch (error) {
             console.error("Lỗi khi tạo khóa học:", error);
         }
+
     };
 
     return (
         <Dialog open={open} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">Tạo Khóa Học Mới</DialogTitle>
+                    <DialogTitle className="text-xl font-semibold">Cập Nhật Khóa Học</DialogTitle>
                     <DialogDescription className="text-xs text-zinc-500">
-                        Điền đầy đủ thông tin bên dưới để tạo khóa học mới vào hệ thống.
+                        Chỉnh sửa thông tin khóa học bên dưới để cập nhật vào hệ thống.
                     </DialogDescription>
                 </DialogHeader>
 
                 <Separator />
 
-                {/* Thêm scroll cho Form khi màn hình nhỏ */}
                 <div className="flex-1 overflow-y-auto pr-1 py-2">
                     <form
-                        id="create-course-form"
+                        id="update-course-form"
                         onSubmit={form.handleSubmit(handleSubmit)}
                         className="space-y-5"
                     >
@@ -204,6 +233,7 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                                                         src={imagePreview}
                                                         alt="Thumbnail Preview"
                                                         fill
+                                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                                         className="object-cover"
                                                     />
                                                     <button
@@ -313,33 +343,6 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                                         </Field>
                                     )}
                                 />
-                                <Controller
-                                    name="instructorId"
-                                    control={form.control}
-                                    render={({ field, fieldState }) => (
-                                        <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel>
-                                                Giảng viên <span className="text-red-500">*</span>
-                                            </FieldLabel>
-                                            <Select
-                                                value={field.value}
-                                                onValueChange={field.onChange}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Chọn giảng viên" />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper">
-                                                    {instructors.map((instructor) => (
-                                                        <SelectItem key={instructor.id} value={String(instructor.id)}>
-                                                            {instructor.email} - {instructor.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                        </Field>
-                                    )}
-                                />
                             </FieldGroup>
 
                         </FieldGroup>
@@ -390,9 +393,6 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                                 </div>
                             </FieldGroup>
                         )}
-
-
-
                     </form>
                 </div>
 
@@ -402,18 +402,18 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                             form.reset();
                             closeDialog();
                         }}
-                        disabled={isPending || isImageLoading}>
+                        disabled={isImageLoading || isUpdatePending}>
                         Hủy bỏ
                     </Button>
 
-                    <Button type="submit" form="create-course-form" disabled={isPending || isImageLoading}>
-                        {isPending || isImageLoading ? (
+                    <Button type="submit" form="update-course-form" disabled={isImageLoading || isUpdatePending}>
+                        {isImageLoading || isUpdatePending ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 Đang xử lý...
                             </>
                         ) : (
-                            "Tạo khóa học"
+                            "Lưu thay đổi"
                         )}
                     </Button>
                 </DialogFooter>

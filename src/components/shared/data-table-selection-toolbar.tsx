@@ -3,7 +3,18 @@ import { Table } from "@tanstack/react-table"
 import { LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DataTableSelectedActionConfig } from "../ui/data-table"
-
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogMedia,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface DataTableSelectedToolbarProps<TData> {
     table: Table<TData>
@@ -50,19 +61,55 @@ export function DataTableSelectedToolbar<TData>({
                 )}
 
                 {actions.map((action, index) => {
-                    const Icon = action.icon
-                    return (
+                    const Icon = action.icon;
+
+                    const renderButton = (
                         <Button
-                            key={index}
                             variant={action.variant || "outline"}
                             size="sm"
                             className="h-8 gap-1.5 text-xs font-medium"
-                            onClick={() => action.onClick(selectedData, table)}
+                            onClick={!action.confirm ? () => action.onClick(selectedData, table) : undefined}
                         >
                             {Icon && <Icon className="h-3.5 w-3.5" />}
                             {action.label}
                         </Button>
-                    )
+                    );
+
+                    if (!action.confirm) {
+                        return <React.Fragment key={index}>{renderButton}</React.Fragment>;
+                    }
+
+                    return (
+                        <AlertDialog key={index}>
+                            <AlertDialogTrigger asChild>
+                                {renderButton}
+                            </AlertDialogTrigger>
+                            <AlertDialogContent size="sm">
+                                <AlertDialogHeader>
+                                    <AlertDialogMedia >
+                                        {Icon && <Icon className="h-3.5 w-3.5" />}
+                                    </AlertDialogMedia>
+                                    <AlertDialogTitle>
+                                        {action.confirm.title || "Xác nhận thực hiện?"}
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        {action.confirm.description || "Hành động này không thể hoàn tác."}
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                        {action.confirm.cancelText || "Hủy"}
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={() => action.onClick(selectedData, table)}
+                                        className={action.variant === "destructive" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+                                    >
+                                        {action.confirm.confirmText || "Xác nhận"}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    );
                 })}
             </div>
         </div>
