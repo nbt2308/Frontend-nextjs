@@ -16,6 +16,7 @@ import { ConfirmModal } from "@/components/shared/data-table-confirm-modal"
 import ModalUpdateCourse from "./modal-update-course"
 import { useAllTags } from "@/hooks/useTag"
 import { useAllInstructors } from "@/hooks/useUser"
+import ModalViewCourse from "./modal-view-course"
 
 
 
@@ -96,6 +97,7 @@ export const CourseCellAction = ({ course, status }: { course: any, status: bool
             </DropdownMenu>
             {/* <ModalViewCourse open={isViewOpen} closeDialog={() => setIsViewOpen(false)} data={user} /> */}
             <ModalUpdateCourse open={isEditOpen} closeDialog={() => setIsEditOpen(false)} course={course} tags={tags} instructors={instructors} />
+            <ModalViewCourse open={isViewOpen} closeDialog={() => setIsViewOpen(false)} course={course} />
             <ConfirmModal
                 isOpen={showDeleteAlert}
                 onClose={() => setShowDeleteAlert(false)}
