@@ -28,13 +28,13 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                     <DialogTitle>Chi tiết khoá học</DialogTitle>
                 </DialogHeader>
                 <Separator />
-                
+
                 <Tabs defaultValue="info" className="flex-1 overflow-hidden flex flex-col">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="info">Thông tin chung</TabsTrigger>
                         <TabsTrigger value="curriculum">Nội dung khoá học</TabsTrigger>
                     </TabsList>
-                    
+
                     <TabsContent value="info" className="flex-1 overflow-y-auto pr-2 mt-4 space-y-4">
                         <div className="flex items-center gap-4 py-2">
                             <Avatar className="h-16 w-16 rounded-md">
@@ -101,6 +101,14 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                                 <span className="text-sm font-medium text-muted-foreground">Ngày tạo:</span>
                                 <span className="text-sm">{new Date(course.createdAt).toLocaleString('vi-VN')}</span>
                             </div>
+                            <div className="flex flex-row justify-between items-center py-2 border-b border-dashed">
+                                <span className="text-sm font-medium text-muted-foreground">Tag:</span>
+                                <div className="flex gap-2">
+                                    {/* <Badge variant={"secondary"} className="text-sm">
+                                        {course.tag?.name}
+                                    </Badge> */}
+                                </div>
+                            </div>
                         </div>
                     </TabsContent>
 
@@ -122,67 +130,67 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                                     </div>
                                 </div>
                                 <Accordion type="multiple" className="w-full space-y-3">
-                                {sections && sections.length > 0 ? sections.map((section: any) => {
-                                    let totalDuration = 0;
-                                    section.lessons?.forEach((lesson: any) => {
-                                        totalDuration += lesson.duration || 0;
-                                    });
+                                    {sections && sections.length > 0 ? sections.map((section: any) => {
+                                        let totalDuration = 0;
+                                        section.lessons?.forEach((lesson: any) => {
+                                            totalDuration += lesson.duration || 0;
+                                        });
 
-                                    return (
-                                        <AccordionItem key={section.id} value={section.id.toString()} className="border rounded-md px-4 bg-zinc-50/50 dark:bg-zinc-900/20">
-                                            <AccordionTrigger className="hover:no-underline py-3">
-                                                <div className="flex items-center justify-between w-full min-w-0 gap-4 mr-2">
-                                                    <span className="font-semibold text-sm truncate text-left">
-                                                        {section.title}
-                                                    </span>
-                                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-normal shrink-0">
-                                                        <span>{section.lessons?.length || 0} bài</span>
-                                                        <span>•</span>
-                                                        <span>{formatDuration(totalDuration)}</span>
+                                        return (
+                                            <AccordionItem key={section.id} value={section.id.toString()} className="border rounded-md px-4 bg-zinc-50/50 dark:bg-zinc-900/20">
+                                                <AccordionTrigger className="hover:no-underline py-3">
+                                                    <div className="flex items-center justify-between w-full min-w-0 gap-4 mr-2">
+                                                        <span className="font-semibold text-sm truncate text-left">
+                                                            {section.title}
+                                                        </span>
+                                                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-normal shrink-0">
+                                                            <span>{section.lessons?.length || 0} bài</span>
+                                                            <span>•</span>
+                                                            <span>{formatDuration(totalDuration)}</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </AccordionTrigger>
+                                                </AccordionTrigger>
 
-                                            <AccordionContent className="pt-2 pb-4">
-                                                <div className="space-y-2">
-                                                    {section.lessons?.length > 0 ? (
-                                                        section.lessons.map((lesson: any) => (
-                                                            <div
-                                                                key={lesson.id}
-                                                                className="flex items-center justify-between p-2.5 rounded-md border bg-background"
-                                                            >
-                                                                <div className="flex items-center gap-3 min-w-0 flex-1 mr-3">
-                                                                    <FileVideo className="h-4 w-4 text-blue-500 shrink-0" />
-                                                                    <span className="font-medium text-sm truncate">{lesson.title}</span>
-                                                                    {lesson.isPreview && (
-                                                                        <Badge variant="outline" className="shrink-0 gap-1 border-emerald-500/40 bg-emerald-500/10 text-emerald-600 text-[10px] px-1.5 py-0">
-                                                                            <Eye className="h-3 w-3" />
-                                                                            Xem trước
-                                                                        </Badge>
+                                                <AccordionContent className="pt-2 pb-4">
+                                                    <div className="space-y-2">
+                                                        {section.lessons?.length > 0 ? (
+                                                            section.lessons.map((lesson: any) => (
+                                                                <div
+                                                                    key={lesson.id}
+                                                                    className="flex items-center justify-between p-2.5 rounded-md border bg-background"
+                                                                >
+                                                                    <div className="flex items-center gap-3 min-w-0 flex-1 mr-3">
+                                                                        <FileVideo className="h-4 w-4 text-blue-500 shrink-0" />
+                                                                        <span className="font-medium text-sm truncate">{lesson.title}</span>
+                                                                        {lesson.isPreview && (
+                                                                            <Badge variant="outline" className="shrink-0 gap-1 border-emerald-500/40 bg-emerald-500/10 text-emerald-600 text-[10px] px-1.5 py-0">
+                                                                                <Eye className="h-3 w-3" />
+                                                                                Xem trước
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
+                                                                    {lesson.duration && (
+                                                                        <span className="text-xs text-muted-foreground shrink-0">
+                                                                            {formatDuration(lesson.duration)}
+                                                                        </span>
                                                                     )}
                                                                 </div>
-                                                                {lesson.duration && (
-                                                                    <span className="text-xs text-muted-foreground shrink-0">
-                                                                        {formatDuration(lesson.duration)}
-                                                                    </span>
-                                                                )}
+                                                            ))
+                                                        ) : (
+                                                            <div className="py-4 text-center text-xs text-muted-foreground italic">
+                                                                Chưa có bài học
                                                             </div>
-                                                        ))
-                                                    ) : (
-                                                        <div className="py-4 text-center text-xs text-muted-foreground italic">
-                                                            Chưa có bài học
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    );
-                                }) : (
-                                    <div className="py-8 text-center text-sm text-muted-foreground border border-dashed rounded-lg bg-muted/20">
-                                        Khoá học chưa có chương trình học
-                                    </div>
-                                )}
-                            </Accordion>
+                                                        )}
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        );
+                                    }) : (
+                                        <div className="py-8 text-center text-sm text-muted-foreground border border-dashed rounded-lg bg-muted/20">
+                                            Khoá học chưa có chương trình học
+                                        </div>
+                                    )}
+                                </Accordion>
                             </div>
                         )}
                     </TabsContent>

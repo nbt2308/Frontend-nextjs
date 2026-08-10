@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateCourseSchema, ICreateCourse } from "@/schemas/course.schema";
 import { CourseType, Level } from "@prisma/client";
 import { useCreateCourse } from "@/hooks/useCourse";
+import { cn } from "@/lib/utils";
 
 // Components UI
 import {
@@ -28,7 +29,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Upload, X, ImagePlus, FileText, CircleDollarSign, Settings } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Upload, X, ImagePlus, FileText, CircleDollarSign, Settings, Check, ChevronsUpDown } from "lucide-react";
 import Image from "next/image";
 import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema";
@@ -57,7 +61,7 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
             discount: 0,
             status: true,
             instructorId: undefined,
-            tagId: undefined,
+            tags: [],
             thumbnail: "",
             thumbnail_publicID: "",
         },
@@ -287,31 +291,84 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                                     )}
                                 />
                                 <Controller
-                                    name="tagId"
+                                    name="tags"
                                     control={form.control}
-                                    render={({ field, fieldState }) => (
-                                        <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel>
-                                                Danh mục / Tag <span className="text-red-500">*</span>
-                                            </FieldLabel>
-                                            <Select
-                                                value={field.value ? String(field.value) : ""}
-                                                onValueChange={(val) => field.onChange(Number(val))}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Chọn danh mục bài viết / Tag" />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper">
-                                                    {tags.map((tag) => (
-                                                        <SelectItem key={tag.id} value={String(tag.id)}>
-                                                            {tag.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                        </Field>
-                                    )}
+                                    render={({ field, fieldState }) => {
+                                        const selectedIds: number[] = field.value ?? [];
+                                        const toggleTag = (tagId: number) => {
+                                            const newValue = selectedIds.includes(tagId)
+                                                ? selectedIds.filter((id) => id !== tagId)
+                                                : [...selectedIds, tagId];
+                                            field.onChange(newValue);
+                                        };
+                                        return (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel>
+                                                    Danh mục / Tag <span className="text-red-500">*</span>
+                                                </FieldLabel>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            role="combobox"
+                                                            type="button"
+                                                            className={cn(
+                                                                "w-full justify-between font-normal h-auto min-h-9",
+                                                                selectedIds.length === 0 && "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            {selectedIds.length > 0 ? (
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    {selectedIds.map((id) => {
+                                                                        const tag = tags.find((t) => t.id === id);
+                                                                        return (
+                                                                            <Badge key={id} variant="secondary" className="text-xs">
+                                                                                {tag?.name}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="ml-1 rounded-full outline-none hover:text-destructive"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        toggleTag(id);
+                                                                                    }}
+                                                                                >
+                                                                                    <X className="h-3 w-3" />
+                                                                                </button>
+                                                                            </Badge>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            ) : (
+                                                                "Chọn danh mục / Tag..."
+                                                            )}
+                                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                                                        <Command>
+                                                            <CommandInput placeholder="Tìm tag..." />
+                                                            <CommandList>
+                                                                <CommandEmpty>Không tìm thấy tag nào.</CommandEmpty>
+                                                                <CommandGroup>
+                                                                    {tags.map((tag) => (
+                                                                        <CommandItem
+                                                                            key={tag.id}
+                                                                            value={tag.name}
+                                                                            onSelect={() => toggleTag(tag.id)}
+                                                                            data-checked={selectedIds.includes(tag.id)}
+                                                                        >
+                                                                            {tag.name}
+                                                                        </CommandItem>
+                                                                    ))}
+                                                                </CommandGroup>
+                                                            </CommandList>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
+                                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                            </Field>
+                                        );
+                                    }}
                                 />
                                 <Controller
                                     name="instructorId"
