@@ -11,7 +11,7 @@ import {
     SidebarMenuItem,
     SidebarMenuButton,
 } from "@/components/ui/sidebar"
-import { Home, Users, Settings, BookOpen, LayoutDashboard, User2 } from "lucide-react"
+import { Home, Users, Settings, BookOpen, LayoutDashboard, User2, Tag } from "lucide-react"
 
 // Sample menu items
 const items = [
@@ -24,6 +24,11 @@ const items = [
         title: "Khoá học",
         url: "/admin/courses",
         icon: BookOpen,
+    },
+    {
+        title: "Tags",
+        url: "/admin/tags",
+        icon: Tag,
     },
     {
         title: "Người dùng",

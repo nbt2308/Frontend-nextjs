@@ -37,9 +37,9 @@ export const BaseCourseSchema = z.object({
         .string({ message: "Vui lòng chọn người hướng dẫn" })
         .min(1, { message: "Vui lòng chọn người hướng dẫn" }),
 
-    tagId: z
-        .number({ message: "Vui lòng chọn tag" })
-        .min(1, { message: "Vui lòng chọn tag" }),
+    tagIds: z
+        .array(z.number(), { message: "Vui lòng chọn tag" })
+        .min(1, { message: "Vui lòng chọn ít nhất 1 tag" }),
 
     thumbnail: z
         .string({ message: "Vui lòng chọn ảnh" })
