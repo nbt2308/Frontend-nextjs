@@ -29,3 +29,18 @@ export function formatDuration(seconds: number | null | undefined): string {
 
   return `${pad(minutes)}:${pad(secs)}`;
 }
+
+export const formatDate = (dateString?: string | Date) => {
+  if (!dateString) return "N/A";
+  try {
+    return new Date(dateString).toLocaleString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "N/A";
+  }
+};

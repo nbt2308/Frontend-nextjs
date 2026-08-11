@@ -65,7 +65,7 @@ export default function Tag() {
         },
         {
             label: "Thêm nhãn",
-            icon: BookPlus,
+            icon: Tags,
             onClick: () => setOpenCreateModal(true),
             isPrimary: true,
         },

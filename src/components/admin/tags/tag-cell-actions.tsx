@@ -13,6 +13,7 @@ import { Ban, Edit, Info, Lock, MoreHorizontal, Trash2, Unlock } from "lucide-re
 import { useChangeStatus, useDeleteTag } from "@/hooks/useTag"
 import { ConfirmModal } from "@/components/shared/data-table-confirm-modal"
 import ModalEditTag from "./modal-edit-tag"
+import ModalViewTag from "./modal-view-tag"
 
 
 export const TagCellAction = ({ tag, status }: { tag: any, status: boolean }) => {
@@ -77,6 +78,7 @@ export const TagCellAction = ({ tag, status }: { tag: any, status: boolean }) =>
                     ><Trash2 /> Xóa tag</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+            <ModalViewTag open={isViewOpen} closeDialog={() => setIsViewOpen(false)} tag={tag} />
             <ModalEditTag open={isEditOpen} closeDialog={() => setIsEditOpen(false)} tag={tag} />
             <ConfirmModal
                 isOpen={showDeleteAlert}

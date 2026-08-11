@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2 } from "lucide-react";
+import { Edit, Loader2 } from "lucide-react";
 import React, { useEffect } from "react";
 import { useEditTag } from "@/hooks/useTag";
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema";
@@ -54,8 +54,17 @@ export default function ModalEditTag({ tag, open, closeDialog }: { tag?: TagType
         <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) closeDialog(); }}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">Cập Nhập Nhãn</DialogTitle>
-                    <DialogDescription className="text-xs font-mono text-zinc-400">Chỉnh sửa thông tin nhãn</DialogDescription>
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                            <Edit className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <DialogTitle className="text-xl font-semibold">Cập Nhật Tag</DialogTitle>
+                            <DialogDescription className="text-xs text-muted-foreground">
+                                Thay đổi thông tin Tag <strong># {tag?.id || ""}</strong>
+                            </DialogDescription>
+                        </div>
+                    </div>
                 </DialogHeader>
                 <Separator />
                 <div className="grid grid-cols-1 gap-2">
@@ -70,7 +79,7 @@ export default function ModalEditTag({ tag, open, closeDialog }: { tag?: TagType
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="update-tag-name">
-                                            Tên nhãn
+                                            Tên nhãn<span className="text-red-500">*</span>
                                         </FieldLabel>
                                         <Input
                                             {...field}
@@ -117,7 +126,7 @@ export default function ModalEditTag({ tag, open, closeDialog }: { tag?: TagType
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="update-tag-status">
-                                            Trạng thái
+                                            Trạng thái<span className="text-red-500">*</span>
                                         </FieldLabel>
                                         <Select
                                             aria-invalid={fieldState.invalid}

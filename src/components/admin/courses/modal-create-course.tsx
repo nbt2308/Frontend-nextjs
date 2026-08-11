@@ -32,7 +32,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, X, ImagePlus, FileText, CircleDollarSign, Settings, Check, ChevronsUpDown } from "lucide-react";
+import { Loader2, Upload, X, ImagePlus, FileText, CircleDollarSign, Settings, Check, ChevronsUpDown, BookPlus } from "lucide-react";
 import Image from "next/image";
 import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema";
@@ -134,10 +134,17 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
         <Dialog open={open} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">Tạo Khóa Học Mới</DialogTitle>
-                    <DialogDescription className="text-xs text-zinc-500">
-                        Điền đầy đủ thông tin bên dưới để tạo khóa học mới vào hệ thống.
-                    </DialogDescription>
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                            <BookPlus className="h-5 w-5" />
+                        </div>
+                        <div className="flex flex-col">
+                            <DialogTitle className="text-xl font-semibold">Tạo Khóa Học Mới</DialogTitle>
+                            <DialogDescription className="text-xs text-muted-foreground">
+                                Điền đầy đủ thông tin bên dưới để tạo khóa học mới vào hệ thống.
+                            </DialogDescription>
+                        </div>
+                    </div>
                 </DialogHeader>
 
                 <Separator />

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2 } from "lucide-react";
+import { Loader2, Tag } from "lucide-react";
 import React from "react";
 import { useCreateTag } from "@/hooks/useTag";
 
@@ -44,8 +44,17 @@ export default function ModalCreateTag({ open, closeDialog }: { open: boolean, c
         <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) closeDialog(); }}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">Thêm Nhãn Mới</DialogTitle>
-                    <DialogDescription className="text-xs font-mono text-zinc-400">Tạo nhãn mới cho hệ thống</DialogDescription>
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                            <Tag className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <DialogTitle className="text-xl font-semibold">Thêm Mới Tag</DialogTitle>
+                            <DialogDescription className="text-xs text-muted-foreground">
+                                Thêm Tag mới cho hệ thống
+                            </DialogDescription>
+                        </div>
+                    </div>
                 </DialogHeader>
                 <Separator />
                 <div className="grid grid-cols-1 gap-2">
@@ -60,7 +69,7 @@ export default function ModalCreateTag({ open, closeDialog }: { open: boolean, c
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="create-tag-name">
-                                            Tên nhãn
+                                            Tên nhãn<span className="text-red-500">*</span>
                                         </FieldLabel>
                                         <Input
                                             {...field}
@@ -107,7 +116,7 @@ export default function ModalCreateTag({ open, closeDialog }: { open: boolean, c
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="create-tag-status">
-                                            Trạng thái
+                                            Trạng thái<span className="text-red-500">*</span>
                                         </FieldLabel>
                                         <Select
                                             aria-invalid={fieldState.invalid}

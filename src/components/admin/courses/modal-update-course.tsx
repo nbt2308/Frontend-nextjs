@@ -29,7 +29,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Loader2, X, ImagePlus, FileText, CircleDollarSign, Settings, ChevronsUpDown } from "lucide-react";
+import { Loader2, X, ImagePlus, FileText, CircleDollarSign, Settings, ChevronsUpDown, Edit } from "lucide-react";
 import Image from "next/image";
 import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema";
@@ -163,10 +163,17 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, instructors
         <Dialog open={open} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">Cập Nhật Khóa Học</DialogTitle>
-                    <DialogDescription className="text-xs text-zinc-500">
-                        Chỉnh sửa thông tin khóa học bên dưới để cập nhật vào hệ thống.
-                    </DialogDescription>
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                            <Edit className="h-5 w-5" />
+                        </div>
+                        <div className="flex flex-col">
+                            <DialogTitle className="text-xl font-semibold">Cập Nhật Khoá Học</DialogTitle>
+                            <DialogDescription className="text-xs text-muted-foreground">
+                                Chỉnh sửa thông tin khóa học bên dưới để cập nhật vào hệ thống.
+                            </DialogDescription>
+                        </div>
+                    </div>
                 </DialogHeader>
 
                 <Separator />
@@ -398,6 +405,27 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, instructors
                                             </Field>
                                         );
                                     }}
+                                />
+                                <Controller
+                                    name="status"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel>
+                                                Trạng thái <span className="text-red-500">*</span>
+                                            </FieldLabel>
+                                            <Select value={field.value?.toString()} onValueChange={(v) => field.onChange(v === 'true')}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Chọn trạng thái" />
+                                                </SelectTrigger>
+                                                <SelectContent position="popper">
+                                                    <SelectItem value="true">Hoạt động</SelectItem>
+                                                    <SelectItem value="false">Ẩn</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                        </Field>
+                                    )}
                                 />
                             </FieldGroup>
 

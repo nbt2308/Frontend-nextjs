@@ -114,18 +114,33 @@ export default function User() {
             label: "Hoạt động",
             icon: ShieldCheck,
             variant: "outline" as const,
+            confirm: {
+                title: "Kích hoạt các mục đã chọn?",
+                description: `Bạn có chắc chắn muốn kích hoạt những người dùng này không?`,
+                confirmText: "Kích hoạt",
+            },
             onClick: (selectedUsers: any, table: any) => handleBulkChangeStatus(selectedUsers, true, table),
         },
         {
             label: "Khoá",
             icon: Lock,
             variant: "outline" as const,
+            confirm: {
+                title: "Khoá các mục đã chọn?",
+                description: `Bạn có chắc chắn muốn khoá những người dùng này không?`,
+                confirmText: "Khoá",
+            },
             onClick: (selectedUsers: any, table: any) => handleBulkChangeStatus(selectedUsers, false, table),
         },
         {
             label: "Xóa",
             icon: Trash2,
             variant: "destructive" as const,
+            confirm: {
+                title: "Xóa các mục đã chọn?",
+                description: `Bạn có chắc chắn muốn xóa những người dùng này không?`,
+                confirmText: "Xóa",
+            },
             onClick: (selectedUsers: any, table: any) => handleBulkDelete(selectedUsers, table),
         },
     ]

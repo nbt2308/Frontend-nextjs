@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Role } from "@prisma/client";
 import { useUpdateUser } from "@/hooks/useUser";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2 } from "lucide-react";
+import { Edit, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 export default function ModalEditUser({ open, closeDialog, data }: { open: boolean, closeDialog: () => void, data: UserType }) {
     const user = data as UserType;
@@ -62,8 +62,17 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
         <Dialog open={open} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">Cập Nhật Người Dùng</DialogTitle>
-                    <DialogDescription className="text-xs font-mono text-zinc-400">ID: {user?.id}</DialogDescription>
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                            <Edit className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <DialogTitle className="text-xl font-semibold">Cập Nhật Người Dùng</DialogTitle>
+                            <DialogDescription className="text-xs text-muted-foreground">
+                                <strong>ID: {user.id}</strong>
+                            </DialogDescription>
+                        </div>
+                    </div>
                 </DialogHeader>
                 <Separator />
                 <div className="grid grid-cols-1 gap-2">
