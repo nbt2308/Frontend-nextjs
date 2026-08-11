@@ -226,7 +226,7 @@ export const columns: ColumnDef<ZodCourseType>[] = [
             const { discount, price, courseType } = row.original as any;
             const originalPrice = parseFloat(price) || 0
             const salePrice = parseFloat(discount) || 0
-            const hasDiscount = courseType === "PAID" && salePrice > 0 && salePrice < originalPrice
+            const hasDiscount = courseType === CourseType.PAID && salePrice > 0 && salePrice < originalPrice
 
             const formatter = new Intl.NumberFormat("vi-VN", {
                 style: "currency",

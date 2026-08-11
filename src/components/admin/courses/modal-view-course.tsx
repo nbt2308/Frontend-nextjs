@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CircleCheck, Lock, FileVideo, Eye } from "lucide-react";
 import { useSections } from "@/hooks/useSection";
 import { formatDuration } from "@/lib/utils";
+import { CourseType } from "@prisma/client";
 
 interface ModalViewCourseProps {
     open: boolean;
@@ -21,6 +22,13 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
 
     if (!course) return null;
 
+    //format price
+    const originalPrice = parseFloat(course?.price) || 0
+    const salePrice = parseFloat(course?.discount) || 0
+    const hasDiscount = course?.courseType === CourseType.PAID && salePrice > 0 && salePrice < originalPrice
+    const discountPercent = Math.round(
+        ((originalPrice - salePrice) / originalPrice) * 100
+    )
     return (
         <Dialog open={open} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
@@ -81,7 +89,21 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                             <div>
                                 <div className="text-[10px] uppercase text-zinc-500 font-semibold mb-1">Giá</div>
                                 <div className="font-medium text-sm">
-                                    {course.courseType === "FREE" ? "Miễn phí" : `${Number(course.price).toLocaleString('vi-VN')} đ`}
+                                    {course.courseType === "FREE" ? "Miễn phí" : hasDiscount ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="line-through text-muted-foreground text-xs">
+                                                {originalPrice.toLocaleString("vi-VN")} đ
+                                            </span>
+                                            <span className="text-emerald-600 font-bold text-sm">
+                                                {salePrice.toLocaleString("vi-VN")} đ
+                                            </span>
+                                            <Badge variant="destructive" className="text-xs">
+                                                -{discountPercent}%
+                                            </Badge>
+                                        </div>
+                                    ) : (
+                                        `${originalPrice.toLocaleString("vi-VN")} đ`
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -104,9 +126,11 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                             <div className="flex flex-row justify-between items-center py-2 border-b border-dashed">
                                 <span className="text-sm font-medium text-muted-foreground">Tag:</span>
                                 <div className="flex gap-2">
-                                    {/* <Badge variant={"secondary"} className="text-sm">
-                                        {course.tag?.name}
-                                    </Badge> */}
+                                    {course?.tags.map((tag: any) => (
+                                        <Badge key={tag.id} variant={"secondary"} className="text-sm">
+                                            {tag.name}
+                                        </Badge>
+                                    ))}
                                 </div>
                             </div>
                         </div>

@@ -353,8 +353,8 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, instructors
                                                                         return (
                                                                             <Badge key={id} variant="secondary" className="text-xs">
                                                                                 {tag?.name}
-                                                                                <button
-                                                                                    type="button"
+                                                                                <span
+                                                                                    role="button"
                                                                                     className="ml-1 rounded-full outline-none hover:text-destructive"
                                                                                     onClick={(e) => {
                                                                                         e.stopPropagation();
@@ -362,7 +362,7 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, instructors
                                                                                     }}
                                                                                 >
                                                                                     <X className="h-3 w-3" />
-                                                                                </button>
+                                                                                </span>
                                                                             </Badge>
                                                                         );
                                                                     })}
