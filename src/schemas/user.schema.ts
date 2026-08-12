@@ -68,10 +68,14 @@ export const UpdateUserSchema = UserSchema.pick({
     name: z.string().min(1, "Vui lòng nhập tên").optional(),
     address: z.string().optional(),
     phone: z
-        .string()
-        .min(1, { message: "Vui lòng nhập số điện thoại" })
-        .regex(phoneRegex, { message: "Số điện thoại Việt Nam không hợp lệ" })
-        .optional(),
+        .preprocess(
+            //biến chuỗi "" || null thì thành undefined
+            (val) => (val === "" || val === null ? undefined : val),
+            z
+                .string()
+                .regex(phoneRegex, { message: "Số điện thoại Việt Nam không hợp lệ" })
+                .optional()
+        ),
     status: z.boolean().optional(),
 })
 export const ChangeStatusSchema = UserSchema.pick({

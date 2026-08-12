@@ -51,14 +51,26 @@ export default function ModalViewUser({ open, closeDialog, data }: ModalViewUser
                     </div>
                 </div>
                 {/* vai trò trạng thái kích hoạt */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                     <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
                         <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">
                             Vai trò
                         </span>
-                        <Badge variant="outline" className="text-sm font-medium mt-1 px-2.5 py-1">
+                        <Badge variant="outline" className="text-xs font-medium mt-1 px-2.5 py-1">
                             {user.role}
                         </Badge>
+                    </div>
+                    <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
+                        <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">
+                            Phương thức đăng nhập
+                        </span>
+                        {
+                            user.provider.map((item) => (
+                                <Badge key={item} variant="outline" className="text-xs font-medium mt-1 px-2.5 py-1">
+                                    {item}
+                                </Badge>
+                            ))
+                        }
                     </div>
                     <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
                         <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">
