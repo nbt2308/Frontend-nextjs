@@ -94,6 +94,9 @@ export const useResendOtp = () => {
         },
         onSuccess: () => {
             toast.success("Gửi lại mã OTP thành công");
+        },
+        onError: (error) => {
+            toast.error(error.message);
         }
     })
 }

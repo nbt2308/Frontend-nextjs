@@ -85,25 +85,7 @@ export function ForgotPassword({ open, onOpenChange }: ForgotPasswordProps) {
             }
         });
     }
-    const errorArr = error?.message ? JSON.parse(error.message) : null;
-    const getErrorMessage = () => {
-        if (!errorArr) return null;
-        switch (errorArr.statusCode) {
-            case 404:
-                return {
-                    text: errorArr.message,
-                };
-            case 400:
-                return {
-                    text: errorArr.message,
-                };
-            default:
-                return {
-                    text: errorArr.message,
-                };
-        }
-    };
-    const errorMessage = getErrorMessage();
+    const errorMessage = error?.message;
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => {
@@ -138,7 +120,7 @@ export function ForgotPassword({ open, onOpenChange }: ForgotPasswordProps) {
                     <Alert variant="destructive">
                         <AlertCircleIcon />
                         <AlertTitle>Lỗi</AlertTitle>
-                        <AlertDescription>{errorMessage.text}</AlertDescription>
+                        <AlertDescription>{errorMessage}</AlertDescription>
                     </Alert>
                 )}
                 {step === 1 &&

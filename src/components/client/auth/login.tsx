@@ -1,6 +1,6 @@
 "use client"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import Logo from "@/components/ui/logo";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -17,7 +17,7 @@ import {
     FieldLabel,
 } from "@/components/ui/field"
 import { useLogin } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Skeleton } from "@/components/ui/skeleton";
 import {
     Alert,
@@ -26,10 +26,26 @@ import {
 } from "@/components/ui/alert"
 import { AlertCircleIcon } from "lucide-react"
 import { ForgotPassword } from "./forgot-password";
+import { toast } from "sonner";
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const urlError = searchParams?.get('error');
+
+    useEffect(() => {
+        if (urlError) {
+            // NextAuth may return 'AccessDenied' if an error occurs but we return the custom error msg
+            if (urlError !== 'AccessDenied') {
+                toast.error(urlError);
+            }
+            // Optional: clean up the URL to remove the error param
+            const url = new URL(window.location.href);
+            url.searchParams.delete('error');
+            window.history.replaceState({}, '', url.toString());
+        }
+    }, [urlError]);
     const togglePassword = () => {
         setShowPassword(!showPassword);
         const passwordInput = document.getElementById('password') as HTMLInputElement;

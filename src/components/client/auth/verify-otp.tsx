@@ -43,44 +43,7 @@ export default function VerifyOtp({ token }: { token: string }) {
         }
     }
 
-    const getErrorMessage = () => {
-        let verifyErrorArr = verifyError?.message ? JSON.parse(verifyError.message) : null;
-        let resendErrorArr = resendError?.message ? JSON.parse(resendError.message) : null;
-        if (!verifyErrorArr && !resendErrorArr) return null;
-        if (verifyErrorArr)
-            switch (verifyErrorArr.statusCode) {
-                case 400:
-                    return {
-                        text: verifyErrorArr.message,
-                    };
-                case 404:
-                    return {
-                        text: verifyErrorArr.message,
-                    };
-                default:
-                    return {
-                        text: 'Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.',
-                    };
-            }
-        if (resendErrorArr) {
-            switch (resendErrorArr.statusCode) {
-                case 404:
-                    return {
-                        text: resendErrorArr.message,
-                    };
-                case 400:
-                    return {
-                        text: resendErrorArr.message,
-                    };
-                default:
-                    return {
-                        text: 'Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.',
-                    };
-            }
-        }
-    };
-    const errorMessage = getErrorMessage();
-
+    const errorMessage = verifyError?.message || resendError?.message;
 
     return (
         <>
@@ -102,7 +65,7 @@ export default function VerifyOtp({ token }: { token: string }) {
                             <Alert variant="destructive">
                                 <AlertCircleIcon />
                                 <AlertTitle>Lỗi xác thực</AlertTitle>
-                                <AlertDescription>{errorMessage.text}</AlertDescription>
+                                <AlertDescription>{errorMessage}</AlertDescription>
                             </Alert>
                         )}
                         <form id="verify-otp-form" onSubmit={(e) => {

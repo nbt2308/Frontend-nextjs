@@ -57,25 +57,7 @@ export default function Register() {
     const handleSubmit = (data: IRegister) => {
         mutate(data);
     };
-    const errorArr = error?.message ? JSON.parse(error.message) : null;
-    const getErrorMessage = () => {
-        if (!errorArr) return null;
-        switch (errorArr.statusCode) {
-            case 409:
-                return {
-                    text: errorArr.message,
-                };
-            case 400:
-                return {
-                    text: errorArr.message,
-                };
-            default:
-                return {
-                    text: 'Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.',
-                };
-        }
-    };
-    const errorMessage = getErrorMessage();
+
     return (
         <main className="px-4 md:px-8 min-h-screen flex flex-col items-center justify-center">
             <div className="py-4 max-w-md w-full">
@@ -88,11 +70,11 @@ export default function Register() {
                         <h1 className="text-slate-900 text-center text-xl font-semibold mb-3 dark:text-slate-50">Đăng ký tài khoản</h1>
                         <p className="text-sm text-slate-600 dark:text-slate-400">Vui lòng điền thông tin bên dưới.</p>
                     </div>
-                    {!isPending && errorMessage && (
+                    {!isPending && error && (
                         <Alert variant="destructive">
                             <AlertCircleIcon />
                             <AlertTitle>Lỗi đăng ký</AlertTitle>
-                            <AlertDescription>{errorMessage.text}</AlertDescription>
+                            <AlertDescription>{error.message}</AlertDescription>
                         </Alert>
                     )}
                     <form id="register-form" onSubmit={(e) => {

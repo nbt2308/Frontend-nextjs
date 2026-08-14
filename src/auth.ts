@@ -80,8 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return false;
         }
         catch (error: any) {
-          console.log(error);
-          return false;
+          return `/auth/login?error=${encodeURIComponent(error?.message)}`;
         }
       }
       return true;

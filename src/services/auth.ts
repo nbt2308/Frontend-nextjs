@@ -51,13 +51,7 @@ export const authService = {
             return res.data;
         }
         catch (error: any) {
-            if (error.response) {
-                const status = error.response.status;
-                if (status === 400) {
-                    throw new InvalidParameters();
-                }
-            }
-            throw error;
+            throw new Error(error?.response?.data?.message);
         }
 
     },
@@ -68,17 +62,7 @@ export const authService = {
 
             return res.data;
         } catch (error: any) {
-            if (error.response) {
-
-                const status = error.response.data.statusCode;
-                if (status === 409) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-                if (status === 400) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-            }
-            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+            throw new Error(error?.response?.data?.message || error.message);
         }
     },
     verifyOtp: async (data: IVerifyOtp) => {
@@ -86,18 +70,7 @@ export const authService = {
             const res = await authAxios.post('/auth/activate', data);
             return res.data;
         } catch (error: any) {
-            if (error.response) {
-
-                const status = error.response.data.statusCode;
-                if (status === 400) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-                if (status === 404) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-
-            }
-            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+            throw new Error(error?.response?.data?.message || error.message);
         }
     },
     resendOtp: async (verifyToken: string) => {
@@ -106,16 +79,7 @@ export const authService = {
 
             return res.data;
         } catch (error: any) {
-            if (error.response) {
-                const status = error.response.data.statusCode;
-                if (status === 404) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-                if (status === 400) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-            }
-            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+            throw new Error(error?.response?.data?.message || error.message);
         }
     },
     sendForgotPasswordOtp: async (email: string) => {
@@ -123,16 +87,7 @@ export const authService = {
             const res = await authAxios.post('/auth/send-reset-password-otp', { email });
             return res.data;
         } catch (error: any) {
-            if (error.response) {
-                const status = error.response.data.statusCode;
-                if (status === 404) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-                if (status === 400) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-            }
-            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+            throw new Error(error?.response?.data?.message || error.message);
         }
     },
     verifyForgotPasswordOtp: async (email: string, codeId: string) => {
@@ -140,16 +95,7 @@ export const authService = {
             const res = await authAxios.post('/auth/verify-reset-password-otp', { email, codeId });
             return res.data;
         } catch (error: any) {
-            if (error.response) {
-                const status = error.response.data.statusCode;
-                if (status === 404) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-                if (status === 400) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-            }
-            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+            throw new Error(error?.response?.data?.message || error.message);
         }
     },
     resetPassword: async (email: string, password: string) => {
@@ -157,16 +103,7 @@ export const authService = {
             const res = await authAxios.post('/auth/reset-password', { email, password });
             return res.data;
         } catch (error: any) {
-            if (error.response) {
-                const status = error.response.data.statusCode;
-                if (status === 404) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-                if (status === 400) {
-                    throw new Error(JSON.stringify(error.response.data));
-                }
-            }
-            throw new Error(JSON.stringify({ message: error.message || "Đã xảy ra lỗi không xác định" }));
+            throw new Error(error?.response?.data?.message || error.message);
         }
     },
     adminLogin: async (data: ISignIn) => {
