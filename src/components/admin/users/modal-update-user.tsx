@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IUpdateUser, UpdateUserSchema } from "@/schemas/user.schema";
+import { IUpdateUser, IUpdateUserInput, UpdateUserSchema } from "@/schemas/user.schema";
 import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ import { Edit, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 export default function ModalEditUser({ open, closeDialog, data }: { open: boolean, closeDialog: () => void, data: UserType }) {
     const user = data as UserType;
-    const form = useForm<IUpdateUser>({
+    const form = useForm<IUpdateUserInput, any, IUpdateUser>({
         resolver: zodResolver(UpdateUserSchema),
         defaultValues: {
             name: "",

@@ -69,7 +69,9 @@ export const UpdateUserSchema = UserSchema.pick({
         .string()
         .regex(phoneRegex, { message: "Số điện thoại Việt Nam không hợp lệ" })
         .or(z.literal(""))
-        .optional(),
+        .or(z.null())
+        .optional()
+        .transform((val) => (val === "" || val === null ? undefined : val)),
     status: z.boolean().optional(),
 })
 export const ChangeStatusSchema = UserSchema.pick({
@@ -82,5 +84,6 @@ export const ChangeStatusSchema = UserSchema.pick({
 
 export type IBulkStatus = z.infer<typeof BulkStatusSchema>;
 export type IBulkDelete = z.infer<typeof BulkDeleteSchema>;
-export type IUpdateUser = z.infer<typeof UpdateUserSchema>;
+export type IUpdateUser = z.infer<typeof UpdateUserSchema>; // output when submit form
+export type IUpdateUserInput = z.input<typeof UpdateUserSchema>; // input validate form 
 export type IChangeStatus = z.infer<typeof ChangeStatusSchema>;
