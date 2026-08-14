@@ -66,7 +66,7 @@ export default function ModalViewUser({ open, closeDialog, data }: ModalViewUser
                         </span>
                         {
                             user.provider.map((item) => (
-                                <Badge key={item} variant="outline" className="text-xs font-medium mt-1 px-2.5 py-1">
+                                <Badge key={item} variant="outline" className="text-xs font-medium mt-1 px-2.5 py-1 mr-1">
                                     {item}
                                 </Badge>
                             ))

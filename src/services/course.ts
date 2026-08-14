@@ -68,7 +68,7 @@ export const CourseService = {
     },
     deleteCourse: async (id: string) => {
         try {
-            const response = await axiosClient.delete(`/courses/${id}`);
+            const response = await axiosClient.delete(`/courses/soft/${id}`);
             return response.data;
         } catch (error: any) {
             throw new Error(error.message)

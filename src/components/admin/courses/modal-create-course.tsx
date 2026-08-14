@@ -393,11 +393,17 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                                                     <SelectValue placeholder="Chọn giảng viên" />
                                                 </SelectTrigger>
                                                 <SelectContent position="popper">
-                                                    {instructors.map((instructor) => (
-                                                        <SelectItem key={instructor.id} value={String(instructor.id)}>
-                                                            {instructor.email} - {instructor.name}
-                                                        </SelectItem>
-                                                    ))}
+                                                    {instructors && instructors.length > 0 ? (
+                                                        instructors.map((instructor) => (
+                                                            <SelectItem key={instructor.id} value={String(instructor.id)}>
+                                                                {instructor.email} - {instructor.name}
+                                                            </SelectItem>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-4 text-center text-sm text-muted-foreground">
+                                                            Không có dữ liệu
+                                                        </div>
+                                                    )}
                                                 </SelectContent>
                                             </Select>
                                             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

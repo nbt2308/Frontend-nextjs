@@ -56,26 +56,20 @@ export const BulkDeleteSchema = z.object({
 });
 
 export const UpdateUserSchema = UserSchema.pick({
-    id: true,
     name: true,
     phone: true,
     address: true,
     status: true,
     role: true
 }).extend({
-    id: z.string().min(1, "ID không được để trống"),
     role: z.nativeEnum(Role).optional(),
     name: z.string().min(1, "Vui lòng nhập tên").optional(),
     address: z.string().optional(),
     phone: z
-        .preprocess(
-            //biến chuỗi "" || null thì thành undefined
-            (val) => (val === "" || val === null ? undefined : val),
-            z
-                .string()
-                .regex(phoneRegex, { message: "Số điện thoại Việt Nam không hợp lệ" })
-                .optional()
-        ),
+        .string()
+        .regex(phoneRegex, { message: "Số điện thoại Việt Nam không hợp lệ" })
+        .or(z.literal(""))
+        .optional(),
     status: z.boolean().optional(),
 })
 export const ChangeStatusSchema = UserSchema.pick({

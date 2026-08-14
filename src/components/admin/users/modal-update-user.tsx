@@ -23,24 +23,22 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
     const form = useForm<IUpdateUser>({
         resolver: zodResolver(UpdateUserSchema),
         defaultValues: {
-            id: user?.id,
-            name: user?.name,
-            phone: user?.phone || '',
-            address: user?.address || '',
-            status: user?.status,
-            role: user?.role || Role.STUDENT
+            name: "",
+            phone: "",
+            address: "",
+            status: true,
+            role: Role.STUDENT
         },
     })
 
     useEffect(() => {
         if (user) {
             form.reset({
-                id: user.id,
-                name: user.name,
-                phone: user.phone || '',
-                address: user.address || '',
-                status: user.status,
-                role: user.role || Role.STUDENT
+                name: user?.name || "",
+                phone: user?.phone || "",
+                address: user?.address || "",
+                status: user?.status,
+                role: user?.role || Role.STUDENT
             });
         }
     }, [user, form]);
@@ -49,9 +47,10 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
 
     const handleSubmit = async (data: IUpdateUser) => {
         try {
-            mutate(data, {
+            mutate({ id: user.id, data }, {
                 onSuccess: () => {
                     closeDialog();
+                    form.reset();
                 }
             });
         } catch (error) {
@@ -88,7 +87,7 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="update-user-name">
-                                            Tên người dùng
+                                            Tên người dùng<span className="text-red-500">*</span>
                                         </FieldLabel>
                                         <Input
                                             {...field}
@@ -110,7 +109,7 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="update-user-phone">
-                                            Số điện thoại
+                                            Số điện thoại<span className="text-red-500">*</span>
                                         </FieldLabel>
                                         <Input
                                             {...field}
@@ -156,7 +155,7 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
                                     render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>
                                             <FieldLabel htmlFor="update-user-role">
-                                                Vai trò
+                                                Vai trò<span className="text-red-500">*</span>
                                             </FieldLabel>
                                             <Select
                                                 value={field.value}
@@ -184,7 +183,7 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
                                     render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>
                                             <FieldLabel htmlFor="update-user-status">
-                                                Trạng thái
+                                                Trạng thái<span className="text-red-500">*</span>
                                             </FieldLabel>
                                             <Select
                                                 aria-invalid={fieldState.invalid}

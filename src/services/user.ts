@@ -33,9 +33,9 @@ export const UserService = {
     //     }
     // }
 
-    updateUser: async (data: IUpdateUser) => {
+    updateUser: async (id: string, data: IUpdateUser) => {
         try {
-            const response = await axiosClient.patch(`/users`, data);
+            const response = await axiosClient.patch(`/users/${id}`, data);
             return response.data;
         } catch (error: any) {
             throw new Error(error.message)
@@ -61,6 +61,14 @@ export const UserService = {
     changeStatus: async (data: IChangeStatus) => {
         try {
             const response = await axiosClient.post(`/users/change-status`, data);
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message)
+        }
+    },
+    softDelete: async (id: string) => {
+        try {
+            const response = await axiosClient.delete(`/users/soft/${id}`);
             return response.data;
         } catch (error: any) {
             throw new Error(error.message)

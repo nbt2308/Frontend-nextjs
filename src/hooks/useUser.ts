@@ -52,8 +52,8 @@ export function useAllInstructors() {
 export function useUpdateUser() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (data: IUpdateUser) => {
-            const result = await UserService.updateUser(data)
+        mutationFn: async ({ id, data }: { id: string, data: IUpdateUser }) => {
+            const result = await UserService.updateUser(id, data)
             if (result?.error) {
                 throw new Error(result?.error);
             }
@@ -128,5 +128,25 @@ export function useChangeStatus() {
         }
     })
     return handleChangeStatus;
+}
+
+export function useSoftDelete() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const result = await UserService.softDelete(id);
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+            toast.success("Xoá người dùng thành công");
+        },
+        onError: (error: any) => {
+            toast.error(error?.message);
+        }
+    })
 }
 

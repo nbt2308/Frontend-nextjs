@@ -12,14 +12,22 @@ import { Button } from "@/components/ui/button"
 import { Ban, Edit, Info, Lock, MoreHorizontal, Trash2, Unlock } from "lucide-react"
 import ModalViewUser from "./modal-view-user"
 import ModalEditUser from "./modal-update-user"
-import { useChangeStatus } from "@/hooks/useUser"
+import { useChangeStatus, useSoftDelete } from "@/hooks/useUser"
+import { ConfirmModal } from "@/components/shared/data-table-confirm-modal"
 
 
 
 export const UserCellAction = ({ user, status }: { user: any, status: boolean }) => {
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [isEditOpen, setIsEditOpen] = useState(false)
-    const { mutate: handleChangeStatus, isPending } = useChangeStatus();
+    const [isDeleteAlert, setIsDeleteAlert] = useState(false)
+    const { mutate: handleChangeStatus, isPending: isChangeStatusPending } = useChangeStatus();
+    const { mutate: handleSoftDelete, isPending: isSoftDeletePending } = useSoftDelete();
+
+    const deleteHandler = async () => {
+        handleSoftDelete(user?.id);
+        setIsDeleteAlert(false);
+    }
     return (
         <>
             <DropdownMenu >
@@ -55,7 +63,7 @@ export const UserCellAction = ({ user, status }: { user: any, status: boolean })
                                 status: !status
                             })
                         }}
-                        disabled={isPending}
+                        disabled={isChangeStatusPending}
                     >
                         {
                             status ?
@@ -66,11 +74,28 @@ export const UserCellAction = ({ user, status }: { user: any, status: boolean })
                         {status ? "Khóa" : "Mở khóa"}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" title="Tính năng này không khả dụng" disabled><Trash2 /> Xóa tài khoản</DropdownMenuItem>
+                    <DropdownMenuItem variant="destructive"
+                        onSelect={() => setIsDeleteAlert(true)}
+                        disabled={isSoftDeletePending}
+                    ><Trash2 /> Xóa tài khoản</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
             <ModalViewUser open={isViewOpen} closeDialog={() => setIsViewOpen(false)} data={user} />
             <ModalEditUser open={isEditOpen} closeDialog={() => setIsEditOpen(false)} data={user} />
+            <ConfirmModal
+                isOpen={isDeleteAlert}
+                onClose={() => setIsDeleteAlert(false)}
+                onConfirm={deleteHandler}
+                title="Xóa Tài khoản?"
+                isLoading={isSoftDeletePending}
+                description={
+                    <>
+                        Bạn có chắc chắn muốn xóa người dùng với email{" "}
+                        <strong className="text-foreground">{user?.email}</strong> không?
+                    </>
+                }
+                confirmText="Xóa vĩnh viễn"
+            />
         </>
     )
 }
