@@ -1,5 +1,6 @@
+import { RoleSchema } from '@/types/generated-zod/schemas';
 import { UserSchema } from '@/types/generated-zod/schemas/models';
-import { Role } from '@prisma/client';
+
 import * as z from "zod";
 
 const phoneRegex = /^(?:\+84|84|0)(3|5|7|8|9)\d{8}$/;
@@ -34,9 +35,7 @@ export const createUserSchema = UserSchema.pick({
         isActive: z
             .boolean()
             .default(true),
-        role: z
-            .nativeEnum(Role)
-            .default(Role.STUDENT),
+        role: RoleSchema.default('STUDENT')
 
     })
 
@@ -62,7 +61,7 @@ export const UpdateUserSchema = UserSchema.pick({
     status: true,
     role: true
 }).extend({
-    role: z.nativeEnum(Role).optional(),
+    role: RoleSchema.default('STUDENT').optional(),
     name: z.string().min(1, "Vui lòng nhập tên").optional(),
     address: z.string().optional(),
     phone: z

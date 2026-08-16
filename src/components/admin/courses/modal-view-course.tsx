@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CircleCheck, Lock, FileVideo, Eye, BookOpen, Menu, FileText, Clock, Link, Tag, Calendar } from "lucide-react";
 import { useSections } from "@/hooks/useSection";
 import { formatDate, formatDuration } from "@/lib/utils";
-import { CourseType } from "@prisma/client";
+import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 
 interface ModalViewCourseProps {
     open: boolean;
@@ -17,6 +17,8 @@ interface ModalViewCourseProps {
 }
 
 export default function ModalViewCourse({ open, closeDialog, course }: ModalViewCourseProps) {
+    const CourseType = CourseTypeSchema.enum;
+    const Level = LevelSchema.enum;
     // Only fetch sections if course exists and modal is open
     const { data: sections, isPending } = useSections(course?.id || "");
 
@@ -76,7 +78,7 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                                     Loại khoá học
                                 </div>
                                 <Badge variant="outline" className="font-medium">
-                                    {course.courseType === "FREE" ? "Miễn phí" : "Trả phí"}
+                                    {course.courseType === CourseType.FREE ? "Miễn phí" : "Trả phí"}
                                 </Badge>
                             </div>
                             <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
@@ -104,7 +106,7 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                             <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
                                 <div className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">Giá</div>
                                 <div className="font-medium text-sm">
-                                    {course.courseType === "FREE" ? "Miễn phí" : hasDiscount ? (
+                                    {course.courseType === CourseType.FREE ? "Miễn phí" : hasDiscount ? (
                                         <div className="flex items-center gap-2">
                                             <span className="line-through text-muted-foreground text-xs">
                                                 {originalPrice.toLocaleString("vi-VN")} đ

@@ -9,17 +9,18 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IUpdateUser, IUpdateUserInput, UpdateUserSchema } from "@/schemas/user.schema";
 import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
+import { RoleSchema } from "@/types/generated-zod/schemas";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Role } from "@prisma/client";
 import { useUpdateUser } from "@/hooks/useUser";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Edit, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 export default function ModalEditUser({ open, closeDialog, data }: { open: boolean, closeDialog: () => void, data: UserType }) {
     const user = data as UserType;
+    const Role = RoleSchema.enum;
     const form = useForm<IUpdateUserInput, any, IUpdateUser>({
         resolver: zodResolver(UpdateUserSchema),
         defaultValues: {

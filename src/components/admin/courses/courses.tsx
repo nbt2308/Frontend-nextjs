@@ -22,13 +22,15 @@ import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
 import { useBulkDelete, useBulkUpdateStatus, useCourses } from "@/hooks/useCourse";
-import { CourseType, Level } from "@prisma/client";
 import ModalCreateCourse from "./modal-create-course";
-import { useAllTags, useTags } from "@/hooks/useTag";
+import { useAllTags } from "@/hooks/useTag";
 import { useAllInstructors } from "@/hooks/useUser";
+import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 
 export default function Course() {
 
+    const CourseType = CourseTypeSchema.enum;
+    const Level = LevelSchema.enum;
     const [filters, setFilters] = useState<FindAllQueryParams>({
         page: 1,
         limit: 10,

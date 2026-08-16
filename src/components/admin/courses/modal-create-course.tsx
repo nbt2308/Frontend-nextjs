@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateCourseSchema, ICreateCourse } from "@/schemas/course.schema";
-import { CourseType, Level } from "@prisma/client";
+import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { useCreateCourse } from "@/hooks/useCourse";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +47,8 @@ interface ModalCreateCourseProps {
 }
 
 export default function ModalCreateCourse({ open, closeDialog, tags, instructors }: ModalCreateCourseProps) {
+    const CourseType = CourseTypeSchema.enum;
+    const Level = LevelSchema.enum;
     const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);

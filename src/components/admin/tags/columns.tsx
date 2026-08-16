@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 // import { UserCellAction } from "./user-cell-actions"
 import { TagType as ZodTagType } from "@/types/generated-zod/schemas/models/Tag.schema"
-import { CourseType, Level } from "@prisma/client"
 import { TagCellAction } from "./tag-cell-actions"
 // import { CourseCellAction } from "./course-cell-actions"
 

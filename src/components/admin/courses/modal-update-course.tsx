@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UpdateCourseSchema, IUpdateCourse } from "@/schemas/course.schema";
-import { CourseType, Level } from "@prisma/client";
+import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -47,6 +47,8 @@ interface ModalUpdateCourseProps {
 }
 
 export default function ModalUpdateCourse({ open, closeDialog, tags, instructors, course }: ModalUpdateCourseProps) {
+    const CourseType = CourseTypeSchema.enum;
+    const Level = LevelSchema.enum;
     const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);

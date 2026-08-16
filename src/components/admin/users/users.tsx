@@ -22,7 +22,9 @@ import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
+import { RoleSchema } from "@/types/generated-zod/schemas";
 export default function User() {
+    const Role = RoleSchema.enum;
     const [filters, setFilters] = useState<FindAllQueryParams>({
         page: 1,
         limit: 10,
@@ -38,21 +40,21 @@ export default function User() {
             options: [
                 {
                     label: "Admin",
-                    value: "ADMIN",
+                    value: Role.ADMIN,
                     icon: ShieldUser,
-                    count: users?.filter((user: any) => user.role === "ADMIN").length
+                    count: users?.filter((user: any) => user.role === Role.ADMIN).length
                 },
                 {
                     label: "Instructor",
-                    value: "INSTRUCTOR",
+                    value: Role.INSTRUCTOR,
                     icon: UserCog,
-                    count: users?.filter((user: any) => user.role === "INSTRUCTOR").length
+                    count: users?.filter((user: any) => user.role === Role.INSTRUCTOR).length
                 },
                 {
                     label: "Student",
-                    value: "STUDENT",
+                    value: Role.STUDENT,
                     icon: UserStar,
-                    count: users?.filter((user: any) => user.role === "STUDENT").length
+                    count: users?.filter((user: any) => user.role === Role.STUDENT).length
                 },
             ],
         },
@@ -167,7 +169,7 @@ export default function User() {
     const { mutate: bulkDelete } = useBulkDelete();
     const handleBulkDelete = (selectedUsers: any, table: any) => {
         const ids = selectedUsers.map((u: any) => u.id)
-        if (selectedUsers.some((user: any) => user.role === "ADMIN")) {
+        if (selectedUsers.some((user: any) => user.role === Role.ADMIN)) {
             toast.error("Không thể xóa admin");
             return;
         }
@@ -273,7 +275,7 @@ export default function User() {
                         />
                         <KpiCard
                             label="Quản trị viên"
-                            value={users?.filter((user: any) => user.role === "ADMIN").length.toString()}
+                            value={users?.filter((user: any) => user.role === Role.ADMIN).length.toString()}
                             icon={UserCog}
                             iconColor="text-purple-500"
                             glowColor="bg-purple-500/15 border-purple-500/30"
@@ -283,7 +285,7 @@ export default function User() {
                         />
                         <KpiCard
                             label="Giảng viên"
-                            value={users?.filter((user: any) => user.role === "INSTRUCTOR").length.toString()}
+                            value={users?.filter((user: any) => user.role === Role.INSTRUCTOR).length.toString()}
                             icon={UserPen}
                             iconColor="text-orange-500"
                             glowColor="bg-orange-500/15 border-orange-500/30"
@@ -293,7 +295,7 @@ export default function User() {
                         />
                         <KpiCard
                             label="Học viên"
-                            value={users?.filter((user: any) => user.role === "STUDENT").length.toString()}
+                            value={users?.filter((user: any) => user.role === Role.STUDENT).length.toString()}
                             icon={UserStar}
                             iconColor="text-amber-500"
                             glowColor="bg-amber-500/15 border-amber-500/30"

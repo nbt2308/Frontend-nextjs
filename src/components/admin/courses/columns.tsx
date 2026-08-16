@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 // import { UserCellAction } from "./user-cell-actions"
 import { CourseType as ZodCourseType } from "@/types/generated-zod/schemas/models/Course.schema"
-import { CourseType, Level } from "@prisma/client"
+import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas"
 import { CourseCellAction } from "./course-cell-actions"
 
 
@@ -174,14 +174,14 @@ export const columns: ColumnDef<ZodCourseType>[] = [
         cell: ({ row }) => {
             const level = row.getValue("level") as string
             const levelIcon =
-                level === Level.BEGINNER ? <Sprout /> :
-                    level === Level.INTERMEDIATE ? <Zap /> :
-                        level === Level.ADVANCED ? <Rocket /> : ""
+                level === LevelSchema.enum.BEGINNER ? <Sprout /> :
+                    level === LevelSchema.enum.INTERMEDIATE ? <Zap /> :
+                        level === LevelSchema.enum.ADVANCED ? <Rocket /> : ""
 
             const levelBadgeClass =
-                level === Level.BEGINNER ? "bg-sky-500/15 text-sky-500 dark:bg-sky-950 dark:text-sky-300" :
-                    level === Level.INTERMEDIATE ? "bg-violet-500/15 text-violet-500 dark:bg-violet-950 dark:text-violet-300" :
-                        level === Level.ADVANCED ? "bg-amber-500/15 text-amber-500 dark:bg-amber-950 dark:text-amber-300" : ""
+                level === LevelSchema.enum.BEGINNER ? "bg-sky-500/15 text-sky-500 dark:bg-sky-950 dark:text-sky-300" :
+                    level === LevelSchema.enum.INTERMEDIATE ? "bg-violet-500/15 text-violet-500 dark:bg-violet-950 dark:text-violet-300" :
+                        level === LevelSchema.enum.ADVANCED ? "bg-amber-500/15 text-amber-500 dark:bg-amber-950 dark:text-amber-300" : ""
             return (
                 <Badge className={`text-xs font-medium px-2 py-1 rounded ${levelBadgeClass}`}>
                     {levelIcon}
@@ -226,7 +226,7 @@ export const columns: ColumnDef<ZodCourseType>[] = [
             const { discount, price, courseType } = row.original as any;
             const originalPrice = parseFloat(price) || 0
             const salePrice = parseFloat(discount) || 0
-            const hasDiscount = courseType === CourseType.PAID && salePrice > 0 && salePrice < originalPrice
+            const hasDiscount = courseType === CourseTypeSchema.enum.PAID && salePrice > 0 && salePrice < originalPrice
 
             const formatter = new Intl.NumberFormat("vi-VN", {
                 style: "currency",

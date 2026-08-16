@@ -1,6 +1,7 @@
+import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { CourseSchema } from "@/types/generated-zod/schemas/models";
-import { CourseType, Level } from "@prisma/client";
 import * as z from "zod";
+
 
 export const BaseCourseSchema = z.object({
     title: z
@@ -21,18 +22,9 @@ export const BaseCourseSchema = z.object({
         .number({ message: "Giảm giá phải là số" })
         .min(0, { message: "Giảm giá không được nhỏ hơn 0" }),
 
-    courseType: z
-        .nativeEnum(CourseType, {
-            message: "Loại khóa học không hợp lệ",
-        }),
-
-    level: z
-        .nativeEnum(Level, {
-            message: "Cấp độ không hợp lệ",
-        }),
-
+    courseType: CourseTypeSchema,
+    level: LevelSchema,
     status: z.boolean(),
-
     instructorId: z
         .string({ message: "Vui lòng chọn người hướng dẫn" })
         .min(1, { message: "Vui lòng chọn người hướng dẫn" }),
@@ -51,7 +43,7 @@ export const BaseCourseSchema = z.object({
 })
 const courseRefineLogic = (data: any, ctx: z.RefinementCtx) => {
     // Nếu khóa học FREE
-    if (data.courseType === CourseType.FREE) {
+    if (data.courseType === CourseTypeSchema.enum.FREE) {
         if (data.price !== undefined && data.price > 0) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
@@ -68,7 +60,7 @@ const courseRefineLogic = (data: any, ctx: z.RefinementCtx) => {
         }
     }
     // Nếu khóa học PAID
-    if (data.courseType === CourseType.PAID) {
+    if (data.courseType === CourseTypeSchema.enum.PAID) {
         if (data.price !== undefined && data.price <= 0) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
