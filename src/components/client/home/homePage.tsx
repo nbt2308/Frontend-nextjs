@@ -1,53 +1,44 @@
 "use client";
-import { motion, Variants } from "motion/react";
-import { ArrowRight, BookOpen, MessageCircle, PlayCircle, Star, Users, ArrowUpRight } from "lucide-react";
+import { motion } from "motion/react";
+import { ArrowRight, BookOpen, MessageCircle, PlayCircle, Star, Users, ArrowUpRight, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
-
-
-const fadeIn: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-};
-
-const staggerContainer: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.15
-        }
-    }
-};
+import { useHome } from "@/hooks/useHome";
+import FeatureCourses from "./FeatureCourse/featureCourse";
+import { fadeIn, staggerContainer } from "./animations";
 
 export default function HomePage() {
+
+    const { data: home, isPending, isError, error, refetch } = useHome();
+    console.log("Home data:", home);
     return (
         <div className="min-h-screen bg-background text-foreground font-sans overflow-hidden">
-
-
-
             {/* HERO SECTION */}
-            <section className="relative pt-32 pb-20 md:pt-32 md:pb-32 px-6">
+            <section className="relative pt-20 pb-20 md:pt-20 md:pb-32 px-6">
                 <div className="container mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="flex gap-12 items-center justify-center">
                         <motion.div
                             initial="hidden"
                             animate="visible"
                             variants={staggerContainer}
-                            className="max-w-2xl"
+                            className="max-w-2xl flex flex-col items-center justify-center"
                         >
                             <motion.div variants={fadeIn} className="inline-flex items-center gap-2 px-3 py-1 border border-border rounded-full text-xs font-medium mb-6">
                                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                                 Nền tảng học tập thế hệ mới
                             </motion.div>
-                            <motion.h1 variants={fadeIn} className="text-5xl md:text-7xl font-black tracking-tighter leading-[1.1] mb-6">
-                                HỌC TẬP.<br />
-                                <span className="text-muted-foreground">SÁNG TẠO.</span><br />
-                                VƯỢT TRỘI.
+                            <motion.h1
+                                variants={fadeIn}
+                                className="text-5xl md:text-7xl text-center font-black tracking-tighter leading-[1.1] mb-6 flex flex-col items-center gap-1"
+                            >
+                                <span>HỌC TẬP.</span>
+                                <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
+                                    SÁNG TẠO.
+                                </span>
+                                <span className="text-muted-foreground">VƯỢT TRỘI.</span>
                             </motion.h1>
-                            <motion.p variants={fadeIn} className="text-lg text-muted-foreground mb-8 max-w-lg leading-relaxed">
-                                Nâng tầm kỹ năng lập trình của bạn với các khoá học chất lượng cao, bài viết chuyên sâu và cộng đồng hỏi đáp năng động. Hoàn toàn bằng tiếng Việt.
+                            <motion.p variants={fadeIn} className="text-lg text-center text-muted-foreground mb-8 max-w-lg leading-relaxed">
+                                Nâng tầm kỹ năng lập trình của bạn với các khoá học chất lượng cao, bài viết chuyên sâu và cộng đồng hỏi đáp năng động. Môi trường phù hợp để phát triển bản thân.
                             </motion.p>
                             <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4">
                                 <button className="bg-primary text-primary-foreground px-8 py-4 rounded-none font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group">
@@ -58,17 +49,6 @@ export default function HomePage() {
                                     <PlayCircle className="w-5 h-5" /> Xem giới thiệu
                                 </button>
                             </motion.div>
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.8, delay: 0.2 }}
-                            className="relative aspect-square md:aspect-[4/5] lg:aspect-square w-full max-w-lg mx-auto"
-                        >
-                            <div className="absolute inset-0 bg-muted translate-x-4 translate-y-4 border border-border z-0"></div>
-                            <div className="relative w-full h-full z-10 grayscale hover:grayscale-0 transition-all duration-700 ease-in-out border border-border overflow-hidden">
-
-                            </div>
                         </motion.div>
                     </div>
                 </div>
@@ -91,57 +71,7 @@ export default function HomePage() {
             </div>
 
             {/* FEATURED COURSES */}
-            <section id="courses" className="py-24 px-6 relative">
-                <div className="container mx-auto">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-                        <div>
-                            <h2 className="text-4xl md:text-5xl font-black tracking-tight uppercase mb-4">Khoá học nổi bật</h2>
-                            <p className="text-muted-foreground max-w-xl text-lg">Được thiết kế tỉ mỉ để mang lại trải nghiệm học tập tốt nhất, từ cơ bản đến chuyên sâu.</p>
-                        </div>
-                        <Link href="/courses" className="group flex items-center gap-2 text-foreground font-medium border-b border-foreground pb-1 hover:text-muted-foreground hover:border-muted-foreground transition-colors">
-                            Xem tất cả <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                        </Link>
-                    </div>
-                    <motion.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, margin: "-100px" }}
-                        variants={staggerContainer}
-                        className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-                    >
-                        {[
-                            { img: "", title: "Fullstack Next.js & NestJS", author: "Nguyễn Văn A", tags: ["Web", "Advanced"] },
-                            { img: "", title: "Làm chủ React 19 từ A-Z", author: "Trần Thị B", tags: ["Frontend", "Beginner"] },
-                            { img: "", title: "Kiến trúc Microservices", author: "Lê Văn C", tags: ["Backend", "Expert"] },
-                        ].map((course, idx) => (
-                            <motion.div key={idx} variants={fadeIn} className="group cursor-pointer">
-                                <div className="relative aspect-video w-full overflow-hidden mb-6 border border-border">
-                                    <Image
-                                        src={course.img}
-                                        alt={course.title}
-                                        fill
-                                        className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                                    />
-                                    <div className="absolute top-4 left-4 flex gap-2">
-                                        {course.tags.map(tag => (
-                                            <span key={tag} className="bg-background/80 backdrop-blur text-foreground text-xs px-2 py-1 font-medium border border-border uppercase tracking-wider">
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                                    <Users className="w-4 h-4" /> 1.2k học viên
-                                    <span className="mx-2 text-muted-foreground/50">•</span>
-                                    <Star className="w-4 h-4 fill-primary text-primary" /> 4.9
-                                </div>
-                                <h3 className="text-xl font-bold mb-2 group-hover:underline underline-offset-4 decoration-2">{course.title}</h3>
-                                <p className="text-muted-foreground text-sm">Bởi {course.author}</p>
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                </div>
-            </section>
+            <FeatureCourses data={home?.popularCourses} isPending={isPending} />
 
             {/* LATEST ARTICLES */}
             <section id="blog" className="py-24 px-6 bg-muted/30 relative border-y border-border">
@@ -165,7 +95,7 @@ export default function HomePage() {
                             className="group cursor-pointer"
                         >
                             <div className="relative aspect-[4/3] w-full overflow-hidden mb-6 border border-border">
-                                <Image src="" alt="Blog 1" fill className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" />
+                                {/* <Image src="" alt="Blog 1" fill className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" /> */}
                             </div>
                             <div className="flex items-center gap-3 text-sm font-medium mb-4">
                                 <span className="bg-foreground text-background px-3 py-1 uppercase tracking-wider text-xs">Deep Dive</span>
@@ -190,7 +120,7 @@ export default function HomePage() {
                                     className="group flex gap-6 cursor-pointer items-center border-b border-border pb-10 last:border-0 last:pb-0"
                                 >
                                     <div className="relative w-32 h-32 md:w-48 md:h-32 shrink-0 overflow-hidden border border-border">
-                                        <Image src={post.img} alt={post.title} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                                        {/* <Image src={post.img} alt={post.title} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500" /> */}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-3 text-xs font-medium mb-2">
