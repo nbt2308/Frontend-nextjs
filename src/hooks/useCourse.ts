@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { IBulkDelete, IBulkStatus, IChangeStatus, ICreateCourse, IUpdateCourse } from "@/schemas/course.schema";
 import { CourseService } from "@/services/course";
 
+
+
 export function useCourses(params: FindAllQueryParams) {
     const defaultParams: DefaultFindAllQueryParams = {
         page: 1,
@@ -20,6 +22,37 @@ export function useCourses(params: FindAllQueryParams) {
         staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
     })
     return queryInfo;
+}
+
+export function useCoursesForUser(params: CourseUserQueryParams = {}) {
+    const defaultParams: CourseUserQueryParams = {
+        page: 1,
+        limit: 12,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+        search: '',
+        level: [],
+        courseType: [],
+        tag: [],
+        rating: undefined,
+    };
+
+    const queryParams = {
+        ...defaultParams,
+        ...params,
+    };
+
+    return useQuery({
+        queryKey: ['courses-user', queryParams],
+        queryFn: async () => {
+            const result = await CourseService.getAllCoursesForUser(queryParams);
+            return {
+                courses: result.courses as CourseForUser[],
+                filtersCount: result.filtersCount as filtersCount,
+            };
+        },
+        staleTime: 1000 * 60 * 5,
+    });
 }
 
 export function useCreateCourse() {

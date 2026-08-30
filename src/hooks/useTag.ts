@@ -34,6 +34,18 @@ export function useAllTags() {
     return queryInfo;
 }
 
+export function useAllTagsForUser() {
+    const queryInfo = useQuery({
+        queryKey: ['tags'],
+        queryFn: async () => {
+            const result = await TagService.getAllTagsForUser();
+            return result;
+        },
+        staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
+    })
+    return queryInfo;
+}
+
 export function useCreateTag() {
     const queryClient = useQueryClient();
     const mutationInfo = useMutation({

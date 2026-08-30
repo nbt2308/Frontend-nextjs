@@ -2,6 +2,8 @@ import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidPar
 import axiosClient from './axiosClient';
 import { IBulkDelete, IBulkStatus, IChangeStatus, ICreateCourse, IUpdateCourse } from "@/schemas/course.schema";
 
+
+
 export const CourseService = {
 
     getAllCoursesWithPagination: async (queryParams: FindAllQueryParams) => {
@@ -11,6 +13,18 @@ export const CourseService = {
 
         } catch (error: any) {
 
+            throw new Error(error.message)
+        }
+    },
+
+    getAllCoursesForUser: async (queryParams: CourseUserQueryParams) => {
+        try {
+            const response = await axiosClient.get(`/courses/user`, {
+                params: queryParams,
+                paramsSerializer: { indexes: null },
+            });
+            return response.data;
+        } catch (error: any) {
             throw new Error(error.message)
         }
     },

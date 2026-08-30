@@ -35,7 +35,7 @@ export default function FeatureCourses({ data, isPending }: FeatureCoursesProps)
                 </div>
 
                 {isPending ? (
-                    <CourseSkeletonLoader />
+                    <CourseSkeletonLoader course={3} />
                 ) : (
                     <motion.div
                         initial="hidden"
@@ -159,7 +159,8 @@ export default function FeatureCourses({ data, isPending }: FeatureCoursesProps)
                                     </div>
                                 </div>
                             </motion.div>
-                        </motion.div>
+                        ))}
+                    </motion.div>
                 )}
             </div>
         </section>)

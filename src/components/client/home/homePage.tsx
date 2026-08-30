@@ -6,11 +6,13 @@ import Link from "next/link";
 import { useHome } from "@/hooks/useHome";
 import FeatureCourses from "./FeatureCourse/featureCourse";
 import { fadeIn, staggerContainer } from "./animations";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
 
     const { data: home, isPending, isError, error, refetch } = useHome();
-    console.log("Home data:", home);
+    const router = useRouter();
     return (
         <div className="min-h-screen bg-background text-foreground font-sans overflow-hidden">
             {/* HERO SECTION */}
@@ -41,13 +43,13 @@ export default function HomePage() {
                                 Nâng tầm kỹ năng lập trình của bạn với các khoá học chất lượng cao, bài viết chuyên sâu và cộng đồng hỏi đáp năng động. Môi trường phù hợp để phát triển bản thân.
                             </motion.p>
                             <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4">
-                                <button className="bg-primary text-primary-foreground px-8 py-4 rounded-none font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group">
+                                <Button onClick={() => router.push("/courses")} className="bg-primary text-md text-primary-foreground px-8 py-7 rounded-none font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group">
                                     Khám phá Khoá học
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </button>
-                                <button className="bg-transparent border border-border text-foreground px-8 py-4 rounded-none font-bold hover:bg-accent hover:text-accent-foreground transition-all flex items-center justify-center gap-2">
+                                </Button>
+                                <Button variant="outline" className="bg-transparent border border-border text-foreground px-8 py-7 rounded-none font-bold hover:bg-accent hover:text-accent-foreground transition-all flex items-center justify-center gap-2">
                                     <PlayCircle className="w-5 h-5" /> Xem giới thiệu
-                                </button>
+                                </Button>
                             </motion.div>
                         </motion.div>
                     </div>

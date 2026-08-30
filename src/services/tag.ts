@@ -19,6 +19,14 @@ export const TagService = {
             throw new Error(error.message)
         }
     },
+    getAllTagsForUser: async () => {
+        try {
+            const response = await axiosClient.get(`/tags/user`);
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message)
+        }
+    },
     createTag: async (data: ICreateTag) => {
         try {
             const response = await axiosClient.post(`/tags`, data);
