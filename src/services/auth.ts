@@ -127,5 +127,13 @@ export const authService = {
             }
             throw error;
         }
+    },
+    refreshToken: async (refreshToken: string) => {
+        try {
+            const res = await authAxios.post('/auth/refresh', { refreshToken });
+            return res.data;
+        } catch (error: any) {
+            throw new Error(error?.response?.data?.message || 'Refresh token thất bại');
+        }
     }
 };

@@ -46,14 +46,13 @@ import Link from "next/link"
 import { NavUser } from "../shared/nav-user-admin"
 import { useSession } from "next-auth/react"
 import Logo from "../ui/logo"
-import { Label } from "../ui/label"
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { data: session } = useSession()
     const user = {
         name: session?.user?.name as string,
         email: session?.user?.email as string,
-        avatar: session?.user?.image as string,
+        avatar: session?.user?.avatar as string,
     }
     return (
         <Sidebar collapsible="icon" {...props}>

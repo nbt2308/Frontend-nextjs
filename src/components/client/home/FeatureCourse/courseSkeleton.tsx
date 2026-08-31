@@ -1,6 +1,6 @@
 export function CourseSkeleton() {
     return (
-        <div className="border border-border/60 bg-card p-4 rounded-none animate-pulse">
+        <div className="border border-border/60 bg-card p-4 rounded-lg animate-pulse">
             <div>
                 {/* Image Skeleton */}
                 <div className="relative aspect-video w-full overflow-hidden rounded-xl mb-4 border border-border/40 bg-muted" />

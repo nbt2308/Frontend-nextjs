@@ -1,46 +1,133 @@
-import { auth } from "@/auth"
-import { getToken } from "next-auth/jwt";
+
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import { RoleSchema } from "./types/generated-zod/schemas";
+
 export const config = {
     matcher: [
-        '/((?!api/auth|_next/static|_next/image|favicon.ico|verify|$).*)',
+        "/((?!api/auth|_next/static|_next/image|favicon.ico|verify|$).*)",
     ],
-}
-export default auth(async (req) => {
-    const token = await getToken({
-        req: req,
-        secret: process.env.AUTH_SECRET
-    });
-    const isLoggedIn = !!req.auth
-    const { pathname } = req.nextUrl
+};
 
-    const isAuthPage = pathname.startsWith("/auth")
-    const isAdminLogin = pathname === '/admin-login';
-    const isAdminRoute = pathname.startsWith('/admin') && !isAdminLogin;
-    if (!isLoggedIn) {
+// Public routes không yêu cầu đăng nhập
+const PUBLIC_ROUTES = ["/course"];
+
+export default auth((req) => {
+    const Role = RoleSchema.enum;
+    const isLoggedIn = !!req.auth;
+    const { pathname } = req.nextUrl;
+
+    const isAuthPage = pathname.startsWith("/auth");
+    const isAdminLogin = pathname === "/admin-login";
+    const isAdminRoute =
+        pathname.startsWith("/admin") && !isAdminLogin;
+
+    const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+        pathname.startsWith(route)
+    );
+
+    // req.auth được tạo từ session callback của Auth.js
+    // auth.ts hiện tại đang đưa role vào session.role
+    const role = (req.auth as any)?.user?.role;
+
+    // auth.ts set token.error = "RefreshTokenError"
+    // và session callback đưa nó ra session.error
+    const authError = (req.auth as any)?.error;
+
+    /*
+     * =====================================================
+     * 1. REFRESH TOKEN THẤT BẠI
+     * =====================================================
+     *
+     * Phải xử lý admin và user riêng.
+     *
+     * Admin:
+     *     /admin/* → /admin-login
+     *
+     * User:
+     *     các protected route → /auth/login
+     */
+    if (authError === "RefreshTokenError") {
         if (isAdminRoute) {
-            return NextResponse.redirect(new URL("/admin-login", req.nextUrl.origin))
+            return NextResponse.redirect(
+                new URL("/admin-login", req.nextUrl.origin)
+            );
         }
-        if (isAuthPage || isAdminLogin) {
+        if (isAdminLogin) {
             return NextResponse.next();
         }
-        return NextResponse.redirect(new URL("/auth/login", req.nextUrl));
-    }
 
-    if (isAdminRoute && token?.role !== "ADMIN") {
-        return NextResponse.redirect(new URL("/", req.nextUrl));
-    }
-
-    if (isAdminLogin) {
-        if (token?.role === "ADMIN") {
-            return NextResponse.redirect(new URL("/admin/dashboard", req.nextUrl));
+        if (!isPublicRoute && !isAuthPage) {
+            return NextResponse.redirect(
+                new URL("/auth/login", req.nextUrl.origin)
+            );
         }
-        return NextResponse.redirect(new URL("/", req.nextUrl));
+
+        return NextResponse.next();
     }
 
-    if (isAuthPage && token) {
-        return NextResponse.redirect(new URL("/", req.nextUrl));
+    /*
+     * =====================================================
+     * 2. CHƯA ĐĂNG NHẬP
+     * =====================================================
+     */
+    if (!isLoggedIn) {
+        // Admin route → admin login
+        if (isAdminRoute) {
+            return NextResponse.redirect(
+                new URL("/admin-login", req.nextUrl.origin)
+            );
+        }
+
+        // Các route public/auth → cho phép truy cập
+        if (isAuthPage || isAdminLogin || isPublicRoute) {
+            return NextResponse.next();
+        }
+
+        // Protected user route → user login
+        return NextResponse.redirect(
+            new URL("/auth/login", req.nextUrl.origin)
+        );
+    }
+
+    /*
+     * =====================================================
+     * 3. ĐÃ ĐĂNG NHẬP NHƯNG KHÔNG PHẢI ADMIN
+     * =====================================================
+     */
+    if (isAdminRoute && role !== Role.ADMIN) {
+        return NextResponse.redirect(
+            new URL("/", req.nextUrl.origin)
+        );
+    }
+
+    /*
+     * =====================================================
+     * 4. ADMIN ĐÃ LOGIN MÀ TRUY CẬP /admin-login
+     * =====================================================
+     */
+    if (isAdminLogin) {
+        if (role === Role.ADMIN) {
+            return NextResponse.redirect(
+                new URL("/admin/dashboard", req.nextUrl.origin)
+            );
+        }
+
+        return NextResponse.redirect(
+            new URL("/", req.nextUrl.origin)
+        );
+    }
+
+    /*
+     * =====================================================
+     * 5. USER ĐÃ LOGIN MÀ TRUY CẬP /auth/*
+     * =====================================================
+     */
+    if (isAuthPage) {
+        return NextResponse.redirect(
+            new URL("/", req.nextUrl.origin)
+        );
     }
 
     return NextResponse.next();
-})
+});

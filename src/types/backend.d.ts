@@ -26,13 +26,14 @@ declare global {
         sortOrder: 'asc' | 'desc';
     }
 
-    interface FindAllQueryParams {
+    export interface FindAllQueryParams {
         page?: number;
         limit?: number;
         sortBy?: string;
         sortOrder?: 'asc' | 'desc';
     }
 
+    
     interface IModelPaginate<T> {
         meta: {
             current: number;

@@ -22,15 +22,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useSession } from "next-auth/react"
 import { signOut } from "next-auth/react"
-export function DropdownMenuAvatar() {
-    const { data: session } = useSession()
+import { IUser } from "@/types/next-auth"
+interface DropdownMenuAvatarProps {
+    user: IUser;
+}
+export function DropdownMenuAvatar({ user }: DropdownMenuAvatarProps) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                     <Avatar>
-                        {session?.user?.image && <AvatarImage src={session?.user?.image} alt="shadcn" />}
-                        <AvatarFallback>{session?.user?.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        {user.avatar && <AvatarImage src={user.avatar} alt="shadcn" />}
+                        <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
                         <AvatarBadge className="bg-green-600 dark:bg-green-800" />
                     </Avatar>
                 </Button>

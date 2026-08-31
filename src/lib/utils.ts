@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-
+import { decodeJwt } from "jose";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -43,4 +43,14 @@ export const formatDate = (dateString?: string | Date) => {
   } catch {
     return "N/A";
   }
+};
+
+export const getTokenExpire = (accessToken: string) => {
+    const payload = decodeJwt(accessToken);
+
+    if (!payload.exp) {
+        throw new Error("Access token không có exp");
+    }
+
+    return payload.exp * 1000;
 };
