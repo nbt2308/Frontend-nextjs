@@ -1,7 +1,7 @@
 "use client";
 import { ArrowRight, BookOpen, MessageCircle, PlayCircle, Star, Users, ArrowUpRight, Heart } from "lucide-react";
 import Image from "next/image";
-import { fadeIn, staggerContainer } from "./animations";
+import { fadeIn, staggerContainer } from "@/components/client/animation/animations";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";

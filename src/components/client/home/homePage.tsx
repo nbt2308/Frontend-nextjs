@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useHome } from "@/hooks/useHome";
 import FeatureCourses from "./FeatureCourse/featureCourse";
-import { fadeIn, staggerContainer } from "./animations";
+import { fadeIn, staggerContainer } from "../animation/animations";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 

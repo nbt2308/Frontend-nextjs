@@ -1,6 +1,6 @@
 "use client";
 import { ArrowUpRight } from "lucide-react";
-import { fadeIn, staggerContainer } from "../animations";
+import { fadeIn, staggerContainer } from "../../animation/animations";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { CourseSkeletonLoader } from "./courseSkeleton";
