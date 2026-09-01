@@ -86,12 +86,12 @@ axiosClient.interceptors.response.use(
                 // Kiểm tra nếu refresh thất bại (jwt callback set error)
                 if (session?.error === "RefreshTokenError") {
                     processQueue(new Error("RefreshTokenError"), null);
-                    // Refresh token cũng hết hạn → bắt buộc signOut
-                    if(session.user?.role === RoleSchema.enum.ADMIN) {
-                        await signOut({ callbackUrl: "/admin-login" });
-                    }
-                    await signOut({ callbackUrl: "/auth/login" });
-                    return new Promise(() => { }); // Ngăn react-query retry
+                    // Rút gọn điều hướng logout cưỡng bức
+                    const callbackUrl = session.user?.role === RoleSchema.enum.ADMIN 
+                        ? "/admin-login" 
+                        : "/auth/login";
+                    await signOut({ callbackUrl });
+                    return new Promise(() => { });
                 }
 
                 // Refresh thành công → xử lý queue

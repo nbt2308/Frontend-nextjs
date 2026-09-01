@@ -120,8 +120,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 return token;
             }
 
-            // Token chưa hết hạn → return bình thường
-            if (Date.now() < (token.access_expire as number)) {
+            // Thêm 60 giây khoảng đệm (leeway) để chủ động refresh trước khi thực sự hết hạn
+            const now = Date.now();
+            const bufferTime = 60 * 1000; 
+            // Nếu access token chưa hết hạn → trả về token hiện tại
+            if (now + bufferTime < (token.access_expire as number)) {
                 return token;
             }
 
