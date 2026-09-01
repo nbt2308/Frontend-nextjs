@@ -19,7 +19,7 @@ export const CourseService = {
 
     getAllCoursesForUser: async (queryParams: CourseUserQueryParams) => {
         try {
-            const response = await axiosClient.get(`/courses/user`, {
+            const response = await axiosClient.get(`/courses/courses-for-user`, {
                 params: queryParams,
                 paramsSerializer: { indexes: null },
             });

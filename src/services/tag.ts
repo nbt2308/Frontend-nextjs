@@ -21,7 +21,7 @@ export const TagService = {
     },
     getAllTagsForUser: async () => {
         try {
-            const response = await axiosClient.get(`/tags/user`);
+            const response = await axiosClient.get(`/tags/tags-for-user`);
             return response.data;
         } catch (error: any) {
             throw new Error(error.message)
