@@ -6,6 +6,7 @@ import { authService } from "@/services/auth";
 
 import { ISignIn } from "./schemas/auth.schema";
 import { getTokenExpire } from "./lib/utils";
+import { IUser } from "./types/next-auth";
 
 
 
@@ -27,13 +28,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 const data = res.data;
 
                 if (data && data.user) {
+                    const me = await authService.getMe(data.access_token);
                     return {
                         user: {
-                            id: data.user.id,
-                            name: data.user.name,
-                            email: data.user.email,
-                            role: data.user.role,
-                            avatar: data.user.avatar,
+                            id: me.data.id,
+                            name: me.data.name,
+                            email: me.data.email,
+                            role: me.data.roles,
+                            avatar: me.data.avatar,
                         },
                         access_token: data.access_token,
                         refresh_token: data.refresh_token,
@@ -59,13 +61,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 const data = res.data ?? res; // Depending on how adminLogin response is wrapped
 
                 if (data && data.user) {
+                    const me = await authService.getMe(data.access_token);
+
                     return {
                         user: {
-                            id: data.user.id,
-                            name: data.user.name,
-                            email: data.user.email,
-                            role: data.user.role,
-                            avatar: data.user.avatar,
+                            id: me.data.id,
+                            name: me.data.name,
+                            email: me.data.email,
+                            role: me.data.roles,
+                            avatar: me.data.avatar,
                         },
                         access_token: data.access_token,
                         refresh_token: data.refresh_token,
@@ -86,9 +90,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 try {
                     const res = await authService.handleOAuthLogin(user, account);
                     if (res.data) {
+                        const me = await authService.getMe(res.data.access_token);
+                        user.user = {
+                            id: me.id,
+                            name: me.name,
+                            email: me.email,
+                            role: me.roles,
+                            avatar: me.avatar,
+                        } as IUser;
                         user.access_token = res.data.access_token;
                         user.refresh_token = res.data.refresh_token;
-                        user.user = res.data.user;
                         return true;
                     }
                     return false;
