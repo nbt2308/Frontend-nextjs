@@ -17,9 +17,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useUpdateUser } from "@/hooks/useUser";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Edit, Loader2 } from "lucide-react";
+import { Edit, Loader2, ChevronsUpDown, X } from "lucide-react";
 import { useEffect } from "react";
 import { SYSTEM_ROLES } from "../../../constants/roles.constant";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+
 export default function ModalEditUser({ open, closeDialog, data }: { open: boolean, closeDialog: () => void, data: UserType }) {
     const user = data as UserType;
     const Role = SYSTEM_ROLES;
@@ -161,44 +165,89 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
                                 <Controller
                                     name="roles"
                                     control={form.control}
-                                    render={({ field, fieldState }) => (
+                                    render={({ field, fieldState }) => {
+                                        const selectedRoles: string[] = field.value ?? [];
+                                        const toggleRole = (roleValue: string) => {
+                                            const newValue = selectedRoles.includes(roleValue)
+                                                ? selectedRoles.filter((val) => val !== roleValue)
+                                                : [...selectedRoles, roleValue];
+                                            field.onChange(newValue);
+                                        };
+                                        const roleOptions = [
+                                            { value: Role.ADMIN, label: "Admin" },
+                                            { value: Role.STUDENT, label: "Student" },
+                                            { value: Role.INSTRUCTOR, label: "Instructor" }
+                                        ];
+
+                                        return (
                                         <Field data-invalid={fieldState.invalid}>
                                             <FieldLabel>
                                                 Vai trò<span className="text-red-500">*</span>
                                             </FieldLabel>
-                                            <div className="flex flex-col gap-2 mt-2">
-                                                {[
-                                                    { value: Role.ADMIN, label: "Admin" },
-                                                    { value: Role.STUDENT, label: "Student" },
-                                                    { value: Role.INSTRUCTOR, label: "Instructor" }
-                                                ].map((r) => (
-                                                    <div key={r.value} className="flex flex-row items-center space-x-2">
-                                                        <Checkbox
-                                                            id={`role-${r.value}`}
-                                                            checked={field.value?.includes(r.value)}
-                                                            onCheckedChange={(checked) => {
-                                                                const newValue = field.value || [];
-                                                                if (checked) {
-                                                                    field.onChange([...newValue, r.value]);
-                                                                } else {
-                                                                    field.onChange(newValue.filter((val: string) => val !== r.value));
-                                                                }
-                                                            }}
-                                                        />
-                                                        <label
-                                                            htmlFor={`role-${r.value}`}
-                                                            className="text-sm font-medium leading-none cursor-pointer"
-                                                        >
-                                                            {r.label}
-                                                        </label>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        type="button"
+                                                        className={cn(
+                                                            "w-full justify-between font-normal h-auto min-h-8",
+                                                            selectedRoles.length === 0 && "text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        {selectedRoles.length > 0 ? (
+                                                            <div className="flex flex-wrap gap-1">
+                                                                {selectedRoles.map((roleValue) => {
+                                                                    const roleOption = roleOptions.find((r) => r.value === roleValue);
+                                                                    return (
+                                                                        <Badge key={roleValue} variant="secondary" className="text-xs">
+                                                                            {roleOption?.label || roleValue}
+                                                                            <span
+                                                                                role="button"
+                                                                                className="ml-1 rounded-full outline-none hover:text-destructive"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    toggleRole(roleValue);
+                                                                                }}
+                                                                            >
+                                                                                <X className="h-3 w-3" />
+                                                                            </span>
+                                                                        </Badge>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        ) : (
+                                                            "Chọn vai trò..."
+                                                        )}
+                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                                                    <Command>
+                                                        <CommandInput placeholder="Tìm vai trò..." />
+                                                        <CommandList>
+                                                            <CommandEmpty>Không tìm thấy vai trò nào.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {roleOptions.map((roleOption) => (
+                                                                    <CommandItem
+                                                                        key={roleOption.value}
+                                                                        value={roleOption.label}
+                                                                        onSelect={() => toggleRole(roleOption.value)}
+                                                                        data-checked={selectedRoles.includes(roleOption.value)}
+                                                                    >
+                                                                        {roleOption.label}
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />
                                             )}
                                         </Field>
-                                    )}
+                                    )}}
                                 />
                                 <Controller
                                     name="status"

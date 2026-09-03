@@ -40,7 +40,6 @@ export const SheetAddLesson = ({ sectionId, open, onOpenChange }: sheetAddLesson
     }, [sectionId, form]);
     const { mutate, isPending } = useCreateLesson()
     const handleSubmit = (data: ICreateLesson) => {
-        console.log(data)
         mutate(data, {
             onSuccess: () => {
                 form.reset()

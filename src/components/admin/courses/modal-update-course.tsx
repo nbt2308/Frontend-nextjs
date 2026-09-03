@@ -5,6 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UpdateCourseSchema, IUpdateCourse } from "@/schemas/course.schema";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
+import {CourseType as ICourseType} from "@/types/generated-zod/schemas/models/Course.schema"
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -43,7 +44,7 @@ interface ModalUpdateCourseProps {
     closeDialog: () => void;
     tags: TagType[];
     instructors: UserType[];
-    course: any;
+    course: ICourseType;
 }
 
 export default function ModalUpdateCourse({ open, closeDialog, tags, instructors, course }: ModalUpdateCourseProps) {
@@ -115,7 +116,6 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, instructors
 
     const { mutate: updateCourse, isPending: isUpdatePending } = useUpdateCourse();
     const handleSubmit = async (data: IUpdateCourse) => {
-        console.log("Update Data:", data, course);
 
         try {
 

@@ -60,7 +60,6 @@ export const CourseCellAction = ({ course, status }: { course: any, status: bool
                         onSelect={() => {
                             // Logic xử lý hành động
                             setIsEditOpen(true)
-                            console.log("course", course)
                         }}>
                         <Edit className="h-4 w-4 mr-2" /> Cập nhật khoá học
                     </DropdownMenuItem>
