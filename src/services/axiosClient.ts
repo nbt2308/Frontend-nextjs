@@ -1,4 +1,5 @@
 
+import { SYSTEM_ROLES } from '@/constants/roles.constant';
 import { RoleSchema } from '@/types/generated-zod/schemas';
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getSession, signOut } from 'next-auth/react';
@@ -87,7 +88,7 @@ axiosClient.interceptors.response.use(
                 if (session?.error === "RefreshTokenError") {
                     processQueue(new Error("RefreshTokenError"), null);
                     // Rút gọn điều hướng logout cưỡng bức
-                    const callbackUrl = session.user?.role === RoleSchema.enum.ADMIN 
+                    const callbackUrl = session.user?.role.includes(SYSTEM_ROLES.ADMIN)
                         ? "/admin-login" 
                         : "/auth/login";
                     await signOut({ callbackUrl });

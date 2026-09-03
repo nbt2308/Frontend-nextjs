@@ -135,5 +135,18 @@ export const authService = {
         } catch (error: any) {
             throw new Error(error?.response?.data?.message || 'Refresh token thất bại');
         }
+    },
+    getMe: async (accessToken: string) => {
+        try {
+            const res = await axios.get('/auth/me', {
+                baseURL: process.env.NEXT_PUBLIC_API_URL,
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            return res.data;
+        } catch (error: any) {
+            throw new Error(error?.response?.data?.message || 'Lấy thông tin người dùng thất bại');
+        }
     }
 };

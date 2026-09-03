@@ -2,6 +2,7 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { RoleSchema } from "./types/generated-zod/schemas";
+import { SYSTEM_ROLES } from "./constants/roles.constant";
 
 export const config = {
     matcher: [
@@ -13,10 +14,12 @@ export const config = {
 const PUBLIC_ROUTES = ["/course"];
 
 export default auth((req) => {
-    const Role = RoleSchema.enum;
     const isLoggedIn = !!req.auth;
     const { pathname } = req.nextUrl;
-
+    // req.auth được tạo từ session callback của Auth.js
+    // auth.ts hiện tại đang đưa role vào session.role
+    const role = req.auth?.user?.role;
+    
     const isAuthPage = pathname.startsWith("/auth");
     const isAdminLogin = pathname === "/admin-login";
     const isAdminRoute =
@@ -26,9 +29,7 @@ export default auth((req) => {
         pathname.startsWith(route)
     );
 
-    // req.auth được tạo từ session callback của Auth.js
-    // auth.ts hiện tại đang đưa role vào session.role
-    const role = (req.auth as any)?.user?.role;
+    
 
     // auth.ts set token.error = "RefreshTokenError"
     // và session callback đưa nó ra session.error
@@ -95,7 +96,7 @@ export default auth((req) => {
      * 3. ĐÃ ĐĂNG NHẬP NHƯNG KHÔNG PHẢI ADMIN
      * =====================================================
      */
-    if (isAdminRoute && role !== Role.ADMIN) {
+    if (isAdminRoute && !role?.includes(SYSTEM_ROLES.ADMIN)) {
         return NextResponse.redirect(
             new URL("/", req.nextUrl.origin)
         );
@@ -107,7 +108,7 @@ export default auth((req) => {
      * =====================================================
      */
     if (isAdminLogin) {
-        if (role === Role.ADMIN) {
+        if (role?.includes(SYSTEM_ROLES.ADMIN)) {
             return NextResponse.redirect(
                 new URL("/admin/dashboard", req.nextUrl.origin)
             );
