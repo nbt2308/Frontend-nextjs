@@ -23,8 +23,10 @@ import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
 import { RoleSchema } from "@/types/generated-zod/schemas";
+import { SYSTEM_ROLES } from "@/constants/roles.constant";
+import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
+import { RoleType } from "@/types/generated-zod/schemas/models/Role.schema";
 export default function User() {
-    const Role = RoleSchema.enum;
     const [filters, setFilters] = useState<FindAllQueryParams>({
         page: 1,
         limit: 10,
@@ -33,28 +35,46 @@ export default function User() {
     });
     const { data: users, isPending, isError, error, refetch } = useUsers(filters)
 
+    //count
+    const adminCount = users?.filter((user: UserType) =>
+        user.roles.some(
+            (role: RoleType) => role.name === SYSTEM_ROLES.ADMIN
+        )
+    ).length ?? 0;
+
+    const instructorCount = users?.filter((user: UserType) =>
+        user.roles.some(
+            (role: RoleType) => role.name === SYSTEM_ROLES.INSTRUCTOR
+        )
+    ).length ?? 0;
+
+    const studentCount = users?.filter((user: UserType) =>
+        user.roles.some(
+            (role: RoleType) => role.name === SYSTEM_ROLES.STUDENT
+        )
+    ).length ?? 0;
     const userFilters = [
         {
-            columnId: "role",
+            columnId: "roles",
             title: "Vai trò",
             options: [
                 {
                     label: "Admin",
-                    value: Role.ADMIN,
+                    value: SYSTEM_ROLES.ADMIN,
                     icon: ShieldUser,
-                    count: users?.filter((user: any) => user.role === Role.ADMIN).length
+                    count: adminCount
                 },
                 {
                     label: "Instructor",
-                    value: Role.INSTRUCTOR,
+                    value: SYSTEM_ROLES.INSTRUCTOR,
                     icon: UserCog,
-                    count: users?.filter((user: any) => user.role === Role.INSTRUCTOR).length
+                    count: instructorCount
                 },
                 {
                     label: "Student",
-                    value: Role.STUDENT,
+                    value: SYSTEM_ROLES.STUDENT,
                     icon: UserStar,
-                    count: users?.filter((user: any) => user.role === Role.STUDENT).length
+                    count: studentCount
                 },
             ],
         },
@@ -106,7 +126,7 @@ export default function User() {
         {
             label: "Thêm thành viên",
             icon: UserPlus,
-            onClick: () => true, // Hàm mở modal của bạn
+            onClick: () => true,
             isPrimary: true,
         },
     ]
@@ -169,7 +189,7 @@ export default function User() {
     const { mutate: bulkDelete } = useBulkDelete();
     const handleBulkDelete = (selectedUsers: any, table: any) => {
         const ids = selectedUsers.map((u: any) => u.id)
-        if (selectedUsers.some((user: any) => user.role === Role.ADMIN)) {
+        if (selectedUsers.some((user: UserType) => user.roles.some((role: RoleType) => role.name === SYSTEM_ROLES.ADMIN))) {
             toast.error("Không thể xóa admin");
             return;
         }
@@ -275,7 +295,7 @@ export default function User() {
                         />
                         <KpiCard
                             label="Quản trị viên"
-                            value={users?.filter((user: any) => user.role === Role.ADMIN).length.toString()}
+                            value={adminCount.toString()}
                             icon={UserCog}
                             iconColor="text-purple-500"
                             glowColor="bg-purple-500/15 border-purple-500/30"
@@ -285,7 +305,7 @@ export default function User() {
                         />
                         <KpiCard
                             label="Giảng viên"
-                            value={users?.filter((user: any) => user.role === Role.INSTRUCTOR).length.toString()}
+                            value={instructorCount.toString()}
                             icon={UserPen}
                             iconColor="text-orange-500"
                             glowColor="bg-orange-500/15 border-orange-500/30"
@@ -295,7 +315,7 @@ export default function User() {
                         />
                         <KpiCard
                             label="Học viên"
-                            value={users?.filter((user: any) => user.role === Role.STUDENT).length.toString()}
+                            value={studentCount.toString()}
                             icon={UserStar}
                             iconColor="text-amber-500"
                             glowColor="bg-amber-500/15 border-amber-500/30"

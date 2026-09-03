@@ -56,9 +56,11 @@ export default function ModalViewUser({ open, closeDialog, data }: ModalViewUser
                         <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">
                             Vai trò
                         </span>
-                        <Badge variant="outline" className="text-xs font-medium mt-1 px-2.5 py-1">
-                            {user.role}
-                        </Badge>
+                        {user.roles?.map((item) => (
+                            <Badge key={item.name} variant="outline" className="text-xs font-medium mt-1 px-2.5 py-1">
+                                {item.name}
+                            </Badge>
+                        ))}
                     </div>
                     <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
                         <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">

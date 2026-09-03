@@ -2,7 +2,7 @@
 
 import React from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown, BadgeCheck, Ban, CircleCheck, Edit, Info, Lock, ShieldCheck, ShieldX, Trash2, Unlock } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, BadgeCheck, Ban, CircleCheck, Edit, Info, Lock, Mail, Phone, ShieldCheck, ShieldX, Trash2, Unlock } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { UserCellAction } from "./user-cell-actions"
 import { UserType } from "@/types/generated-zod/schemas/models/User.schema"
+import { UserRoleType } from "@/types/generated-zod/schemas/models/UserRole.schema"
+import { RoleType } from "@/types/generated-zod/schemas/models/Role.schema"
 // Định nghĩa kiểu dữ liệu cho User
 export type User = {
     avatar: string
@@ -118,11 +120,11 @@ export const columns: ColumnDef<UserType>[] = [
         },
     },
     {
-        id: "email",
+        id: "contact",
         meta: {
-            label: "Email",
+            label: "Liên hệ",
         },
-        accessorKey: "email",
+        accessorFn: (row) => `${row.email} ${(row as any).phone || ""}`,
         header: ({ column }) => {
             const isSorted = column.getIsSorted();
             return (
@@ -138,23 +140,39 @@ export const columns: ColumnDef<UserType>[] = [
                         }
                     }}
                 >
-                    Email
+                    Liên hệ
                     {isSorted === "asc" && <ArrowUp className="ml-2 h-4 w-4" />}
                     {isSorted === "desc" && <ArrowDown className="ml-2 h-4 w-4" />}
                     {!isSorted && <ArrowUpDown className="ml-2 h-4 w-4" />}
                 </Button>
             )
         },
-        cell: ({ row }) => (
-            <span className="text-zinc-500 text-sm">{row.getValue("email")}</span>
-        )
+        cell: ({ row }) => {
+            const email = row.original.email as string;
+            const phone = (row.original as any).phone;
+
+            return (
+                <div className="flex flex-col gap-1 text-sm text-zinc-500">
+                    <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        <span>{email}</span>
+                    </div>
+                    {phone && (
+                        <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4" />
+                            <span>{phone}</span>
+                        </div>
+                    )}
+                </div>
+            )
+        }
     },
     {
-        id: "role",
+        id: "roles",
         meta: {
             label: "Vai trò",
         },
-        accessorKey: "role",
+        accessorKey: "roles",
         header: ({ column }) => {
             const isSorted = column.getIsSorted();
             return (
@@ -178,11 +196,19 @@ export const columns: ColumnDef<UserType>[] = [
             )
         },
         cell: ({ row }) => {
-            const role = row.getValue("role") as string
+            const roles = row.getValue("roles") as RoleType[]
+
             return (
-                <span className="text-xs font-medium px-2 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
-                    {role}
-                </span>
+                <div className="flex flex-wrap gap-1">
+                    {roles.map((item) => (
+                        <span
+                            key={item.name}
+                            className="text-xs font-medium px-2 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                        >
+                            {item.name}
+                        </span>
+                    ))}
+                </div>
             )
         },
         filterFn: (row, id, value) => {
