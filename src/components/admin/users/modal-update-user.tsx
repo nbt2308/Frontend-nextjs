@@ -14,13 +14,15 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useUpdateUser } from "@/hooks/useUser";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Edit, Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import { SYSTEM_ROLES } from "../../../constants/roles.constant";
 export default function ModalEditUser({ open, closeDialog, data }: { open: boolean, closeDialog: () => void, data: UserType }) {
     const user = data as UserType;
-    const Role = RoleSchema.enum;
+    const Role = SYSTEM_ROLES;
     const form = useForm<IUpdateUserInput, any, IUpdateUser>({
         resolver: zodResolver(UpdateUserSchema),
         defaultValues: {
@@ -28,18 +30,24 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
             phone: "",
             address: "",
             status: true,
-            role: Role.STUDENT
+            roles: [Role.STUDENT]
         },
     })
 
     useEffect(() => {
         if (user) {
+            let initialRoles = [Role.STUDENT];
+            if (user?.roles && Array.isArray(user.roles)) {
+                initialRoles = user.roles.map((r: any) => typeof r === "string" ? r : r?.name || r?.role?.name || r);
+            } else if ((user as any)?.role) {
+                initialRoles = [(user as any).role];
+            }
             form.reset({
                 name: user?.name || "",
                 phone: user?.phone || "",
                 address: user?.address || "",
                 status: user?.status,
-                role: user?.role || Role.STUDENT
+                roles: initialRoles
             });
         }
     }, [user, form]);
@@ -151,27 +159,41 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                                 <Controller
-                                    name="role"
+                                    name="roles"
                                     control={form.control}
                                     render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel htmlFor="update-user-role">
+                                            <FieldLabel>
                                                 Vai trò<span className="text-red-500">*</span>
                                             </FieldLabel>
-                                            <Select
-                                                value={field.value}
-                                                onValueChange={field.onChange}
-                                                aria-invalid={fieldState.invalid}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Chọn vai trò" />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper">
-                                                    <SelectItem value={Role.ADMIN}>Admin</SelectItem>
-                                                    <SelectItem value={Role.STUDENT}>Student</SelectItem>
-                                                    <SelectItem value={Role.INSTRUCTOR}>Instructor</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+                                            <div className="flex flex-col gap-2 mt-2">
+                                                {[
+                                                    { value: Role.ADMIN, label: "Admin" },
+                                                    { value: Role.STUDENT, label: "Student" },
+                                                    { value: Role.INSTRUCTOR, label: "Instructor" }
+                                                ].map((r) => (
+                                                    <div key={r.value} className="flex flex-row items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`role-${r.value}`}
+                                                            checked={field.value?.includes(r.value)}
+                                                            onCheckedChange={(checked) => {
+                                                                const newValue = field.value || [];
+                                                                if (checked) {
+                                                                    field.onChange([...newValue, r.value]);
+                                                                } else {
+                                                                    field.onChange(newValue.filter((val: string) => val !== r.value));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <label
+                                                            htmlFor={`role-${r.value}`}
+                                                            className="text-sm font-medium leading-none cursor-pointer"
+                                                        >
+                                                            {r.label}
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />
                                             )}

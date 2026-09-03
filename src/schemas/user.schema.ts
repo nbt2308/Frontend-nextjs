@@ -1,3 +1,4 @@
+import { SYSTEM_ROLES } from '@/constants/roles.constant';
 import { RoleSchema } from '@/types/generated-zod/schemas';
 import { UserSchema } from '@/types/generated-zod/schemas/models';
 
@@ -5,12 +6,12 @@ import * as z from "zod";
 
 const phoneRegex = /^(?:\+84|84|0)(3|5|7|8|9)\d{8}$/;
 export const createUserSchema = UserSchema.pick({
-    role: true,
     email: true,
     password: true,
     name: true,
     phone: true,
-    isActive: true
+    isActive: true,
+    roles: true
 })
     .extend({
         email: z
@@ -35,7 +36,7 @@ export const createUserSchema = UserSchema.pick({
         isActive: z
             .boolean()
             .default(true),
-        role: RoleSchema.default('STUDENT')
+        roles: z.array(RoleSchema)
 
     })
 
@@ -59,9 +60,8 @@ export const UpdateUserSchema = UserSchema.pick({
     phone: true,
     address: true,
     status: true,
-    role: true
 }).extend({
-    role: RoleSchema.default('STUDENT').optional(),
+    roles: z.array(z.string()).min(1, "Vui lòng chọn ít nhất 1 quyền").optional(),
     name: z.string().min(1, "Vui lòng nhập tên").optional(),
     address: z.string().optional(),
     phone: z
