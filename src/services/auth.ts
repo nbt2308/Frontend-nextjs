@@ -148,5 +148,14 @@ export const authService = {
         } catch (error: any) {
             throw new Error(error?.response?.data?.message || 'Lấy thông tin người dùng thất bại');
         }
-    }
+    },
+    logout: async (refreshToken?: string) => {
+        try {
+            const res = await authAxios.post('/auth/logout', { refreshToken });
+            return res.data;
+        } catch (error: any) {
+            console.error('Lỗi khi gọi logout API:', error?.response?.data || error.message);
+            return null;
+        }
+    },
 };

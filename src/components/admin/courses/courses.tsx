@@ -39,7 +39,36 @@ export default function Course() {
     });
 
     const { data: courses, isPending, isError, error, refetch } = useCourses(filters);
+    const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
+    const { mutate: bulkDelete } = useBulkDelete();
+    const { data: tags, isLoading: isLoadingTags } = useAllTags();
+    const { data: instructors, isLoading: isLoadingInstructors } = useAllInstructors();
     const [openCreateModal, setOpenCreateModal] = useState(false);
+
+    const handleBulkChangeStatus = (selectedCourses: any, status: boolean, table: any) => {
+        const ids = selectedCourses.map((course: any) => course.id)
+        bulkUpdateStatus({ ids, status }, {
+            onSuccess: () => {
+                refetch();
+                if (table) {
+                    table.resetRowSelection();
+                }
+            }
+        });
+    }
+
+    const handleBulkDelete = (selectedCourses: any, table: any) => {
+        const ids = selectedCourses.map((u: any) => u.id)
+        bulkDelete({ ids }, {
+            onSuccess: () => {
+                refetch();
+                if (table) {
+                    table.resetRowSelection();
+                }
+            }
+        });
+    }
+
     const courseFilters = [
         {
             columnId: "courseType",
@@ -117,8 +146,7 @@ export default function Course() {
             isPrimary: true,
         },
     ]
-    const { data: tags, isLoading: isLoadingTags } = useAllTags();
-    const { data: instructors, isLoading: isLoadingInstructors } = useAllInstructors();
+
     const courseSelectedActions: DataTableSelectedActionConfig<any>[] = [
         {
             label: "Hoạt động",
@@ -161,31 +189,6 @@ export default function Course() {
                 <DataTableError error={error} refetch={refetch} />
             </div>
         )
-    }
-
-    const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
-    const handleBulkChangeStatus = (selectedCourses: any, status: boolean, table: any) => {
-        const ids = selectedCourses.map((course: any) => course.id)
-        bulkUpdateStatus({ ids, status }, {
-            onSuccess: () => {
-                refetch();
-                if (table) {
-                    table.resetRowSelection();
-                }
-            }
-        });
-    }
-    const { mutate: bulkDelete } = useBulkDelete();
-    const handleBulkDelete = (selectedCourses: any, table: any) => {
-        const ids = selectedCourses.map((u: any) => u.id)
-        bulkDelete({ ids }, {
-            onSuccess: () => {
-                refetch();
-                if (table) {
-                    table.resetRowSelection();
-                }
-            }
-        });
     }
     return (
 

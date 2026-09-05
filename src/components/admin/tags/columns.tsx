@@ -191,7 +191,7 @@ export const columns: ColumnDef<ZodTagType>[] = [
             )
         },
         cell: ({ row }) => {
-            const count = row.original._count?.courses ?? 0;
+            const count = (row.original as any)._count?.courses || 0;
             return (
                 <Badge className={`ml-5 text-xs font-medium px-2 py-1 rounded`}>
                     {count}
@@ -231,7 +231,7 @@ export const columns: ColumnDef<ZodTagType>[] = [
             )
         },
         cell: ({ row }) => {
-            const count = row.original._count?.posts ?? 0;
+            const count = (row.original as any)._count?.posts || 0;
             return (
                 <Badge className={`ml-5 text-xs font-medium px-2 py-1 rounded`}>
                     {count}

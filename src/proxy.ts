@@ -19,7 +19,7 @@ export default auth((req) => {
     // req.auth được tạo từ session callback của Auth.js
     // auth.ts hiện tại đang đưa role vào session.role
     const role = req.auth?.user?.role;
-    
+
     const isAuthPage = pathname.startsWith("/auth");
     const isAdminLogin = pathname === "/admin-login";
     const isAdminRoute =
@@ -29,7 +29,7 @@ export default auth((req) => {
         pathname.startsWith(route)
     );
 
-    
+
 
     // auth.ts set token.error = "RefreshTokenError"
     // và session callback đưa nó ra session.error

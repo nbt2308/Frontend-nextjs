@@ -103,7 +103,7 @@ export function NavUser({
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => signOut()}
+                        <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/admin-login" })}
                             className="cursor-pointer flex items-center gap-2"
                             variant="destructive">
                             <LogOut />

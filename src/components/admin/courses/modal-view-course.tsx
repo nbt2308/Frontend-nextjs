@@ -9,11 +9,12 @@ import { CircleCheck, Lock, FileVideo, Eye, BookOpen, Menu, FileText, Clock, Lin
 import { useSections } from "@/hooks/useSection";
 import { formatDate, formatDuration } from "@/lib/utils";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
+import { CourseType as ICourseType } from "@/types/generated-zod/schemas/models/Course.schema"
 
 interface ModalViewCourseProps {
     open: boolean;
     closeDialog: () => void;
-    course: any;
+    course: ICourseType;
 }
 
 export default function ModalViewCourse({ open, closeDialog, course }: ModalViewCourseProps) {
@@ -25,8 +26,8 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
     if (!course) return null;
 
     //format price
-    const originalPrice = parseFloat(course?.price) || 0
-    const salePrice = parseFloat(course?.discount) || 0
+    const originalPrice = Number(course?.price || 0);
+    const salePrice = Number(course?.discount || 0);
     const hasDiscount = course?.courseType === CourseType.PAID && salePrice > 0 && salePrice < originalPrice
     const discountPercent = Math.round(
         ((originalPrice - salePrice) / originalPrice) * 100
@@ -59,7 +60,7 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                         <div className="flex items-center gap-3 p-3 bg-card border rounded-lg">
                             {/* Vòng tròn Avatar */}
                             <Avatar className="h-10 w-10 rounded-full">
-                                <AvatarImage src={course.thumbnail} alt={course.title} />
+                                <AvatarImage src={course.thumbnail || undefined} alt={course.title} />
                                 <AvatarFallback className="rounded-full">{course.title?.substring(0, 2)}</AvatarFallback>
                             </Avatar>
                             <div className="leading-tight flex gap-2 flex-col">

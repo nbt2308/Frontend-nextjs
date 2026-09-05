@@ -34,7 +34,8 @@ export default function User() {
         sortOrder: "desc"
     });
     const { data: users, isPending, isError, error, refetch } = useUsers(filters)
-
+    const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
+    const { mutate: bulkDelete } = useBulkDelete();
     //count
     const adminCount = users?.filter((user: UserType) =>
         user.roles.some(
@@ -174,7 +175,7 @@ export default function User() {
         )
     }
 
-    const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
+
     const handleBulkChangeStatus = (selectedUsers: any, status: boolean, table: any) => {
         const ids = selectedUsers.map((u: any) => u.id)
         bulkUpdateStatus({ ids, status }, {
@@ -186,7 +187,7 @@ export default function User() {
             }
         });
     }
-    const { mutate: bulkDelete } = useBulkDelete();
+
     const handleBulkDelete = (selectedUsers: any, table: any) => {
         const ids = selectedUsers.map((u: any) => u.id)
         if (selectedUsers.some((user: UserType) => user.roles.some((role: RoleType) => role.name === SYSTEM_ROLES.ADMIN))) {

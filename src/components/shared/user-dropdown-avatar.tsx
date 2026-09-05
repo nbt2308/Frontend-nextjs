@@ -55,7 +55,7 @@ export function DropdownMenuAvatar({ user }: DropdownMenuAvatarProps) {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                    onClick={() => signOut()}
+                    onClick={() => signOut({ callbackUrl: "/auth/login" })}
                     className="cursor-pointer flex items-center gap-2 text-red-500 focus:bg-red-50 dark:focus:bg-red-950/50"
                 >
                     <LogOutIcon className="h-4 w-4" />

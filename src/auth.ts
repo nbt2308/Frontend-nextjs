@@ -7,6 +7,7 @@ import { authService } from "@/services/auth";
 import { ISignIn } from "./schemas/auth.schema";
 import { getTokenExpire } from "./lib/utils";
 import { IUser } from "./types/next-auth";
+import { withRefreshLock } from "./lib/auth/refresh-lock";
 
 
 
@@ -83,6 +84,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         signIn: "/auth/login",
         error: "/error",
     },
+    events: {
+        async signOut(message) {
+            if ("token" in message && message.token?.refresh_token) {
+                try {
+                    await authService.logout(message.token.refresh_token as string);
+                } catch (error) {
+                    console.error("Lỗi khi revoke refresh token trên backend:", error);
+                }
+            }
+        },
+    },
     callbacks: {
         async signIn({ user, account, profile }) {
 
@@ -110,7 +122,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
             return true;
         },
-        async jwt({ token, user, account }) {
+        async jwt({ token, user, account, trigger, session }) {
             // Lần đầu đăng nhập → lưu access_token, refresh_token, access_expire
             if (account) {
                 if (account.provider === "credentials" || account.provider === "admin-login") {
@@ -130,19 +142,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 token.error = "";
                 return token;
             }
-
+            if (!token.access_token) {
+                return token;
+            }
             // Thêm 60 giây khoảng đệm (leeway) để chủ động refresh trước khi thực sự hết hạn
             const now = Date.now();
-            const bufferTime = 60 * 1000; 
+            const bufferTime = 60 * 1000;
             // Nếu access token chưa hết hạn → trả về token hiện tại
             if (now + bufferTime < (token.access_expire as number)) {
+                return token;
+            }
+            if (!token.refresh_token) {
+                token.error = "RefreshTokenError";
+                token.access_token = "";
+                token.access_expire = 0;
                 return token;
             }
 
             // Token hết hạn → gọi refresh
             try {
-                const res = await authService.refreshToken(token.refresh_token as string);
-                const data = res.data ?? res;
+                const userId = (token.user as IUser)?.id;
+
+                const data = await withRefreshLock(
+                    String(userId),
+                    async () => {
+                        const res = await authService.refreshToken(
+                            token.refresh_token as string,
+                        );
+
+                        return res.data ?? res;
+                    },
+                );
 
                 token.access_token = data.access_token;
                 token.refresh_token = data.refresh_token;
@@ -151,18 +181,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             } catch (error) {
                 console.error("Refresh token thất bại:", error);
                 token.error = "RefreshTokenError";
+                token.access_token = "";
+                token.refresh_token = "";
+                token.access_expire = 0;
             }
 
             return token;
         },
         async session({ session, token }) {
+            if (token.error === "RefreshTokenError") {
+                session.access_token = "";
+                session.access_expire = 0;
+                session.error = token.error;
+                return session;
+            }
             if (token && session.user) {
                 session.user = token.user as any;
-
             }
             session.access_token = token.access_token;
             session.access_expire = token.access_expire;
-
             session.error = token.error;
             return session;
         },

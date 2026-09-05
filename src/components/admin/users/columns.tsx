@@ -202,7 +202,7 @@ export const columns: ColumnDef<UserType>[] = [
                 <div className="flex flex-wrap gap-1">
                     {roles.map((item) => (
                         <span
-                            key={item.name}
+                            key={item.id}
                             className="text-xs font-medium px-2 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                         >
                             {item.name}

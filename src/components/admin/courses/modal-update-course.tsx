@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UpdateCourseSchema, IUpdateCourse } from "@/schemas/course.schema";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
-import {CourseType as ICourseType} from "@/types/generated-zod/schemas/models/Course.schema"
+import { CourseType as ICourseType } from "@/types/generated-zod/schemas/models/Course.schema"
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -81,7 +81,7 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, instructors
                 price: course.price ? Number(course.price) : 0,
                 discount: course.discount ? Number(course.discount) : 0,
                 status: course.status !== undefined ? Boolean(course.status) : true,
-                tags: course.tags?.map((t: any) => t.id) || [],
+                tags: course.tags?.map((t: TagType) => t.id) || [],
                 thumbnail: course.thumbnail || undefined,
                 thumbnail_publicID: course.thumbnail_publicID || undefined,
             });
