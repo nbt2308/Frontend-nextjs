@@ -34,6 +34,8 @@ export default function Tag() {
     });
 
     const { data: tags, isPending, isError, error, refetch } = useTags(filters);
+    const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
+    const { mutate: bulkDelete } = useBulkDelete();
     const [openCreateModal, setOpenCreateModal] = useState(false);
     const tagFilters = [
         {
@@ -114,7 +116,7 @@ export default function Tag() {
         )
     }
 
-    const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
+    
     const handleBulkChangeStatus = (selectedCourses: any, status: boolean, table: any) => {
         const ids = selectedCourses.map((course: any) => course.id)
         bulkUpdateStatus({ ids, status }, {
@@ -126,7 +128,7 @@ export default function Tag() {
             }
         });
     }
-    const { mutate: bulkDelete } = useBulkDelete();
+    
     const handleBulkDelete = (selectedCourses: any, table: any) => {
         const ids = selectedCourses.map((u: any) => u.id)
         bulkDelete({ ids }, {
