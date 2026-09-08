@@ -11,7 +11,7 @@ import {
     SidebarMenuItem,
     SidebarMenuButton,
 } from "@/components/ui/sidebar"
-import { Home, Users, Settings, BookOpen, LayoutDashboard, User2, Tag } from "lucide-react"
+import { Home, Users, Settings, BookOpen, LayoutDashboard, User2, Tag, ShieldCheck, Key } from "lucide-react"
 
 // Sample menu items
 const items = [
@@ -40,6 +40,19 @@ const items = [
         url: "/admin/settings",
         icon: Settings,
     },
+]
+
+const systemItems = [
+    {
+        title: "Vai trò & Phân quyền",
+        url: "/admin/roles",
+        icon: ShieldCheck,
+    },
+    {
+        title: "Danh sách quyền",
+        url: "/admin/permissions",
+        icon: Key,
+    }
 ]
 
 import Link from "next/link"
@@ -76,6 +89,24 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton asChild tooltip={item.title}>
+                                        <Link href={item.url}>
+                                            <item.icon />
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                <SidebarGroup>
+                    <SidebarGroupLabel>Hệ thống</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {systemItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild tooltip={item.title}>
                                         <Link href={item.url}>
