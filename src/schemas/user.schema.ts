@@ -11,7 +11,6 @@ export const createUserSchema = UserSchema.pick({
     name: true,
     phone: true,
     isActive: true,
-    roles: true
 })
     .extend({
         email: z
@@ -61,7 +60,7 @@ export const UpdateUserSchema = UserSchema.pick({
     address: true,
     status: true,
 }).extend({
-    roles: z.array(z.string()).min(1, "Vui lòng chọn ít nhất 1 quyền").optional(),
+    roles: z.array(z.number()).min(1, "Vui lòng chọn ít nhất 1 quyền").optional(),
     name: z.string().min(1, "Vui lòng nhập tên").optional(),
     address: z.string().optional(),
     phone: z

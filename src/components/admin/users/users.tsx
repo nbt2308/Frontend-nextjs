@@ -4,6 +4,7 @@ import { DataTable, DataTableSelectedActionConfig } from "../../ui/data-table";
 import { columns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
 import { useBulkDelete, useBulkUpdateStatus, useUsers } from "@/hooks/useUser";
+import { useAllRoles } from "@/hooks/useRole";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,11 @@ import { RoleSchema } from "@/types/generated-zod/schemas";
 import { SYSTEM_ROLES } from "@/constants/roles.constant";
 import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
 import { RoleType } from "@/types/generated-zod/schemas/models/Role.schema";
+
+export type UserResponse = Omit<UserType, "roles"> & {
+    roles: RoleType[];
+};
+
 export default function User() {
     const [filters, setFilters] = useState<FindAllQueryParams>({
         page: 1,
@@ -33,51 +39,35 @@ export default function User() {
         sortBy: "createdAt",
         sortOrder: "desc"
     });
-    const { data: users, isPending, isError, error, refetch } = useUsers(filters)
+    const { data: users, isPending, isError, error, refetch } = useUsers()
     const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
     const { mutate: bulkDelete } = useBulkDelete();
-    //count
-    const adminCount = users?.filter((user: UserType) =>
-        user.roles.some(
-            (role: RoleType) => role.name === SYSTEM_ROLES.ADMIN
-        )
-    ).length ?? 0;
+    const { data: rolesData } = useAllRoles();
 
-    const instructorCount = users?.filter((user: UserType) =>
-        user.roles.some(
-            (role: RoleType) => role.name === SYSTEM_ROLES.INSTRUCTOR
-        )
-    ).length ?? 0;
+    // Tạo options cho filter Vai trò từ data API
+    const roleOptions = rolesData ? rolesData.map((role: RoleType) => {
+        const count = users?.filter((user: UserResponse) =>
+            user.roles.some((userRole: RoleType) => userRole.name === role.name)
+        ).length ?? 0;
+        
+        let icon = Users; // Icon mặc định cho other roles
+        if (role.name === SYSTEM_ROLES.ADMIN) icon = ShieldUser;
+        else if (role.name === SYSTEM_ROLES.INSTRUCTOR) icon = UserCog;
+        else if (role.name === 'STUDENT' || role.name === 'USER') icon = UserStar;
 
-    const studentCount = users?.filter((user: UserType) =>
-        user.roles.some(
-            (role: RoleType) => role.name === SYSTEM_ROLES.STUDENT
-        )
-    ).length ?? 0;
+        return {
+            label: role.name,
+            value: role.name,
+            icon: icon,
+            count: count
+        }
+    }) : [];
+
     const userFilters = [
         {
             columnId: "roles",
             title: "Vai trò",
-            options: [
-                {
-                    label: "Admin",
-                    value: SYSTEM_ROLES.ADMIN,
-                    icon: ShieldUser,
-                    count: adminCount
-                },
-                {
-                    label: "Instructor",
-                    value: SYSTEM_ROLES.INSTRUCTOR,
-                    icon: UserCog,
-                    count: instructorCount
-                },
-                {
-                    label: "Student",
-                    value: SYSTEM_ROLES.STUDENT,
-                    icon: UserStar,
-                    count: studentCount
-                },
-            ],
+            options: roleOptions,
         },
         {
             columnId: "isActive",
@@ -190,7 +180,7 @@ export default function User() {
 
     const handleBulkDelete = (selectedUsers: any, table: any) => {
         const ids = selectedUsers.map((u: any) => u.id)
-        if (selectedUsers.some((user: UserType) => user.roles.some((role: RoleType) => role.name === SYSTEM_ROLES.ADMIN))) {
+        if (selectedUsers.some((user: UserResponse) => user.roles.some((role: RoleType) => role.name === SYSTEM_ROLES.ADMIN))) {
             toast.error("Không thể xóa admin");
             return;
         }
@@ -230,12 +220,9 @@ export default function User() {
                     <p className="text-muted-foreground text-sm">Quản lý phân quyền, trạng thái và thông tin người dùng trong hệ thống.</p>
                 </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 mb-6 gap-4 justify-between">
+            <div className="grid grid-cols-2 md:grid-cols-5 mb-6 gap-4 justify-between">
                 {isPending ? (
                     <>
-                        <KpiCard.Skeleton />
-                        <KpiCard.Skeleton />
-                        <KpiCard.Skeleton />
                         <KpiCard.Skeleton />
                         <KpiCard.Skeleton />
                         <KpiCard.Skeleton />
@@ -293,36 +280,6 @@ export default function User() {
                             valueColor="text-red-500"
                             hoverBorderColor="hover:border-red-500/60"
                             hoverShadowColor="hover:shadow-[0_0_20px_rgba(239,68,68,0.25)]"
-                        />
-                        <KpiCard
-                            label="Quản trị viên"
-                            value={adminCount.toString()}
-                            icon={UserCog}
-                            iconColor="text-purple-500"
-                            glowColor="bg-purple-500/15 border-purple-500/30"
-                            valueColor="text-purple-500"
-                            hoverBorderColor="hover:border-purple-500/60"
-                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(168,85,247,0.25)]"
-                        />
-                        <KpiCard
-                            label="Giảng viên"
-                            value={instructorCount.toString()}
-                            icon={UserPen}
-                            iconColor="text-orange-500"
-                            glowColor="bg-orange-500/15 border-orange-500/30"
-                            valueColor="text-orange-500"
-                            hoverBorderColor="hover:border-orange-500/60"
-                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(249,115,22,0.25)]"
-                        />
-                        <KpiCard
-                            label="Học viên"
-                            value={studentCount.toString()}
-                            icon={UserStar}
-                            iconColor="text-amber-500"
-                            glowColor="bg-amber-500/15 border-amber-500/30"
-                            valueColor="text-amber-500"
-                            hoverBorderColor="hover:border-amber-500/60"
-                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(245,158,11,0.25)]"
                         />
                     </>
                 )}

@@ -24,6 +24,19 @@ export function useCourses(params: FindAllQueryParams) {
     return queryInfo;
 }
 
+
+export function useAllCourses() {
+    const queryInfo = useQuery({
+        queryKey: ['courses', 'all'],
+        queryFn: async () => {
+            const result = await CourseService.getAllCourses()
+            return result;
+        },
+        staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút
+    })
+    return queryInfo;
+}
+
 export function useCoursesForUser(params: CourseUserQueryParams = {}) {
     const defaultParams: CourseUserQueryParams = {
         page: 1,

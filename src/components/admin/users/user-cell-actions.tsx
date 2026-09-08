@@ -23,6 +23,7 @@ export const UserCellAction = ({ user, status }: { user: any, status: boolean })
     const [isDeleteAlert, setIsDeleteAlert] = useState(false)
     const { mutate: handleChangeStatus, isPending: isChangeStatusPending } = useChangeStatus();
     const { mutate: handleSoftDelete, isPending: isSoftDeletePending } = useSoftDelete();
+    
 
     const deleteHandler = async () => {
         handleSoftDelete(user?.id);

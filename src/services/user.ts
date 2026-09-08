@@ -4,10 +4,10 @@ import { IBulkDelete, IBulkStatus, IChangeStatus, IUpdateUser } from "@/schemas/
 
 export const UserService = {
 
-    getAllUsersWithPagination: async (queryParams: FindAllQueryParams) => {
+    getAllUsersWithPagination: async () => {
         try {
-            const response = await axiosClient.get(`/users`, { params: queryParams });
-            return response.data.users;
+            const response = await axiosClient.get(`/users/all`);
+            return response.data;
 
         } catch (error: any) {
 

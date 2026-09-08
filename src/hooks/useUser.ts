@@ -4,18 +4,11 @@ import { toast } from "sonner";
 import { IBulkDelete, IBulkStatus, IChangeStatus, IUpdateUser } from "@/schemas/user.schema";
 
 
-export function useUsers(params: FindAllQueryParams) {
-    const defaultParams: DefaultFindAllQueryParams = {
-        page: 1,
-        limit: 10,
-        sortBy: 'createdAt',
-        sortOrder: 'desc'
-    };
-    const queryParams = { ...defaultParams, ...params };
+export function useUsers() {
     const queryInfo = useQuery({
-        queryKey: ['users', queryParams],
+        queryKey: ['users', ''],
         queryFn: async () => {
-            const result = await UserService.getAllUsersWithPagination(queryParams)
+            const result = await UserService.getAllUsersWithPagination()
             return result;
         },
         staleTime: 1000 * 60 * 5, // Cache dữ liệu trong 5 phút

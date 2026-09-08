@@ -95,7 +95,7 @@ export const CourseCellAction = ({ course, status }: { course: any, status: bool
                 </DropdownMenuContent>
             </DropdownMenu>
             {/* <ModalViewCourse open={isViewOpen} closeDialog={() => setIsViewOpen(false)} data={user} /> */}
-            <ModalUpdateCourse open={isEditOpen} closeDialog={() => setIsEditOpen(false)} course={course} tags={tags} instructors={instructors} />
+            <ModalUpdateCourse open={isEditOpen} closeDialog={() => setIsEditOpen(false)} course={course} tags={tags}/>
             <ModalViewCourse open={isViewOpen} closeDialog={() => setIsViewOpen(false)} course={course} />
             <ConfirmModal
                 isOpen={showDeleteAlert}

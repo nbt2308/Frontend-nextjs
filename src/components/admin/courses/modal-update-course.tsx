@@ -38,16 +38,16 @@ import { toast } from "sonner";
 import { CloudinaryService } from "@/services/cloudinary";
 import { useUpdateCourse } from "@/hooks/useCourse";
 import { Badge } from "@/components/ui/badge";
+import { CourseResponse } from "./courses";
 
 interface ModalUpdateCourseProps {
     open: boolean;
     closeDialog: () => void;
     tags: TagType[];
-    instructors: UserType[];
-    course: ICourseType;
+    course: CourseResponse;
 }
 
-export default function ModalUpdateCourse({ open, closeDialog, tags, instructors, course }: ModalUpdateCourseProps) {
+export default function ModalUpdateCourse({ open, closeDialog, tags, course }: ModalUpdateCourseProps) {
     const CourseType = CourseTypeSchema.enum;
     const Level = LevelSchema.enum;
     const [isImageLoading, setIsImageLoading] = useState<boolean>(false);

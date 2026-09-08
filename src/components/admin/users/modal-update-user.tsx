@@ -23,10 +23,13 @@ import { SYSTEM_ROLES } from "../../../constants/roles.constant";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { UserResponse } from "./users";
+import { useAllRoles } from "@/hooks/useRole";
+import { RoleType } from "@/types/generated-zod/schemas/models/Role.schema";
 
 export default function ModalEditUser({ open, closeDialog, data }: { open: boolean, closeDialog: () => void, data: UserType }) {
-    const user = data as UserType;
-    const Role = SYSTEM_ROLES;
+    const user = data as UserResponse;
+    // const Role = SYSTEM_ROLES;
     const form = useForm<IUpdateUserInput, any, IUpdateUser>({
         resolver: zodResolver(UpdateUserSchema),
         defaultValues: {
@@ -34,29 +37,27 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
             phone: "",
             address: "",
             status: true,
-            roles: [Role.STUDENT]
+            roles: []
         },
     })
 
+    const { mutate, isPending } = useUpdateUser();
+    const { data: roles, isLoading: isLoadingRoles } = useAllRoles();
+
     useEffect(() => {
-        if (user) {
-            let initialRoles = [Role.STUDENT];
-            if (user?.roles && Array.isArray(user.roles)) {
-                initialRoles = user.roles.map((r: any) => typeof r === "string" ? r : r?.name || r?.role?.name || r);
-            } else if ((user as any)?.role) {
-                initialRoles = [(user as any).role];
-            }
+        if (open && user) {
+
             form.reset({
                 name: user?.name || "",
                 phone: user?.phone || "",
                 address: user?.address || "",
                 status: user?.status,
-                roles: initialRoles
+                roles: user?.roles?.map((role: RoleType) => role.id) || []
             });
         }
-    }, [user, form]);
+    }, [open, user, form]);
 
-    const { mutate, isPending } = useUpdateUser();
+
 
     const handleSubmit = async (data: IUpdateUser) => {
         try {
@@ -166,88 +167,85 @@ export default function ModalEditUser({ open, closeDialog, data }: { open: boole
                                     name="roles"
                                     control={form.control}
                                     render={({ field, fieldState }) => {
-                                        const selectedRoles: string[] = field.value ?? [];
-                                        const toggleRole = (roleValue: string) => {
-                                            const newValue = selectedRoles.includes(roleValue)
-                                                ? selectedRoles.filter((val) => val !== roleValue)
-                                                : [...selectedRoles, roleValue];
+                                        const selectedRoles:number[] = field.value ?? [];
+                                        const toggleRole = (roleId: number) => {
+                                            const newValue = selectedRoles.includes(roleId)
+                                                ? selectedRoles.filter((val) => val !== roleId)
+                                                : [...selectedRoles, roleId];
                                             field.onChange(newValue);
                                         };
-                                        const roleOptions = [
-                                            { value: Role.ADMIN, label: "Admin" },
-                                            { value: Role.STUDENT, label: "Student" },
-                                            { value: Role.INSTRUCTOR, label: "Instructor" }
-                                        ];
+
 
                                         return (
-                                        <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel>
-                                                Vai trò<span className="text-red-500">*</span>
-                                            </FieldLabel>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        role="combobox"
-                                                        type="button"
-                                                        className={cn(
-                                                            "w-full justify-between font-normal h-auto min-h-8",
-                                                            selectedRoles.length === 0 && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        {selectedRoles.length > 0 ? (
-                                                            <div className="flex flex-wrap gap-1">
-                                                                {selectedRoles.map((roleValue) => {
-                                                                    const roleOption = roleOptions.find((r) => r.value === roleValue);
-                                                                    return (
-                                                                        <Badge key={roleValue} variant="secondary" className="text-xs">
-                                                                            {roleOption?.label || roleValue}
-                                                                            <span
-                                                                                role="button"
-                                                                                className="ml-1 rounded-full outline-none hover:text-destructive"
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    toggleRole(roleValue);
-                                                                                }}
-                                                                            >
-                                                                                <X className="h-3 w-3" />
-                                                                            </span>
-                                                                        </Badge>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        ) : (
-                                                            "Chọn vai trò..."
-                                                        )}
-                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                                                    <Command>
-                                                        <CommandInput placeholder="Tìm vai trò..." />
-                                                        <CommandList>
-                                                            <CommandEmpty>Không tìm thấy vai trò nào.</CommandEmpty>
-                                                            <CommandGroup>
-                                                                {roleOptions.map((roleOption) => (
-                                                                    <CommandItem
-                                                                        key={roleOption.value}
-                                                                        value={roleOption.label}
-                                                                        onSelect={() => toggleRole(roleOption.value)}
-                                                                        data-checked={selectedRoles.includes(roleOption.value)}
-                                                                    >
-                                                                        {roleOption.label}
-                                                                    </CommandItem>
-                                                                ))}
-                                                            </CommandGroup>
-                                                        </CommandList>
-                                                    </Command>
-                                                </PopoverContent>
-                                            </Popover>
-                                            {fieldState.invalid && (
-                                                <FieldError errors={[fieldState.error]} />
-                                            )}
-                                        </Field>
-                                    )}}
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel>
+                                                    Vai trò<span className="text-red-500">*</span>
+                                                </FieldLabel>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            role="combobox"
+                                                            type="button"
+                                                            className={cn(
+                                                                "w-full justify-between font-normal h-auto min-h-8",
+                                                                selectedRoles.length === 0 && "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            {selectedRoles.length > 0 ? (
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    {selectedRoles.map((id: number) => {
+                                                                        const roleOption = roles?.find((r: RoleType) => r.id === id);
+                                                                        return (
+                                                                            <Badge key={id} variant="secondary" className="text-xs">
+                                                                                {roleOption?.name}
+                                                                                <span
+                                                                                    role="button"
+                                                                                    className="ml-1 rounded-full outline-none hover:text-destructive"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        toggleRole(id);
+                                                                                    }}
+                                                                                >
+                                                                                    <X className="h-3 w-3" />
+                                                                                </span>
+                                                                            </Badge>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            ) : (
+                                                                "Chọn vai trò..."
+                                                            )}
+                                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                                                        <Command>
+                                                            <CommandInput placeholder="Tìm vai trò..." />
+                                                            <CommandList>
+                                                                <CommandEmpty>Không tìm thấy vai trò nào.</CommandEmpty>
+                                                                <CommandGroup>
+                                                                    {roles?.map((roleOption: RoleType) => (
+                                                                        <CommandItem
+                                                                            key={roleOption.id}
+                                                                            value={roleOption.name}
+                                                                            onSelect={() => toggleRole(roleOption.id)}
+                                                                            data-checked={selectedRoles.includes(roleOption.id)}
+                                                                        >
+                                                                            {roleOption.name}
+                                                                        </CommandItem>
+                                                                    ))}
+                                                                </CommandGroup>
+                                                            </CommandList>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
+                                                {fieldState.invalid && (
+                                                    <FieldError errors={[fieldState.error]} />
+                                                )}
+                                            </Field>
+                                        )
+                                    }}
                                 />
                                 <Controller
                                     name="status"

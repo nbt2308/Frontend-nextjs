@@ -24,7 +24,7 @@ export function useTags(params: FindAllQueryParams) {
 
 export function useAllTags() {
     const queryInfo = useQuery({
-        queryKey: ['tags'],
+        queryKey: ['tags','all'],
         queryFn: async () => {
             const result = await TagService.getAllTags();
             return result;

@@ -212,7 +212,9 @@ export const columns: ColumnDef<UserType>[] = [
             )
         },
         filterFn: (row, id, value) => {
-            return value.includes(row.getValue(id));
+            const roles = row.getValue(id) as RoleType[];
+            const roleNames = roles.map(r => r.name);
+            return roleNames.some(roleName => value.includes(roleName));
         },
         enableGlobalFilter: false
     },

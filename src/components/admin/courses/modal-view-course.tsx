@@ -10,11 +10,12 @@ import { useSections } from "@/hooks/useSection";
 import { formatDate, formatDuration } from "@/lib/utils";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { CourseType as ICourseType } from "@/types/generated-zod/schemas/models/Course.schema"
+import { CourseResponse } from "./courses";
 
 interface ModalViewCourseProps {
     open: boolean;
     closeDialog: () => void;
-    course: ICourseType;
+    course: CourseResponse;
 }
 
 export default function ModalViewCourse({ open, closeDialog, course }: ModalViewCourseProps) {

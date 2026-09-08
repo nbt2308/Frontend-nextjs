@@ -21,24 +21,23 @@ import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
-import { useBulkDelete, useBulkUpdateStatus, useCourses } from "@/hooks/useCourse";
+import { useAllCourses, useBulkDelete, useBulkUpdateStatus, useCourses } from "@/hooks/useCourse";
 import ModalCreateCourse from "./modal-create-course";
 import { useAllTags } from "@/hooks/useTag";
 import { useAllInstructors } from "@/hooks/useUser";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
+import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema";
+import { CourseType as ICourseType } from "@/types/generated-zod/schemas/models/Course.schema"
+export type CourseResponse = Omit<ICourseType, "tags"> & {
+    tags: TagType[];
+};
 
 export default function Course() {
 
     const CourseType = CourseTypeSchema.enum;
     const Level = LevelSchema.enum;
-    const [filters, setFilters] = useState<FindAllQueryParams>({
-        page: 1,
-        limit: 10,
-        sortBy: "createdAt",
-        sortOrder: "desc"
-    });
 
-    const { data: courses, isPending, isError, error, refetch } = useCourses(filters);
+    const { data: courses, isPending, isError, error, refetch } = useAllCourses();
     const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
     const { mutate: bulkDelete } = useBulkDelete();
     const { data: tags, isLoading: isLoadingTags } = useAllTags();

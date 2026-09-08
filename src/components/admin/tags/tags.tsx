@@ -21,19 +21,19 @@ import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
-import { useBulkDelete, useBulkUpdateStatus, useTags } from "@/hooks/useTag";
+import { useAllTags, useBulkDelete, useBulkUpdateStatus, useTags } from "@/hooks/useTag";
 import ModalCreateTag from "./modal-create-tag";
 
 export default function Tag() {
 
-    const [filters, setFilters] = useState<FindAllQueryParams>({
-        page: 1,
-        limit: 10,
-        sortBy: "createdAt",
-        sortOrder: "desc"
-    });
+    // const [filters, setFilters] = useState<FindAllQueryParams>({
+    //     page: 1,
+    //     limit: 10,
+    //     sortBy: "createdAt",
+    //     sortOrder: "desc"
+    // });
 
-    const { data: tags, isPending, isError, error, refetch } = useTags(filters);
+    const { data: tags, isPending, isError, error, refetch } = useAllTags();
     const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
     const { mutate: bulkDelete } = useBulkDelete();
     const [openCreateModal, setOpenCreateModal] = useState(false);
