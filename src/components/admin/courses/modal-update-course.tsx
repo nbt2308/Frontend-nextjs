@@ -59,7 +59,10 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
         resolver: zodResolver(UpdateCourseSchema),
         defaultValues: {
             title: "",
-            description: "",
+            introduction: "",
+            learningOutcomes: "",
+            requirements: "",
+            resources: "",
             courseType: CourseType.FREE,
             level: Level.BEGINNER,
             price: 0,
@@ -75,7 +78,10 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
         if (course && open) {
             form.reset({
                 title: course.title || "",
-                description: course.description || "",
+                introduction: course.courseDescription?.introduction ?? "",
+                learningOutcomes: course.courseDescription?.learningOutcomes ?? "",
+                requirements: course.courseDescription?.requirements ?? "",
+                resources: course.courseDescription?.resources ?? "",
                 courseType: course.courseType || CourseType.FREE,
                 level: course.level || Level.BEGINNER,
                 price: course.price ? Number(course.price) : 0,
@@ -144,6 +150,8 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
                     setIsImageLoading(false);
                 }
             }
+            data.requirements = data.requirements?.trim() || undefined;
+            data.resources = data.resources?.trim() || undefined;
             updateCourse({
                 id: course?.id,
                 courseData: data
@@ -211,24 +219,87 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
 
                                 {/* 2. Mô tả khóa học */}
                                 <Controller
-                                    name="description"
+                                    name="introduction"
                                     control={form.control}
                                     render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel htmlFor="course-description">
-                                                Mô tả khóa học <span className="text-red-500">*</span>
+                                            <FieldLabel htmlFor="course-introduction">
+                                                Giới thiệu <span className="text-red-500">*</span>
                                             </FieldLabel>
                                             <Textarea
                                                 {...field}
-                                                id="course-description"
-                                                placeholder="Tóm tắt ngắn gọn nội dung và giá trị của khóa học..."
-                                                rows={3}
+                                                id="course-introduction"
+                                                placeholder="Giới thiệu tổng quan về khóa học..."
+                                                rows={4}
                                             />
-                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
                                         </Field>
                                     )}
                                 />
 
+                                <Controller
+                                    name="learningOutcomes"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="course-learning-outcomes">
+                                                Bạn sẽ học được gì? <span className="text-red-500">*</span>
+                                            </FieldLabel>
+                                            <Textarea
+                                                {...field}
+                                                id="course-learning-outcomes"
+                                                placeholder="Liệt kê những kiến thức, kỹ năng mà học viên sẽ đạt được... (Mỗi dòng là một ý)"
+                                                rows={4}
+                                            />
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                />
+
+                                <Controller
+                                    name="requirements"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="course-requirements">
+                                                Yêu cầu trước khi học
+                                            </FieldLabel>
+                                            <Textarea
+                                                {...field}
+                                                id="course-requirements"
+                                                placeholder="Học viên cần chuẩn bị kiến thức hoặc công cụ gì trước khi bắt đầu? (Mỗi dòng là một ý)"
+                                                rows={3}
+                                            />
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                />
+
+                                <Controller
+                                    name="resources"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="course-resources">
+                                                Tài liệu khóa học
+                                            </FieldLabel>
+                                            <Input
+                                                {...field}
+                                                id="course-resources"
+                                                placeholder="https://github.com/username/repository"
+                                            />
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                />
                                 {/* 3. Upload Ảnh Thumbnail */}
                                 <Controller
                                     name="thumbnail"

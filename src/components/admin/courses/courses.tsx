@@ -16,7 +16,7 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator";
-import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2, CircleCheck, ShieldX, Users, UserPen, Book, Gift, Gem, Sprout, Zap, Rocket, Flame, BookPlus, BookOpen } from "lucide-react";
+import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2, CircleCheck, ShieldX, Users, UserPen, Book, Gift, Gem, Sprout, Zap, Rocket, Flame, BookPlus, BookOpen, Tag } from "lucide-react";
 import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
@@ -28,8 +28,14 @@ import { useAllInstructors } from "@/hooks/useUser";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema";
 import { CourseType as ICourseType } from "@/types/generated-zod/schemas/models/Course.schema"
-export type CourseResponse = Omit<ICourseType, "tags"> & {
+export type CourseResponse = Omit<ICourseType, "tags" | "courseDescription"> & {
     tags: TagType[];
+    courseDescription: {
+        introduction: string;
+        learningOutcomes: string;
+        requirements: string | null;
+        resources: string | null;
+    } | null;
 };
 
 export default function Course() {
@@ -67,6 +73,20 @@ export default function Course() {
             }
         });
     }
+    const tagOptions = tags ? tags.map((tag: TagType) => {
+        const count = courses?.filter((course: CourseResponse) =>
+            course.tags.some((courseTag: TagType) => courseTag.name === tag.name)
+        ).length ?? 0;
+
+
+
+        return {
+            label: tag.name,
+            value: tag.name,
+            icon: Tag,
+            count: count
+        }
+    }) : [];
 
     const courseFilters = [
         {
@@ -129,6 +149,12 @@ export default function Course() {
                 },
             ],
         },
+        {
+            columnId: "tags",
+            title: "Tags",
+            options: tagOptions,
+        },
+        
     ]
 
     const courseActions = [

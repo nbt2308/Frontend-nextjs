@@ -17,10 +17,11 @@ import ModalUpdateCourse from "./modal-update-course"
 import { useAllTags } from "@/hooks/useTag"
 import { useAllInstructors } from "@/hooks/useUser"
 import ModalViewCourse from "./modal-view-course"
+import { CourseResponse } from "./courses"
 
 
 
-export const CourseCellAction = ({ course, status }: { course: any, status: boolean }) => {
+export const CourseCellAction = ({ course, status }: { course: CourseResponse, status: boolean }) => {
     const router = useRouter()
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [isEditOpen, setIsEditOpen] = useState(false)

@@ -10,9 +10,11 @@ import { Badge } from "@/components/ui/badge"
 import { CourseType as ZodCourseType } from "@/types/generated-zod/schemas/models/Course.schema"
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas"
 import { CourseCellAction } from "./course-cell-actions"
+import { CourseResponse } from "./courses"
+import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema"
 
 
-export const columns: ColumnDef<ZodCourseType>[] = [
+export const columns: ColumnDef<CourseResponse>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -98,6 +100,56 @@ export const columns: ColumnDef<ZodCourseType>[] = [
                 </div>
             )
         },
+    },
+    {
+        id: "tags",
+        meta: {
+            label: "Tags",
+        },
+        accessorKey: "tags",
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted();
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => {
+                        if (isSorted === "asc") {
+                            column.toggleSorting(true);
+                        } else if (isSorted === "desc") {
+                            column.clearSorting();
+                        } else {
+                            column.toggleSorting(false);
+                        }
+                    }}
+                >
+                    Tag
+                    {isSorted === "asc" && <ArrowUp className="ml-2 h-4 w-4" />}
+                    {isSorted === "desc" && <ArrowDown className="ml-2 h-4 w-4" />}
+                    {!isSorted && <ArrowUpDown className="ml-2 h-4 w-4" />}
+                </Button>
+            )
+        },
+        cell: ({ row }) => {
+            const courseTags = row.getValue("tags") as TagType[]
+            return (
+                <div className="w-[150px] flex flex-wrap gap-1">
+                    {courseTags.map((item) => (
+                        <Badge
+                            key={item.id}
+                        // className="text-xs font-medium px-2 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                        >
+                            {item.name}
+                        </Badge>
+                    ))}
+                </div>
+            )
+        },
+        filterFn: (row, id, value) => {
+            const tags = row.getValue(id) as TagType[];
+            const tagNames = tags.map(r => r.name);
+            return tagNames.some(tagName => value.includes(tagName));
+        },
+        enableGlobalFilter: false
     },
     {
         id: "courseType",

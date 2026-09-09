@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { CircleCheck, Lock, FileVideo, Eye, BookOpen, Menu, FileText, Clock, Link, Tag, Calendar } from "lucide-react";
+import { CircleCheck, Lock, FileVideo, Eye, BookOpen, Clock, Link, Tag, Calendar, StepForward, Check } from "lucide-react";
 import { useSections } from "@/hooks/useSection";
 import { formatDate, formatDuration } from "@/lib/utils";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
-import { CourseType as ICourseType } from "@/types/generated-zod/schemas/models/Course.schema"
 import { CourseResponse } from "./courses";
+import { DescriptionList } from "@/components/shared/DescriptionList";
 
 interface ModalViewCourseProps {
     open: boolean;
@@ -29,10 +29,11 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
     //format price
     const originalPrice = Number(course?.price || 0);
     const salePrice = Number(course?.discount || 0);
-    const hasDiscount = course?.courseType === CourseType.PAID && salePrice > 0 && salePrice < originalPrice
+    const hasDiscount = course?.courseType === CourseType.PAID && salePrice > 0 && salePrice < originalPrice;
     const discountPercent = Math.round(
         ((originalPrice - salePrice) / originalPrice) * 100
-    )
+    );
+
     return (
         <Dialog open={open} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
@@ -75,7 +76,7 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
+                            <div className="bg-card p-3 border rounded-lg space-y-1.5">
                                 <div className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">
                                     Loại khoá học
                                 </div>
@@ -83,13 +84,13 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                                     {course.courseType === CourseType.FREE ? "Miễn phí" : "Trả phí"}
                                 </Badge>
                             </div>
-                            <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
+                            <div className="bg-card p-3 border rounded-lg space-y-1.5">
                                 <div className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">Cấp độ</div>
                                 <Badge variant="secondary" className="font-medium">
                                     {course.level}
                                 </Badge>
                             </div>
-                            <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
+                            <div className="bg-card p-3 border rounded-lg space-y-1.5">
                                 <div className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">Trạng thái</div>
                                 <Badge className={
                                     course.status ?
@@ -105,7 +106,7 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                                     {course.status ? "Hoạt động" : "Đã ẩn"}
                                 </Badge>
                             </div>
-                            <div className="bg-card p-3 rounded border rounded-lg space-y-1.5">
+                            <div className="bg-card p-3 border rounded-lg space-y-1.5">
                                 <div className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">Giá</div>
                                 <div className="font-medium text-sm">
                                     {course.courseType === CourseType.FREE ? "Miễn phí" : hasDiscount ? (
@@ -126,15 +127,64 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                                 </div>
                             </div>
                         </div>
-                        <div className="p-3.5 rounded-lg border bg-card space-y-1.5">
-                            <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">
-                                <FileText className="h-3.5 w-3.5" />
-                                Mô tả khóa học
-                            </span>
-                            <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
-                                {course.description ? course.description : <span className="italic text-muted-foreground">Chưa có mô tả cho khóa học này.</span>}
-                            </p>
-                        </div>
+
+                        {/* Accordion cho 3 mục thông tin */}
+                        <Accordion type="multiple" defaultValue={["intro"]} className="w-full space-y-2">
+                            <AccordionItem value="intro" className="border rounded-lg px-3 bg-card">
+                                <AccordionTrigger className="font-semibold text-sm hover:no-underline py-3">
+                                    Giới thiệu
+                                </AccordionTrigger>
+                                <AccordionContent className="whitespace-pre-wrap text-sm text-muted-foreground pt-1 pb-3">
+                                    {course.courseDescription?.introduction || "Chưa có thông tin."}
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="outcomes" className="border rounded-lg px-3 bg-card">
+                                <AccordionTrigger className="font-semibold text-sm hover:no-underline py-3">
+                                    Bạn sẽ học được gì?
+                                </AccordionTrigger>
+                                <AccordionContent className="whitespace-pre-wrap text-sm text-muted-foreground pt-1 pb-3">
+                                    <DescriptionList
+                                        value={course.courseDescription?.learningOutcomes}
+                                        icon={Check}
+                                    />
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="requirements" className="border rounded-lg px-3 bg-card">
+                                <AccordionTrigger className="font-semibold text-sm hover:no-underline py-3">
+                                    Yêu cầu trước khi học
+                                </AccordionTrigger>
+                                <AccordionContent className="whitespace-pre-wrap text-sm text-muted-foreground pt-1 pb-3">
+                                    <DescriptionList
+                                        value={course.courseDescription?.requirements}
+                                        icon={StepForward} />
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="resources" className="border rounded-lg px-3 bg-card">
+                                <AccordionTrigger className="font-semibold text-sm hover:no-underline py-3">
+                                    Tài nguyên đi kèm
+                                </AccordionTrigger>
+                                <AccordionContent className="whitespace-pre-wrap text-sm text-muted-foreground pt-1 pb-3">
+                                    {course.courseDescription?.resources ? (
+                                        <a
+                                            href={course.courseDescription.resources}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-primary flex items-center gap-1.5 underline"
+                                        >
+                                            <Link className="h-3.5 w-3.5" /> Link tài nguyên
+                                        </a>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">
+                                            Không có link tài nguyên.
+                                        </p>
+                                    )}
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+
                         <div className="divide-y divide-border border rounded-lg px-3.5 py-1 bg-card">
                             <div className="flex items-center justify-between py-2.5">
                                 <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5"><Link className="h-3.5 w-3.5" /> Đường dẫn (Slug)</span>
@@ -142,7 +192,7 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                             </div>
                             <div className="flex items-center justify-between py-2.5">
                                 <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5"><Tag className="h-3.5 w-3.5" /> Tag:</span>
-                                <div className="flex gap-2 font-medium">
+                                <div className="w-[200px] flex flex-wrap justify-end gap-2 font-medium">
                                     {course?.tags.map((tag: any) => (
                                         <Badge key={tag.id} variant={"secondary"} className="text-xs">
                                             {tag.name}

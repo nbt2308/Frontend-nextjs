@@ -9,10 +9,27 @@ export const BaseCourseSchema = z.object({
         .trim()
         .min(1, { message: "Vui lòng nhập tên khoá học" }),
 
-    description: z
+    introduction: z
         .string()
         .trim()
-        .min(1, { message: "Vui lòng nhập mô tả" }),
+        .min(1, { message: "Vui lòng nhập phần giới thiệu" }),
+
+    learningOutcomes: z
+        .string()
+        .trim()
+        .min(1, { message: "Vui lòng nhập nội dung bạn sẽ học được" }),
+
+    requirements: z
+        .string()
+        .trim()
+        .optional(),
+
+    resources: z
+        .string()
+        .trim()
+        .url({ message: "Link tài nguyên không hợp lệ" })
+        .optional()
+        .or(z.literal("")),
 
     price: z
         .number({ message: "Giá phải là số" })
