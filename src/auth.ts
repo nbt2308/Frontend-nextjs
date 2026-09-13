@@ -104,11 +104,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     if (res.data) {
                         const me = await authService.getMe(res.data.access_token);
                         user.user = {
-                            id: me.id,
-                            name: me.name,
-                            email: me.email,
-                            role: me.roles,
-                            avatar: me.avatar,
+                            id: me.data.id,
+                            name: me.data.name,
+                            email: me.data.email,
+                            role: me.data.roles,
+                            avatar: me.data.avatar,
                         } as IUser;
                         user.access_token = res.data.access_token;
                         user.refresh_token = res.data.refresh_token;
