@@ -19,6 +19,7 @@ import { UserCellAction } from "./user-cell-actions"
 import { UserType } from "@/types/generated-zod/schemas/models/User.schema"
 import { UserRoleType } from "@/types/generated-zod/schemas/models/UserRole.schema"
 import { RoleType } from "@/types/generated-zod/schemas/models/Role.schema"
+import { getInitials } from "@/lib/utils"
 // Định nghĩa kiểu dữ liệu cho User
 export type User = {
     avatar: string
@@ -87,9 +88,7 @@ export const columns: ColumnDef<UserType>[] = [
             const user = row.original
 
 
-            const getInitials = (name: string) => {
-                return name ? name.substring(0, 2).toUpperCase() : "US"
-            }
+            
             return (
                 <div className="flex items-center gap-3 py-1">
                     {/* Vòng tròn Avatar */}

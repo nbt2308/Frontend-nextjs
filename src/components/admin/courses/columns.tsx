@@ -12,6 +12,7 @@ import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas"
 import { CourseCellAction } from "./course-cell-actions"
 import { CourseResponse } from "./courses"
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema"
+import { getInitials } from "@/lib/utils"
 
 
 export const columns: ColumnDef<CourseResponse>[] = [
@@ -69,9 +70,7 @@ export const columns: ColumnDef<CourseResponse>[] = [
             const course = row.original
 
 
-            const getInitials = (title: string) => {
-                return title ? title.substring(0, 2).toUpperCase() : "US"
-            }
+            
             return (
                 <div className="flex items-center gap-3 py-1">
                     {/* Vòng tròn Avatar */}

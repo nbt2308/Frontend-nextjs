@@ -7,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { CircleCheck, Lock, FileVideo, Eye, BookOpen, Clock, Link, Tag, Calendar, StepForward, Check } from "lucide-react";
 import { useSections } from "@/hooks/useSection";
-import { formatDate, formatDuration } from "@/lib/utils";
+import { formatDate, formatLessonDuration, formatSectionDuration } from "@/lib/utils";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { CourseResponse } from "./courses";
 import { DescriptionList } from "@/components/shared/DescriptionList";
@@ -248,7 +248,7 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                                                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-normal shrink-0">
                                                             <span>{section.lessons?.length || 0} bài</span>
                                                             <span>•</span>
-                                                            <span>{formatDuration(totalDuration)}</span>
+                                                            <span>{formatSectionDuration(totalDuration)}</span>
                                                         </div>
                                                     </div>
                                                 </AccordionTrigger>
@@ -273,7 +273,7 @@ export default function ModalViewCourse({ open, closeDialog, course }: ModalView
                                                                     </div>
                                                                     {lesson.duration && (
                                                                         <span className="text-xs text-muted-foreground shrink-0">
-                                                                            {formatDuration(lesson.duration)}
+                                                                            {formatLessonDuration(lesson.duration)}
                                                                         </span>
                                                                     )}
                                                                 </div>
