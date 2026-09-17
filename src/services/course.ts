@@ -27,6 +27,14 @@ export const CourseService = {
             throw new Error(error.message)
         }
     },
+    getCourseBySlug: async (slug: string) => {
+        try {
+            const response = await axiosClient.get(`/courses/${slug}`);
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message)
+        }
+    },
     getAllCoursesForUser: async (queryParams: CourseUserQueryParams) => {
         try {
             const response = await axiosClient.get(`/courses/courses-for-user`, {

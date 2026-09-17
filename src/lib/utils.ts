@@ -13,7 +13,7 @@ export const removeVietnameseTones = (str: string) => {
     .replace(/Đ/g, "D");
 };
 
-export function formatDuration(seconds: number | null | undefined): string {
+export const formatLessonDuration = (seconds: number | null | undefined): string => {
   if (!seconds || seconds <= 0) return '00:00';
 
   const hours = Math.floor(seconds / 3600);
@@ -29,7 +29,12 @@ export function formatDuration(seconds: number | null | undefined): string {
 
   return `${pad(minutes)}:${pad(secs)}`;
 }
-
+export const formatSectionDuration = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h} giờ ${m} phút`;
+  return `${m} phút`;
+}
 export const formatDate = (dateString?: string | Date) => {
   if (!dateString) return "N/A";
   try {
@@ -53,4 +58,13 @@ export const getTokenExpire = (accessToken: string) => {
     }
 
     return payload.exp * 1000;
+};
+
+export const getInitials = (name: string) => {
+  if (!name) return "";
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 };

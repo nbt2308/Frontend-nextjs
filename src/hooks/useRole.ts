@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { RoleService } from "@/services/role";
-import { IBulkDeleteRole, IChangeRoleStatus, ICreateRoleOutput, IUpdateRole } from "@/schemas/role.schema";
+import { IBulkDeleteRole, IChangeRoleStatus, ICreateRole, IUpdateRole } from "@/schemas/role.schema";
 
 export function useRoles(params: FindAllQueryParams) {
     const defaultParams: DefaultFindAllQueryParams = {
@@ -36,7 +36,7 @@ export function useAllRoles() {
 export function useCreateRole() {
     const queryClient = useQueryClient();
     const mutationInfo = useMutation({
-        mutationFn: async (roleData: ICreateRoleOutput) => {
+        mutationFn: async (roleData: ICreateRole) => {
             const result = await RoleService.createRole(roleData);
             return result;
         },

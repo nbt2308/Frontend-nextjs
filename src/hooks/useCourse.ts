@@ -37,6 +37,19 @@ export function useAllCourses() {
     return queryInfo;
 }
 
+export function useCourseBySlug(slug: string | undefined) {
+    return useQuery({
+        queryKey: ['courses', slug],
+        queryFn: async () => {
+            if (!slug) return null;
+            const result = await CourseService.getCourseBySlug(slug);
+            return result;
+        },
+        enabled: !!slug,
+        staleTime: 1000 * 60 * 5,
+    });
+}
+
 export function useCoursesForUser(params: CourseUserQueryParams = {}) {
     const defaultParams: CourseUserQueryParams = {
         page: 1,

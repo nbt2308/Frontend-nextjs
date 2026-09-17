@@ -36,7 +36,8 @@ export default function CardCourse({ course, size = 'sm' }: CardCourseProps) {
     const instructorSize = isLarge ? 'text-xs' : 'text-[10px]';
 
     return (
-        <div className={`group cursor-pointer rounded-lg border border-border/60 bg-card hover:border-primary/40 ${isLarge ? 'hover:shadow-xl hover:-translate-y-1' : 'hover:shadow-lg hover:-translate-y-0.5'} transition-all duration-300 flex flex-col justify-between overflow-hidden`}>
+        <Link href={`/course/${course.slug}`}
+            className={`group cursor-pointer rounded-lg border border-border/60 bg-card hover:border-primary/40 ${isLarge ? 'hover:shadow-xl hover:-translate-y-1' : 'hover:shadow-lg hover:-translate-y-0.5'} transition-all duration-300 flex flex-col justify-between overflow-hidden`}>
             {/* Image & Overlays */}
             <div className="relative aspect-video w-full overflow-hidden border-b border-border/40">
                 <Image
@@ -137,7 +138,7 @@ export default function CardCourse({ course, size = 'sm' }: CardCourseProps) {
                     </div>
                 </div>
             </div>
-        </div>
+        </Link>
     )
 }
 
