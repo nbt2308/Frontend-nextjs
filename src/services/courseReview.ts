@@ -1,5 +1,5 @@
 import { IUpdateCourseReview } from "@/schemas/courseReview.schema";
-import axiosClient from "./axiosClient";
+import axiosClient from "../lib/axiosClient";
 
 
 export const CourseReviewService = {
@@ -16,7 +16,7 @@ export const CourseReviewService = {
         }
     },
 
-    updateReview: async (slug:string,reviewId:number, data: IUpdateCourseReview) => {
+    updateReview: async (slug: string, reviewId: number, data: IUpdateCourseReview) => {
         try {
             const response = await axiosClient.patch(`/courses/${slug}/reviews/${reviewId}`, data);
             return response.data;
@@ -24,7 +24,7 @@ export const CourseReviewService = {
             throw new Error(error.message)
         }
     },
-    deleteReview: async (slug:string, reviewId:string) => {
+    deleteReview: async (slug: string, reviewId: string) => {
         try {
             const response = await axiosClient.delete(`/courses/${slug}/reviews/${reviewId}`);
             return response.data;
@@ -32,7 +32,7 @@ export const CourseReviewService = {
             throw new Error(error.message)
         }
     },
-    createReview: async (slug:string, data: IUpdateCourseReview) => {
+    createReview: async (slug: string, data: IUpdateCourseReview) => {
         try {
             const response = await axiosClient.post(`/courses/${slug}/reviews`, data);
             return response.data;

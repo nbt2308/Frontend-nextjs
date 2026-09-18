@@ -1,5 +1,5 @@
 import { ICreateLesson, IUpdateLesson } from "@/schemas/lession.schema";
-import axiosClient from "./axiosClient";
+import axiosClient from "../lib/axiosClient";
 
 
 export const LessonService = {

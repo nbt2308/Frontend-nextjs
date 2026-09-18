@@ -1,5 +1,5 @@
 import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidParameters } from "@/types/errors";
-import axiosClient from './axiosClient';
+import axiosClient from '../lib/axiosClient';
 import { IBulkDelete, IBulkStatus, IChangeStatus, IUpdateUser } from "@/schemas/user.schema";
 
 export const UserService = {

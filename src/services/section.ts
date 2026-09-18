@@ -1,5 +1,5 @@
 import { ICreateSection, IUpdateSection } from "@/schemas/section.schema";
-import axiosClient from "./axiosClient";
+import axiosClient from "../lib/axiosClient";
 
 
 

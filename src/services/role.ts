@@ -1,5 +1,5 @@
 import { IBulkDeleteRole, IChangeRoleStatus, ICreateRole, IUpdateRole } from '@/schemas/role.schema';
-import axiosClient from './axiosClient';
+import axiosClient from '../lib/axiosClient';
 
 export const RoleService = {
     getAllRolesPaginate: async (queryParams: FindAllQueryParams) => {

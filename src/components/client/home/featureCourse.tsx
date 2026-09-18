@@ -29,7 +29,7 @@ export default function FeatureCourses({ data, isPending }: FeatureCoursesProps)
                         <h2 className="text-4xl md:text-5xl font-black tracking-tight uppercase mb-4">Khoá học nổi bật</h2>
                         <p className="text-muted-foreground max-w-xl text-lg">Được thiết kế tỉ mỉ để mang lại trải nghiệm học tập tốt nhất, từ cơ bản đến chuyên sâu.</p>
                     </div>
-                    <Link href="/courses" className="group flex items-center gap-2 text-foreground font-medium border-b border-foreground pb-1 hover:text-muted-foreground hover:border-muted-foreground transition-colors">
+                    <Link href="/course" className="group flex items-center gap-2 text-foreground font-medium border-b border-foreground pb-1 hover:text-muted-foreground hover:border-muted-foreground transition-colors">
                         Xem tất cả <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </Link>
                 </div>

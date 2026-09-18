@@ -1,6 +1,7 @@
 import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidParameters } from "@/types/errors";
-import axiosClient from './axiosClient';
+import axiosClient from '../lib/axiosClient';
 import { IBulkDelete, IBulkStatus, IChangeStatus, ICreateCourse, IUpdateCourse } from "@/schemas/course.schema";
+import axiosServer from "@/lib/axiosServer";
 
 
 
@@ -34,6 +35,10 @@ export const CourseService = {
         } catch (error: any) {
             throw new Error(error.message)
         }
+    },
+    getCourseBySlugServer: async (slug: string) => {
+        const res = await axiosServer.get(`/courses/${slug}`);
+        return res.data;
     },
     getAllCoursesForUser: async (queryParams: CourseUserQueryParams) => {
         try {

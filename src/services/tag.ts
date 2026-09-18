@@ -1,5 +1,5 @@
 import { IBulkDelete, IBulkStatus, IChangeStatus, ICreateTag, IUpdateTag } from '@/schemas/tag.schema';
-import axiosClient from './axiosClient';
+import axiosClient from '../lib/axiosClient';
 
 export const TagService = {
 
