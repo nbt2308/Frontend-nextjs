@@ -29,7 +29,7 @@ function ReviewCard({ slug, review, params }: { slug: string, review: ReviewItem
 
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const { mutate } = useToggleInteraction(params)
+    const { mutate, isPending } = useToggleInteraction(params)
     const handleInteraction = async (data: ICreateInteraction) => {
         if (!session) {
             toast.warning("Bạn cần phải đăng nhập để thực hiện hành động này");
@@ -125,6 +125,7 @@ function ReviewCard({ slug, review, params }: { slug: string, review: ReviewItem
                         onClick={() => handleInteraction({ targetId: String(review.id), targetType: "COURSE_REVIEW", actionType: 'LIKE' })}
                         variant={review.myInteraction === 'LIKE' ? 'default' : 'outline'}
                         className='hover:cursor-pointer'
+                        disabled={isPending}
                     // className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200
                     //     ${review.myInteraction === 'LIKE'
                     //         ? "bg-primary text-primary-foreground border-primary"
@@ -138,6 +139,7 @@ function ReviewCard({ slug, review, params }: { slug: string, review: ReviewItem
                         onClick={() => handleInteraction({ targetId: String(review.id), targetType: "COURSE_REVIEW", actionType: 'DISLIKE' })}
                         variant={review.myInteraction === 'DISLIKE' ? 'default' : 'outline'}
                         className='hover:cursor-pointer'
+                        disabled={isPending}
                     // className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200
                     //     ${review.myInteraction === 'DISLIKE'
                     //         ? "bg-destructive text-destructive-foreground border-destructive"

@@ -174,7 +174,7 @@ export default function CourseDetail({ slug }: { slug?: string }) {
             <CourseReviews slug={course.slug}/>
 
             {/* RELATED COURSES */}
-            <CourseRelated />
+            <CourseRelated slug={course.slug} />
 
           </div>
 

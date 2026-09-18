@@ -51,6 +51,14 @@ export const CourseService = {
             throw new Error(error.message)
         }
     },
+    findRelatedCoursesBySlug: async (slug: string) => {
+        try {
+            const response = await axiosClient.get(`/courses/${slug}/related-courses`);
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message)
+        }
+    },
 
     createCourse: async (courseData: ICreateCourse) => {
         try {
