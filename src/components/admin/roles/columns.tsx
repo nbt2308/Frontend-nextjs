@@ -9,7 +9,10 @@ import { Badge } from "@/components/ui/badge"
 import { RoleType as ZodRoleType } from "@/types/generated-zod/schemas/models/Role.schema"
 import { RoleCellAction } from "./role-cell-actions"
 
-export const columns: ColumnDef<ZodRoleType>[] = [
+export const getColumns = (
+    onEdit: (role: ZodRoleType) => void,
+    onDelete: (role: ZodRoleType) => void
+): ColumnDef<ZodRoleType>[] => [
     {
         id: "select",
         header: ({ table }) => (
@@ -250,7 +253,12 @@ export const columns: ColumnDef<ZodRoleType>[] = [
             const role = row.original
             const isSystemRole = row.getValue("isSystemRole") as boolean
             return (
-                <RoleCellAction role={role} status={isSystemRole} />
+                <RoleCellAction 
+                    role={role} 
+                    status={isSystemRole}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                />
             )
         },
         enableGlobalFilter: false

@@ -1,9 +1,8 @@
 "use client"
 
 import { DataTable, DataTableSelectedActionConfig } from "../../ui/data-table";
-import { columns } from "./columns";
-// import { useBulkDelete, useBulkUpdateStatus, useUsers } from "@/hooks/useUser";
-import { useState } from "react";
+import { getColumns } from "./columns";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataTableError } from "@/components/shared/data-table-error";
@@ -21,8 +20,11 @@ import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
-import { useAllCourses, useBulkDelete, useBulkUpdateStatus, useCourses } from "@/hooks/useCourse";
+import { useAllCourses, useBulkDelete, useBulkUpdateStatus, useDeleteCourse } from "@/hooks/useCourse";
 import ModalCreateCourse from "./modal-create-course";
+import ModalUpdateCourse from "./modal-update-course";
+import ModalViewCourse from "./modal-view-course";
+import { ConfirmModal } from "@/components/shared/data-table-confirm-modal";
 import { useAllTags } from "@/hooks/useTag";
 import { useAllInstructors } from "@/hooks/useUser";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
@@ -48,7 +50,44 @@ export default function Course() {
     const { mutate: bulkDelete } = useBulkDelete();
     const { data: tags, isLoading: isLoadingTags } = useAllTags();
     const { data: instructors, isLoading: isLoadingInstructors } = useAllInstructors();
+    const { mutate: deleteCourse, isPending: isDeletePending } = useDeleteCourse();
+    
+    // State quản lý Modal
     const [openCreateModal, setOpenCreateModal] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState<CourseResponse | null>(null);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isViewOpen, setIsViewOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+    // Callbacks truyền cho DataTable
+    const handleEdit = (course: CourseResponse) => {
+        setSelectedCourse(course);
+        setIsEditOpen(true);
+    };
+
+    const handleView = (course: CourseResponse) => {
+        setSelectedCourse(course);
+        setIsViewOpen(true);
+    };
+
+    const handleDelete = (course: CourseResponse) => {
+        setSelectedCourse(course);
+        setIsDeleteOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (selectedCourse) {
+            deleteCourse(selectedCourse.id, {
+                onSuccess: () => {
+                    setIsDeleteOpen(false);
+                    setSelectedCourse(null);
+                    refetch();
+                }
+            });
+        }
+    };
+
+    const tableColumns = useMemo(() => getColumns(handleEdit, handleView, handleDelete), []);
 
     const handleBulkChangeStatus = (selectedCourses: any, status: boolean, table: any) => {
         const ids = selectedCourses.map((course: any) => course.id)
@@ -341,7 +380,7 @@ export default function Course() {
             </div>
             <div>
                 <DataTable
-                    columns={columns}
+                    columns={tableColumns}
                     data={courses || []}
                     isPending={isPending}>
                     {(table) => (
@@ -374,6 +413,41 @@ export default function Course() {
                 instructors={instructors || []}
                 tags={tags || []}
             />
+
+            {/* Các Modal tập trung cho DataTable */}
+            {selectedCourse && (
+                <>
+                    {isEditOpen && (
+                        <ModalUpdateCourse 
+                            open={isEditOpen} 
+                            closeDialog={() => { setIsEditOpen(false); setSelectedCourse(null); }} 
+                            course={selectedCourse} 
+                            tags={tags || []}
+                        />
+                    )}
+                    {isViewOpen && (
+                        <ModalViewCourse 
+                            open={isViewOpen} 
+                            closeDialog={() => { setIsViewOpen(false); setSelectedCourse(null); }} 
+                            course={selectedCourse} 
+                        />
+                    )}
+                    <ConfirmModal
+                        isOpen={isDeleteOpen}
+                        onClose={() => { setIsDeleteOpen(false); setSelectedCourse(null); }}
+                        onConfirm={confirmDelete}
+                        title="Xóa khoá học?"
+                        isLoading={isDeletePending}
+                        description={
+                            <>
+                                Bạn có chắc chắn muốn xóa khóa học{" "}
+                                <strong className="text-foreground">{selectedCourse?.title}</strong> không?
+                            </>
+                        }
+                        confirmText="Xóa vĩnh viễn"
+                    />
+                </>
+            )}
         </div>
     );
 }

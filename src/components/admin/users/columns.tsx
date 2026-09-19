@@ -33,7 +33,11 @@ export type User = {
     createdAt: Date
 }
 
-export const columns: ColumnDef<UserType>[] = [
+export const getColumns = (
+    onEdit: (user: UserType) => void,
+    onView: (user: UserType) => void,
+    onDelete: (user: UserType) => void
+): ColumnDef<UserType>[] => [
     {
         id: "select",
         header: ({ table }) => (
@@ -337,7 +341,13 @@ export const columns: ColumnDef<UserType>[] = [
             const user = row.original
             const status = row.getValue("status") as boolean
             return (
-                <UserCellAction user={user} status={status} />
+                <UserCellAction 
+                    user={user} 
+                    status={status}
+                    onEdit={onEdit}
+                    onView={onView}
+                    onDelete={onDelete}
+                />
             )
         },
         enableGlobalFilter: false

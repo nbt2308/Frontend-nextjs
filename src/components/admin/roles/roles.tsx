@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DataTable, DataTableSelectedActionConfig } from "../../ui/data-table";
-import { columns } from "./columns";
+import { getColumns } from "./columns";
 import { DataTableError } from "@/components/shared/data-table-error";
 import {
     Breadcrumb,
@@ -17,8 +17,10 @@ import { House, Download, Lock, ShieldCheck, Trash2, CircleCheck, Shield, Shield
 import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
-import { useBulkDeleteRole, useRoles } from "@/hooks/useRole";
+import { useBulkDeleteRole, useRoles, useDeleteRole } from "@/hooks/useRole";
 import ModalAddRole from "./modal-add-role";
+import ModalEditRole from "./modal-edit-role";
+import { ConfirmModal } from "@/components/shared/data-table-confirm-modal";
 
 export default function RoleManagement() {
 
@@ -31,7 +33,38 @@ export default function RoleManagement() {
 
     const { data, isPending, isError, error, refetch } = useRoles(filters);
     const { mutate: bulkDelete } = useBulkDeleteRole();
+    const { mutate: deleteRole, isPending: isDeletePending } = useDeleteRole();
     const [openAddModal, setOpenAddModal] = useState(false);
+
+    // Modal states
+    const [selectedRole, setSelectedRole] = useState<any>(null);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+    const handleEdit = (role: any) => {
+        setSelectedRole(role);
+        setIsEditOpen(true);
+    };
+
+    const handleDeleteClick = (role: any) => {
+        setSelectedRole(role);
+        setIsDeleteOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (selectedRole) {
+            deleteRole(selectedRole.id, {
+                onSuccess: () => {
+                    setIsDeleteOpen(false);
+                    setSelectedRole(null);
+                    refetch();
+                },
+                onError: () => setIsDeleteOpen(false)
+            });
+        }
+    };
+
+    const tableColumns = useMemo(() => getColumns(handleEdit, handleDeleteClick), []);
 
     const rolesData = data?.roles || [];
 
@@ -171,7 +204,7 @@ export default function RoleManagement() {
             </div>
             <div>
                 <DataTable
-                    columns={columns}
+                    columns={tableColumns}
                     data={rolesData}
                     isPending={isPending}
                 >
@@ -202,6 +235,34 @@ export default function RoleManagement() {
                 open={openAddModal}
                 closeDialog={() => setOpenAddModal(false)}
             />
+            
+            {/* Các Modals dùng chung */}
+            {selectedRole && (
+                <>
+                    {isEditOpen && (
+                        <ModalEditRole
+                            open={isEditOpen}
+                            closeDialog={() => { setIsEditOpen(false); setSelectedRole(null); }}
+                            role={selectedRole}
+                        />
+                    )}
+                    <ConfirmModal
+                        isOpen={isDeleteOpen}
+                        onClose={() => { setIsDeleteOpen(false); setSelectedRole(null); }}
+                        title="Bạn có chắc chắn muốn xoá vai trò này?"
+                        description={
+                            <>
+                                Hành động này sẽ xoá vai trò <strong className="text-foreground">{selectedRole.name}</strong>. Không thể xoá vai trò đang có người dùng hoặc vai trò hệ thống.
+                            </>
+                        }
+                        onConfirm={confirmDelete}
+                        confirmText="Xoá vĩnh viễn"
+                        cancelText="Hủy"
+                        variant="destructive"
+                        isLoading={isDeletePending}
+                    />
+                </>
+            )}
         </div>
     );
 }

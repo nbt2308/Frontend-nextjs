@@ -15,7 +15,11 @@ import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema"
 import { getInitials } from "@/lib/utils"
 
 
-export const columns: ColumnDef<CourseResponse>[] = [
+export const getColumns = (
+    onEdit: (course: CourseResponse) => void,
+    onView: (course: CourseResponse) => void,
+    onDelete: (course: CourseResponse) => void
+): ColumnDef<CourseResponse>[] => [
     {
         id: "select",
         header: ({ table }) => (
@@ -383,7 +387,13 @@ export const columns: ColumnDef<CourseResponse>[] = [
             const course = row.original
             const status = row.getValue("status") as boolean
             return (
-                <CourseCellAction course={course} status={status} />
+                <CourseCellAction 
+                    course={course} 
+                    status={status}
+                    onEdit={onEdit}
+                    onView={onView}
+                    onDelete={onDelete}
+                />
             )
         },
         enableGlobalFilter: false

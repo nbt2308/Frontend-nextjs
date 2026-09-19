@@ -1,11 +1,14 @@
 "use client"
 
 import { DataTable, DataTableSelectedActionConfig } from "../../ui/data-table";
-import { columns } from "./columns";
+import { getColumns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
-import { useBulkDelete, useBulkUpdateStatus, useUsers } from "@/hooks/useUser";
+import { useBulkDelete, useBulkUpdateStatus, useUsers, useSoftDelete } from "@/hooks/useUser";
 import { useAllRoles } from "@/hooks/useRole";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import ModalViewUser from "./modal-view-user";
+import ModalEditUser from "./modal-update-user";
+import { ConfirmModal } from "@/components/shared/data-table-confirm-modal";
 
 import { Button } from "@/components/ui/button";
 import { DataTableError } from "@/components/shared/data-table-error";
@@ -43,6 +46,43 @@ export default function User() {
     const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
     const { mutate: bulkDelete } = useBulkDelete();
     const { data: rolesData } = useAllRoles();
+    const { mutate: handleSoftDelete, isPending: isSoftDeletePending } = useSoftDelete();
+
+    // State quản lý Modal
+    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isViewOpen, setIsViewOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+    // Callbacks truyền cho DataTable
+    const handleEdit = (user: any) => {
+        setSelectedUser(user);
+        setIsEditOpen(true);
+    };
+
+    const handleView = (user: any) => {
+        setSelectedUser(user);
+        setIsViewOpen(true);
+    };
+
+    const handleDelete = (user: any) => {
+        setSelectedUser(user);
+        setIsDeleteOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (selectedUser) {
+            handleSoftDelete(selectedUser?.id, {
+                onSuccess: () => {
+                    setIsDeleteOpen(false);
+                    setSelectedUser(null);
+                    refetch();
+                }
+            });
+        }
+    };
+
+    const tableColumns = useMemo(() => getColumns(handleEdit, handleView, handleDelete), []);
 
     // Tạo options cho filter Vai trò từ data API
     const roleOptions = rolesData ? rolesData.map((role: RoleType) => {
@@ -286,7 +326,7 @@ export default function User() {
             </div>
             <div>
                 <DataTable
-                    columns={columns}
+                    columns={tableColumns}
                     data={users || []}
                     isPending={isPending}>
                     {(table) => (
@@ -312,6 +352,40 @@ export default function User() {
                     )}
                 </DataTable>
             </div>
+
+            {/* Các Modal tập trung cho DataTable */}
+            {selectedUser && (
+                <>
+                    {isEditOpen && (
+                        <ModalEditUser 
+                            open={isEditOpen} 
+                            closeDialog={() => { setIsEditOpen(false); setSelectedUser(null); }} 
+                            data={selectedUser} 
+                        />
+                    )}
+                    {isViewOpen && (
+                        <ModalViewUser 
+                            open={isViewOpen} 
+                            closeDialog={() => { setIsViewOpen(false); setSelectedUser(null); }} 
+                            data={selectedUser} 
+                        />
+                    )}
+                    <ConfirmModal
+                        isOpen={isDeleteOpen}
+                        onClose={() => { setIsDeleteOpen(false); setSelectedUser(null); }}
+                        onConfirm={confirmDelete}
+                        title="Xóa Tài khoản?"
+                        isLoading={isSoftDeletePending}
+                        description={
+                            <>
+                                Bạn có chắc chắn muốn xóa người dùng với email{" "}
+                                <strong className="text-foreground">{selectedUser?.email}</strong> không?
+                            </>
+                        }
+                        confirmText="Xóa vĩnh viễn"
+                    />
+                </>
+            )}
         </div>
     );
 }

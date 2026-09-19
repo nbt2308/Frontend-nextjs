@@ -1,9 +1,8 @@
 "use client"
 
 import { DataTable, DataTableSelectedActionConfig } from "../../ui/data-table";
-import { columns } from "./columns";
-// import { useBulkDelete, useBulkUpdateStatus, useUsers } from "@/hooks/useUser";
-import { useState } from "react";
+import { getColumns } from "./columns";
+import { useState, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataTableError } from "@/components/shared/data-table-error";
@@ -21,8 +20,11 @@ import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
-import { useAllTags, useBulkDelete, useBulkUpdateStatus, useTags } from "@/hooks/useTag";
+import { useAllTags, useBulkDelete, useBulkUpdateStatus, useTags, useDeleteTag } from "@/hooks/useTag";
 import ModalCreateTag from "./modal-create-tag";
+import ModalEditTag from "./modal-edit-tag";
+import ModalViewTag from "./modal-view-tag";
+import { ConfirmModal } from "@/components/shared/data-table-confirm-modal";
 
 export default function Tag() {
 
@@ -36,7 +38,45 @@ export default function Tag() {
     const { data: tags, isPending, isError, error, refetch } = useAllTags();
     const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
     const { mutate: bulkDelete } = useBulkDelete();
+    const { mutate: deleteTag, isPending: isDeletePending } = useDeleteTag();
     const [openCreateModal, setOpenCreateModal] = useState(false);
+
+    // Modal states
+    const [selectedTag, setSelectedTag] = useState<any>(null);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isViewOpen, setIsViewOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+    const handleEdit = (tag: any) => {
+        setSelectedTag(tag);
+        setIsEditOpen(true);
+    };
+
+    const handleView = (tag: any) => {
+        setSelectedTag(tag);
+        setIsViewOpen(true);
+    };
+
+    const handleDeleteClick = (tag: any) => {
+        setSelectedTag(tag);
+        setIsDeleteOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (selectedTag) {
+            deleteTag(selectedTag.id, {
+                onSuccess: () => {
+                    setIsDeleteOpen(false);
+                    setSelectedTag(null);
+                    refetch();
+                },
+                onError: () => setIsDeleteOpen(false)
+            });
+        }
+    };
+
+    const tableColumns = useMemo(() => getColumns(handleEdit, handleView, handleDeleteClick), []);
+
     const tagFilters = [
         {
             columnId: "status",
@@ -211,7 +251,7 @@ export default function Tag() {
             </div>
             <div>
                 <DataTable
-                    columns={columns}
+                    columns={tableColumns}
                     data={tags || []}
                     isPending={isPending}>
                     {(table) => (
@@ -242,6 +282,40 @@ export default function Tag() {
                 open={openCreateModal}
                 closeDialog={() => setOpenCreateModal(false)}
             />
+
+            {/* Các Modals dùng chung */}
+            {selectedTag && (
+                <>
+                    {isEditOpen && (
+                        <ModalEditTag
+                            open={isEditOpen}
+                            closeDialog={() => { setIsEditOpen(false); setSelectedTag(null); }}
+                            tag={selectedTag}
+                        />
+                    )}
+                    {isViewOpen && (
+                        <ModalViewTag
+                            open={isViewOpen}
+                            closeDialog={() => { setIsViewOpen(false); setSelectedTag(null); }}
+                            tag={selectedTag}
+                        />
+                    )}
+                    <ConfirmModal
+                        isOpen={isDeleteOpen}
+                        onClose={() => { setIsDeleteOpen(false); setSelectedTag(null); }}
+                        onConfirm={confirmDelete}
+                        title="Xóa Tag?"
+                        isLoading={isDeletePending}
+                        description={
+                            <>
+                                Bạn có chắc chắn muốn xóa Tag{" "}
+                                <strong className="text-foreground">{selectedTag?.name}</strong> không?
+                            </>
+                        }
+                        confirmText="Xóa vĩnh viễn"
+                    />
+                </>
+            )}
         </div>
     );
 }

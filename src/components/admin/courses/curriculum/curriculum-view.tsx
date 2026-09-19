@@ -14,7 +14,7 @@ import { useDeleteSection, useSections } from "@/hooks/useSection";
 import { ConfirmModal } from "@/components/shared/data-table-confirm-modal";
 import { Badge } from "@/components/ui/badge";
 import { SheetAddLesson } from "./sheet-add-lesson";
-import { formatDuration } from "@/lib/utils";
+import { formatLessonDuration } from "@/lib/utils";
 import { useDeleteLesson } from "@/hooks/useLession";
 import { SheetEditLesson } from "./sheet-edit-lesson";
 
@@ -78,7 +78,16 @@ export default function CurriculumView({ courseId }: { courseId: string }) {
                     </div>
                 </div>
                 <Button onClick={() => setIsAddSectionOpen(true)} className="w-full sm:w-auto"><Plus className="h-4 w-4" /> Thêm Chương mới</Button>
-                <SheetAddSection courseId={courseId} open={isAddSectionOpen} onOpenChange={setIsAddSectionOpen} />
+                {
+                    isAddSectionOpen && (
+                    <SheetAddSection
+                    courseId={courseId}
+                    open={isAddSectionOpen}
+                    onOpenChange={(open) => {
+                        setIsAddSectionOpen(open);
+                    }} />
+                    )
+                }
             </div>
 
             <div className="rounded-lg border shadow-sm p-6">
@@ -102,7 +111,7 @@ export default function CurriculumView({ courseId }: { courseId: string }) {
                                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-normal shrink-0">
                                                 <span>{section.lessons.length ?? 0} bài giảng</span>
                                                 <span>•</span>
-                                                <span>{formatDuration(totalDurationOfSection)}</span>
+                                                <span>{formatLessonDuration(totalDurationOfSection)}</span>
                                             </div>
                                         </div>
                                     </AccordionTrigger>
@@ -159,7 +168,7 @@ export default function CurriculumView({ courseId }: { courseId: string }) {
                                                     <div className="flex items-center gap-3 shrink-0">
                                                         {lesson.duration && (
                                                             <span className="text-xs text-muted-foreground">
-                                                                {formatDuration(lesson.duration)}
+                                                                {formatLessonDuration(lesson.duration)}
                                                             </span>
                                                         )}
 
@@ -222,11 +231,21 @@ export default function CurriculumView({ courseId }: { courseId: string }) {
 
             </div>
 
-            <SheetEditSection
-                open={isEditSectionOpen}
-                onOpenChange={setIsEditSectionOpen}
-                section={editingSection}
-            />
+            {/* edit section */}
+            {
+                isEditSectionOpen && editingSection && (
+                    <SheetEditSection
+                        open={isEditSectionOpen}
+                        onOpenChange={(open) => {
+                            setIsEditSectionOpen(open);
+                            if (!open) setEditingSection(null);
+                        }}
+                        section={editingSection}
+                    />
+                )
+            }
+
+            {/* delete section */}
             <ConfirmModal
                 isOpen={showDeleteSectionAlert}
                 onClose={() => setShowDeleteSectionAlert(false)}
@@ -241,11 +260,29 @@ export default function CurriculumView({ courseId }: { courseId: string }) {
                 }
                 confirmText="Xóa vĩnh viễn"
             />
-            <SheetAddLesson sectionId={addLesson?.sectionId as number} open={isAddLessonOpen} onOpenChange={setIsAddLessonOpen} />
-            <SheetEditLesson
-                open={isEditLessonOpen}
-                onOpenChange={setIsEditLessonOpen}
-                lesson={editingLesson} />
+
+            {/* add lesson */}
+            {
+                isAddLessonOpen && addLesson && (
+                    <SheetAddLesson 
+                    sectionId={addLesson?.sectionId as number} 
+                    open={isAddLessonOpen} 
+                    onOpenChange={setIsAddLessonOpen} />
+                )
+            }
+            {/* edit lesson */}
+            {
+                isEditLessonOpen && editingLesson && (
+                    <SheetEditLesson
+                        open={isEditLessonOpen}
+                        onOpenChange={(open) => {
+                            setIsEditLessonOpen(open);
+                            if (!open) setEditingLesson(null);
+                        }}
+                        lesson={editingLesson} />
+                )}
+
+            {/* delete lesson */}
             <ConfirmModal
                 isOpen={showDeleteLessonAlert}
                 onClose={() => setShowDeleteLessonAlert(false)}

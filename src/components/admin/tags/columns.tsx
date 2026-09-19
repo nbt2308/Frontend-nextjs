@@ -12,7 +12,11 @@ import { TagCellAction } from "./tag-cell-actions"
 // import { CourseCellAction } from "./course-cell-actions"
 
 
-export const columns: ColumnDef<ZodTagType>[] = [
+export const getColumns = (
+    onEdit: (tag: ZodTagType) => void,
+    onView: (tag: ZodTagType) => void,
+    onDelete: (tag: ZodTagType) => void
+): ColumnDef<ZodTagType>[] => [
     {
         id: "select",
         header: ({ table }) => (
@@ -306,7 +310,13 @@ export const columns: ColumnDef<ZodTagType>[] = [
             const tag = row.original
             const status = row.getValue("status") as boolean
             return (
-                <TagCellAction tag={tag} status={status} />
+                <TagCellAction 
+                    tag={tag} 
+                    status={status}
+                    onEdit={onEdit}
+                    onView={onView}
+                    onDelete={onDelete}
+                />
             )
         },
         enableGlobalFilter: false
