@@ -15,7 +15,7 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator";
-import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2, CircleCheck, ShieldX, Users, UserPen, Book, Gift, Gem, Sprout, Zap, Rocket, Flame, BookPlus, BookOpen, Tag } from "lucide-react";
+import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2, CircleCheck, ShieldX, Users, UserPen, Book, Gift, Gem, Sprout, Zap, Rocket, Flame, BookPlus, BookOpen, Tag, FileEdit, Clock, XCircle, CheckCircle2, EyeOff, Grid2x2 } from "lucide-react";
 import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
@@ -27,10 +27,14 @@ import ModalViewCourse from "./modal-view-course";
 import { ConfirmModal } from "@/components/shared/data-table-confirm-modal";
 import { useAllTags } from "@/hooks/useTag";
 import { useAllInstructors } from "@/hooks/useUser";
-import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
+import { CourseStatusSchema, CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema";
 import { CourseType as ICourseType } from "@/types/generated-zod/schemas/models/Course.schema"
-export type CourseResponse = Omit<ICourseType, "tags" | "courseDescription"> & {
+import { useAllCategories } from "@/hooks/useCategory";
+import { CategoryType } from "@/types/generated-zod/schemas/models/Category.schema";
+import { CategoryResponse } from "../categories/categories";
+import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
+export type CourseResponse = Omit<ICourseType, "tags" | "courseDescription" | "category" | "instructor"> & {
     tags: TagType[];
     courseDescription: {
         introduction: string;
@@ -38,20 +42,23 @@ export type CourseResponse = Omit<ICourseType, "tags" | "courseDescription"> & {
         requirements: string | null;
         resources: string | null;
     } | null;
+    category: CategoryType;
+    instructor: UserType;
 };
 
 export default function Course() {
 
     const CourseType = CourseTypeSchema.enum;
     const Level = LevelSchema.enum;
-
+    const courseStatus = CourseStatusSchema.enum;
     const { data: courses, isPending, isError, error, refetch } = useAllCourses();
     const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
     const { mutate: bulkDelete } = useBulkDelete();
     const { data: tags, isLoading: isLoadingTags } = useAllTags();
     const { data: instructors, isLoading: isLoadingInstructors } = useAllInstructors();
+    const { data: categories } = useAllCategories();
     const { mutate: deleteCourse, isPending: isDeletePending } = useDeleteCourse();
-    
+
     // State quản lý Modal
     const [openCreateModal, setOpenCreateModal] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState<CourseResponse | null>(null);
@@ -75,9 +82,9 @@ export default function Course() {
         setIsDeleteOpen(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = (reason: string = "") => {
         if (selectedCourse) {
-            deleteCourse(selectedCourse.id, {
+            deleteCourse({ id: selectedCourse.id, deletedReason: reason }, {
                 onSuccess: () => {
                     setIsDeleteOpen(false);
                     setSelectedCourse(null);
@@ -89,29 +96,6 @@ export default function Course() {
 
     const tableColumns = useMemo(() => getColumns(handleEdit, handleView, handleDelete), []);
 
-    const handleBulkChangeStatus = (selectedCourses: any, status: boolean, table: any) => {
-        const ids = selectedCourses.map((course: any) => course.id)
-        bulkUpdateStatus({ ids, status }, {
-            onSuccess: () => {
-                refetch();
-                if (table) {
-                    table.resetRowSelection();
-                }
-            }
-        });
-    }
-
-    const handleBulkDelete = (selectedCourses: any, table: any) => {
-        const ids = selectedCourses.map((u: any) => u.id)
-        bulkDelete({ ids }, {
-            onSuccess: () => {
-                refetch();
-                if (table) {
-                    table.resetRowSelection();
-                }
-            }
-        });
-    }
     const tagOptions = tags ? tags.map((tag: TagType) => {
         const count = courses?.filter((course: CourseResponse) =>
             course.tags.some((courseTag: TagType) => courseTag.name === tag.name)
@@ -126,6 +110,49 @@ export default function Course() {
             count: count
         }
     }) : [];
+
+    const categoryOptions = useMemo(() => {
+        if (!categories?.categories) return [];
+
+        return categories.categories.flatMap((category: CategoryResponse) => {
+            // Root có con
+            if (category.children?.length > 0) {
+                return category.children.map((child) => {
+                    const count =
+                        courses?.filter(
+                            (course: CourseResponse) =>
+                                course.category?.id === child.id
+                        ).length ?? 0;
+
+                    return {
+                        label: child.name,
+                        value: String(child.id), //vì bên columns.tsx expect value là string
+                        icon: Grid2x2,
+                        count,
+                    };
+                });
+            }
+            
+
+            // Root không có con -> chính nó là category có thể chọn
+            const count =
+                courses?.filter(
+                    (course: CourseResponse) =>
+                        course.category?.id === category.id
+                ).length ?? 0;
+
+            return [
+                {
+                    label: category.name,
+                    value: String(category.id),
+                    icon: Grid2x2,
+                    count,
+                },
+            ];
+        });
+    }, [categories, courses]);
+
+
 
     const courseFilters = [
         {
@@ -175,16 +202,34 @@ export default function Course() {
             title: "Trạng thái",
             options: [
                 {
-                    label: "Hoạt động",
-                    value: "true",
-                    icon: CircleCheck,
-                    count: courses?.filter((course: any) => course.status === true).length
+                    label: "Bản nháp",
+                    value: courseStatus.DRAFT,
+                    icon: FileEdit,
+                    count: courses?.filter((course: any) => course.status === courseStatus.DRAFT).length
                 },
                 {
-                    label: "Bị khoá",
-                    value: "false",
-                    icon: Lock,
-                    count: courses?.filter((course: any) => course.status === false).length
+                    label: "Chờ duyệt",
+                    value: courseStatus.PENDING,
+                    icon: Clock,
+                    count: courses?.filter((course: any) => course.status === courseStatus.PENDING).length
+                },
+                {
+                    label: "Đã xuất bản",
+                    value: courseStatus.PUBLISHED,
+                    icon: CheckCircle2,
+                    count: courses?.filter((course: any) => course.status === courseStatus.PUBLISHED).length
+                },
+                {
+                    label: "Đã từ chối",
+                    value: courseStatus.REJECTED,
+                    icon: XCircle,
+                    count: courses?.filter((course: any) => course.status === courseStatus.REJECTED).length
+                },
+                {
+                    label: "Chưa xuất bản",
+                    value: courseStatus.UNPUBLISHED,
+                    icon: EyeOff,
+                    count: courses?.filter((course: any) => course.status === courseStatus.UNPUBLISHED).length
                 },
             ],
         },
@@ -193,7 +238,11 @@ export default function Course() {
             title: "Tags",
             options: tagOptions,
         },
-        
+        {
+            columnId: "category",
+            title: "Danh mục",
+            options: categoryOptions,
+        },
     ]
 
     const courseActions = [
@@ -211,41 +260,7 @@ export default function Course() {
         },
     ]
 
-    const courseSelectedActions: DataTableSelectedActionConfig<any>[] = [
-        {
-            label: "Hoạt động",
-            icon: ShieldCheck,
-            variant: "outline" as const,
-            confirm: {
-                title: "Kích hoạt các mục đã chọn?",
-                description: `Bạn có chắc chắn muốn kích hoạt các khóa học này không?`,
-                confirmText: "Kích hoạt",
-            },
-            onClick: (selectedCourses: any, table: any) => handleBulkChangeStatus(selectedCourses, true, table),
-        },
-        {
-            label: "Khoá",
-            icon: Lock,
-            variant: "outline" as const,
-            confirm: {
-                title: "Khoá các mục đã chọn?",
-                description: `Bạn có chắc chắn muốn khoá các khóa học này không?`,
-                confirmText: "Khoá",
-            },
-            onClick: (selectedCourses: any, table: any) => handleBulkChangeStatus(selectedCourses, false, table),
-        },
-        {
-            label: "Xóa",
-            icon: Trash2,
-            variant: "destructive" as const,
-            confirm: {
-                title: "Xóa vĩnh viễn",
-                description: `Bạn có chắc chắn muốn xóa các khóa học này không?`,
-                confirmText: "Xóa vĩnh viễn",
-            },
-            onClick: (selectedCourses: any, table: any) => handleBulkDelete(selectedCourses, table),
-        },
-    ]
+
 
     if (isError) {
         return (
@@ -281,11 +296,9 @@ export default function Course() {
                     <p className="text-muted-foreground text-sm">Quản lý thông tin các khoá học trong hệ thống.</p>
                 </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 mb-6 gap-4 justify-between">
+            <div className="grid grid-cols-2 md:grid-cols-3 mb-6 gap-4 justify-between">
                 {isPending ? (
                     <>
-                        <KpiCard.Skeleton />
-                        <KpiCard.Skeleton />
                         <KpiCard.Skeleton />
                         <KpiCard.Skeleton />
                         <KpiCard.Skeleton />
@@ -304,26 +317,6 @@ export default function Course() {
                             valueColor="text-blue-500"
                             hoverBorderColor="hover:border-blue-500/60"
                             hoverShadowColor="hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]"
-                        />
-                        <KpiCard
-                            label="Đang hoạt động"
-                            value={courses?.filter((course: any) => course.status === true).length.toString()}
-                            icon={CircleCheck}
-                            iconColor="text-emerald-500"
-                            glowColor="bg-emerald-500/15 border-emerald-500/30"
-                            valueColor="text-emerald-500"
-                            hoverBorderColor="hover:border-emerald-500/60"
-                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"
-                        />
-                        <KpiCard
-                            label="Bị khoá"
-                            value={courses?.filter((course: any) => course.status === false).length.toString()}
-                            icon={Lock}
-                            iconColor="text-red-500"
-                            glowColor="bg-red-500/15 border-red-500/30"
-                            valueColor="text-red-500"
-                            hoverBorderColor="hover:border-red-500/60"
-                            hoverShadowColor="hover:shadow-[0_0_20px_rgba(239,68,68,0.25)]"
                         />
                         <KpiCard
                             label="Khoá học miễn phí (Free)"
@@ -394,14 +387,6 @@ export default function Course() {
                                 filters={courseFilters}
                                 actions={courseActions}
                             />
-                            {
-                                !isPending &&
-                                <DataTableSelectedToolbar
-                                    table={table}
-                                    label="khoá học"
-                                    actions={courseSelectedActions}
-                                />
-                            }
                         </div>
                     )}
                 </DataTable>
@@ -412,24 +397,26 @@ export default function Course() {
                 closeDialog={() => setOpenCreateModal(false)}
                 instructors={instructors || []}
                 tags={tags || []}
+                categories={categories?.categories || []}
             />
 
             {/* Các Modal tập trung cho DataTable */}
             {selectedCourse && (
                 <>
                     {isEditOpen && (
-                        <ModalUpdateCourse 
-                            open={isEditOpen} 
-                            closeDialog={() => { setIsEditOpen(false); setSelectedCourse(null); }} 
-                            course={selectedCourse} 
+                        <ModalUpdateCourse
+                            open={isEditOpen}
+                            closeDialog={() => { setIsEditOpen(false); setSelectedCourse(null); }}
+                            course={selectedCourse}
                             tags={tags || []}
+                            categories={categories?.categories || []}
                         />
                     )}
                     {isViewOpen && (
-                        <ModalViewCourse 
-                            open={isViewOpen} 
-                            closeDialog={() => { setIsViewOpen(false); setSelectedCourse(null); }} 
-                            course={selectedCourse} 
+                        <ModalViewCourse
+                            open={isViewOpen}
+                            closeDialog={() => { setIsViewOpen(false); setSelectedCourse(null); }}
+                            course={selectedCourse}
                         />
                     )}
                     <ConfirmModal
@@ -445,6 +432,13 @@ export default function Course() {
                             </>
                         }
                         confirmText="Xóa vĩnh viễn"
+
+                        // delete reason
+                        hasReason={true}
+                        isReasonRequired={true}
+                        reasonLabel="Lý do xóa"
+                        reasonPlaceholder="Nhập lý do xóa khóa học..."
+                        useTextarea={true}
                     />
                 </>
             )}

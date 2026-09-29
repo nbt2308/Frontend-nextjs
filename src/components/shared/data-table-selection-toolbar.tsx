@@ -28,7 +28,8 @@ export function DataTableSelectedToolbar<TData>({
     actions = [],
 }: DataTableSelectedToolbarProps<TData>) {
 
-    const selectedRows = table.getFilteredSelectedRowModel()?.rows || []
+    const rowModel = table.getFilteredSelectedRowModel()
+    const selectedRows = rowModel?.flatRows || rowModel?.rows || []
     const selectedCount = selectedRows.length
 
     if (selectedCount === 0) return null

@@ -11,19 +11,26 @@ import {
     SidebarMenuItem,
     SidebarMenuButton,
 } from "@/components/ui/sidebar"
-import { Home, Users, Settings, BookOpen, LayoutDashboard, User2, Tag, ShieldCheck, Key } from "lucide-react"
+import { Home, Users, Settings, BookOpen, LayoutDashboard, User2, Tag, ShieldCheck, Key, FileCheck, Grid2x2 } from "lucide-react"
 
 // Sample menu items
-const items = [
+const items = {
+    title: "Tổng quan",
+    url: "/admin/dashboard",
+    icon: LayoutDashboard,
+}
+
+
+const courseItems = [
     {
-        title: "Tổng quan",
-        url: "/admin/dashboard",
-        icon: LayoutDashboard,
-    },
-    {
-        title: "Khoá học",
+        title: "Tất cả khoá học",
         url: "/admin/courses",
         icon: BookOpen,
+    },
+    {
+        title: "Duyệt khóa học",
+        url: "/admin/moderation",
+        icon: FileCheck,
     },
     {
         title: "Tags",
@@ -31,18 +38,18 @@ const items = [
         icon: Tag,
     },
     {
-        title: "Người dùng",
-        url: "/admin/users",
-        icon: Users,
-    },
-    {
-        title: "Cài đặt",
-        url: "/admin/settings",
-        icon: Settings,
+        title: "Danh mục khóa học",
+        url: "/admin/categories",
+        icon: Grid2x2,
     },
 ]
 
 const systemItems = [
+    {
+        title: "Quản lý người dùng",
+        url: "/admin/users",
+        icon: User2,
+    },
     {
         title: "Vai trò & Phân quyền",
         url: "/admin/roles",
@@ -86,11 +93,27 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
+                {/* dashboard */}
                 <SidebarGroup>
-                    <SidebarGroupLabel>Mục Quản lý</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => {
+                            <SidebarMenuItem key={items.title}>
+                                <SidebarMenuButton asChild tooltip={items.title} isActive={pathname === items.url}>
+                                    <Link href={items.url}>
+                                        <items.icon />
+                                        <span>{items.title}</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+                {/* course management */}
+                <SidebarGroup>
+                    <SidebarGroupLabel>Quản lý khóa học</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {courseItems.map((item) => {
                                 const isActive = pathname === item.url || pathname.startsWith(`${item.url}/`)
                                 return (
                                     <SidebarMenuItem key={item.title}>

@@ -46,23 +46,7 @@ export const CourseCellAction = ({ course, status, onEdit, onView, onDelete }: C
                 <DropdownMenuItem onSelect={() => router.push(`/admin/courses/${course?.id}/curriculum`)}>
                     <Layers className="h-4 w-4 mr-2" /> Quản lý nội dung
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                    onSelect={() => {
-                        handleChangeStatus({
-                            id: course?.id,
-                            status: !status
-                        })
-                    }}
-                    disabled={isChangeStatusPending}
-                >
-                    {
-                        status ?
-                            <Lock className="h-4 w-4 mr-2" />
-                            :
-                            <Unlock className="h-4 w-4 mr-2" />
-                    }
-                    {status ? "Khóa" : "Mở khóa"}
-                </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" onSelect={() => onDelete(course)}>
                     <Trash2 /> Xóa khoá học

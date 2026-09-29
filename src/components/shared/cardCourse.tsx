@@ -3,6 +3,7 @@ import { Star, Users, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
+import { formatter } from "@/lib/utils";
 
 interface CardCourseProps {
     course: CourseForUser
@@ -13,10 +14,7 @@ export default function CardCourse({ course, size = 'sm' }: CardCourseProps) {
     const CourseType = CourseTypeSchema.enum;
     const Level = LevelSchema.enum;
 
-    const formatter = new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-    })
+    
 
     const hasDiscount = () => {
         const isPaid = course.courseType === CourseType.PAID || course.courseType === 'PAID';

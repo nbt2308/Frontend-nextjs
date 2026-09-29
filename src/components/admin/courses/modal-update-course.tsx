@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UpdateCourseSchema, IUpdateCourse } from "@/schemas/course.schema";
-import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
+import { CourseStatusSchema, CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { CourseType as ICourseType } from "@/types/generated-zod/schemas/models/Course.schema"
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -39,21 +39,52 @@ import { CloudinaryService } from "@/services/cloudinary";
 import { useUpdateCourse } from "@/hooks/useCourse";
 import { Badge } from "@/components/ui/badge";
 import { CourseResponse } from "./courses";
+import { CategoryResponse } from "../categories/categories";
+import { MAX_IMAGE_SIZE } from "@/constants/image.constants";
 
 interface ModalUpdateCourseProps {
     open: boolean;
     closeDialog: () => void;
     tags: TagType[];
     course: CourseResponse;
+    categories: CategoryResponse[];
 }
 
-export default function ModalUpdateCourse({ open, closeDialog, tags, course }: ModalUpdateCourseProps) {
+export default function ModalUpdateCourse({ open, closeDialog, tags, course, categories }: ModalUpdateCourseProps) {
     const CourseType = CourseTypeSchema.enum;
     const Level = LevelSchema.enum;
+    const CourseStatus = CourseStatusSchema.enum;
     const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+    const flatCategories = useMemo(() => {
+        if (!categories) return [];
+
+        const flat: any[] = [];
+
+        categories.forEach((category) => {
+            // Root
+            flat.push({
+                ...category,
+                level: 0,
+                displayName: `📁 [Gốc] ${category.name}`,
+            });
+
+            // Cấp 1
+            category.children?.forEach((child: any, index: number) => {
+                const isLast = index === category.children.length - 1;
+
+                flat.push({
+                    ...child,
+                    level: 1,
+                    displayName: `${isLast ? "└──" : "├──"} 📂 [Cấp 1] ${child.name}`,
+                });
+            });
+        });
+
+        return flat;
+    }, [categories]);
 
     const form = useForm<IUpdateCourse>({
         resolver: zodResolver(UpdateCourseSchema),
@@ -67,10 +98,11 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
             level: Level.BEGINNER,
             price: 0,
             discount: 0,
-            status: true,
             tags: [],
             thumbnail: undefined,
             thumbnail_publicID: undefined,
+            status: course.status || CourseStatus.DRAFT,
+            categoryId: undefined,
         },
     });
 
@@ -86,10 +118,12 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
                 level: course.level || Level.BEGINNER,
                 price: course.price ? Number(course.price) : 0,
                 discount: course.discount ? Number(course.discount) : 0,
-                status: course.status !== undefined ? Boolean(course.status) : true,
                 tags: course.tags?.map((t: TagType) => t.id) || [],
                 thumbnail: course.thumbnail || undefined,
                 thumbnail_publicID: course.thumbnail_publicID || undefined,
+                status: course.status || CourseStatus.DRAFT,
+                originalStatus: course.status || CourseStatus.DRAFT,
+                categoryId: course.categoryId || undefined,
             });
             setImagePreview(course.thumbnail || null);
             setSelectedFile(null);
@@ -97,10 +131,11 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
     }, [course, open, form]);
 
     const watchCourseType = form.watch("courseType");
+    const watchStatus = form.watch("status");
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file && file?.size > 5 * 1024 * 1024) {
+        if (file && file?.size > MAX_IMAGE_SIZE) {
             toast.error("Dung lượng file không được vượt quá 5MB!");
             return;
         }
@@ -152,9 +187,10 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
             }
             data.requirements = data.requirements?.trim() || undefined;
             data.resources = data.resources?.trim() || undefined;
+            const { originalStatus, ...courseData } = data;
             updateCourse({
                 id: course?.id,
-                courseData: data
+                courseData: courseData
             }, {
                 onSuccess: () => {
                     form.reset();
@@ -335,7 +371,8 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 text-zinc-500">
                                                         <ImagePlus className="w-8 h-8 mb-2" />
                                                         <p className="text-sm font-medium">Nhấn để tải ảnh đại diện lên</p>
-                                                        <p className="text-xs">PNG, JPG hoặc WEBP (Tối đa 5MB)</p>
+                                                        <p className="text-xs">Khuyên dùng ảnh có tỷ lệ 1920x1080</p>
+                                                        <p className="text-xs">Định dạng: PNG, JPG hoặc WEBP (Tối đa 5MB)</p>
                                                     </div>
                                                     <input
                                                         id="thumbnail-upload"
@@ -399,6 +436,68 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
                                         </Field>
                                     )}
                                 />
+                                <Controller
+                                    name="categoryId"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel>
+                                                Danh mục <span className="text-red-500">*</span>
+                                            </FieldLabel>
+                                            <Select
+                                                value={field.value ? String(field.value) : ""}
+                                                onValueChange={(val) => field.onChange(Number(val))}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Chọn danh mục" />
+                                                </SelectTrigger>
+                                                <SelectContent position="popper">
+                                                    {flatCategories && flatCategories.length > 0 ? (
+                                                        flatCategories.map((cat) => (
+                                                            <SelectItem key={cat.id} value={String(cat.id)} disabled={cat._count?.children > 0}>
+                                                                {cat.displayName}
+                                                            </SelectItem>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-4 text-center text-sm text-muted-foreground">
+                                                            Không có dữ liệu
+                                                        </div>
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                        </Field>
+                                    )}
+                                />
+                                <Controller
+                                    name="status"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel>
+                                                Trạng thái <span className="text-red-500">*</span>
+                                            </FieldLabel>
+                                            <Select value={field.value?.toString()} onValueChange={(v) => field.onChange(v)}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Chọn trạng thái" />
+                                                </SelectTrigger>
+                                                <SelectContent position="popper">
+                                                    <SelectItem value={CourseStatus.DRAFT}>Bản nháp (Draft)</SelectItem>
+                                                    <SelectItem value={CourseStatus.PENDING}>Chờ duyệt (Pending)</SelectItem>
+                                                    <SelectItem value={CourseStatus.PUBLISHED}>Đã xuất bản (Published)</SelectItem>
+                                                    <SelectItem value={CourseStatus.UNPUBLISHED}>Tạm ẩn (Unpublished)</SelectItem>
+                                                    <SelectItem value={CourseStatus.REJECTED}>Từ chối (Rejected)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                        </Field>
+                                    )}
+                                />
+
+
+
+                            </FieldGroup>
+                            <FieldGroup className="grid grid-cols-1 sm:grid-cols-1 gap-4">
                                 <Controller
                                     name="tags"
                                     control={form.control}
@@ -479,27 +578,28 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course }: M
                                         );
                                     }}
                                 />
-                                <Controller
-                                    name="status"
-                                    control={form.control}
-                                    render={({ field, fieldState }) => (
-                                        <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel>
-                                                Trạng thái <span className="text-red-500">*</span>
-                                            </FieldLabel>
-                                            <Select value={field.value?.toString()} onValueChange={(v) => field.onChange(v === 'true')}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Chọn trạng thái" />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper">
-                                                    <SelectItem value="true">Hoạt động</SelectItem>
-                                                    <SelectItem value="false">Ẩn</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                        </Field>
-                                    )}
-                                />
+                            </FieldGroup>
+                            <FieldGroup className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+                                {/* Reason for rejection, only when REJECTED */}
+                                {watchStatus === CourseStatus.REJECTED && (
+                                    <Controller
+                                        name="reason_rejected"
+                                        control={form.control}
+                                        render={({ field, fieldState }) => (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel>
+                                                    Lý do từ chối <span className="text-red-500">*</span>
+                                                </FieldLabel>
+                                                <Textarea
+                                                    {...field}
+                                                    placeholder="Nhập lý do từ chối..."
+                                                    className="w-full min-h-[100px]"
+                                                />
+                                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                            </Field>
+                                        )}
+                                    />
+                                )}
                             </FieldGroup>
 
                         </FieldGroup>

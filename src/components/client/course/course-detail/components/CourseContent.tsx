@@ -2,26 +2,22 @@
 import React, { useState } from "react";
 import { ChevronDown, PlayCircle, Lock } from "lucide-react";
 import { formatLessonDuration, formatSectionDuration } from '@/lib/utils';
-interface Lesson {
-  id: number;
-  title: string;
-  duration: number;
-  isPreview: boolean;
-}
+import CoursePreviewModal from "./CoursePreviewModal";
+import { LessonType } from "@/types/generated-zod/schemas/models/Lesson.schema";
+import { SectionType } from "@/types/generated-zod/schemas/models/Section.schema";
 
-interface Chapter {
-  id: string;
-  title: string;
+
+
+export type SectionTypeResponse = Omit<SectionType, "lessons"> & {
   lessonCount: number;
   totalDuration: number;
-  lessons: Lesson[];
-}
-
+  lessons: LessonType[];
+};
 interface CourseContentProps {
-  sections: Chapter[];
+  sections: SectionTypeResponse[];
   totalLessons: number;
   totalDuration: number;
-  openPreview: (title: string, lessonId: number) => void;
+  slug:string;
 }
 
 
@@ -30,11 +26,13 @@ export default function CourseContent({
   sections,
   totalLessons,
   totalDuration,
-  openPreview
+  slug,
 }: CourseContentProps) {
-  const [expandedChapters, setExpandedChapters] = useState<string[]>(sections?.length > 0 ? [sections[0].id] : []);
-
-  const toggleChapter = (id: string) => {
+  const [previewTitle, setPreviewTitle] = useState("");
+  const [previewLessonId, setPreviewLessonId] = useState<number>(0);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [expandedChapters, setExpandedChapters] = useState<number[]>(sections?.length > 0 ? [sections[0].id] : []);
+  const toggleChapter = (id: number) => {
     setExpandedChapters(prev => 
       prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     );
@@ -46,6 +44,12 @@ export default function CourseContent({
     } else {
       setExpandedChapters((sections || []).map(c => c.id));
     }
+  };
+
+  const openPreview = (title: string, lessonId: number) => {
+    setPreviewTitle(title);
+    setPreviewLessonId(lessonId);
+    setIsVideoModalOpen(true);
   };
 
   return (
@@ -110,6 +114,15 @@ export default function CourseContent({
           );
         })}
       </div>
+      {/* PREVIEW VIDEO MODAL */}
+      {isVideoModalOpen && (
+        <CoursePreviewModal 
+          isVideoModalOpen={isVideoModalOpen}
+          setIsVideoModalOpen={setIsVideoModalOpen}
+          slug={slug}
+          lessonId={previewLessonId}
+        />
+      )}
     </div>
   );
 }

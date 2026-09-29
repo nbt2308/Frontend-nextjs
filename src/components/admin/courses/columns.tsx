@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 // import { UserCellAction } from "./user-cell-actions"
 import { CourseType as ZodCourseType } from "@/types/generated-zod/schemas/models/Course.schema"
-import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas"
+import { CourseStatus, CourseType, CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas"
 import { CourseCellAction } from "./course-cell-actions"
 import { CourseResponse } from "./courses"
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema"
 import { getInitials } from "@/lib/utils"
+import { CourseStatusBadge } from "@/components/shared/courseStatus"
+import { CategoryType } from "@/types/generated-zod/schemas/models/Category.schema"
 
 
 export const getColumns = (
@@ -20,28 +22,6 @@ export const getColumns = (
     onView: (course: CourseResponse) => void,
     onDelete: (course: CourseResponse) => void
 ): ColumnDef<CourseResponse>[] => [
-    {
-        id: "select",
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
     {
         id: "course_info",
         meta: {
@@ -155,6 +135,53 @@ export const getColumns = (
         enableGlobalFilter: false
     },
     {
+        id: "category",
+        meta: {
+            label: "Danh mục",
+        },
+        accessorKey: "category",
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted();
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => {
+                        if (isSorted === "asc") {
+                            column.toggleSorting(true);
+                        } else if (isSorted === "desc") {
+                            column.clearSorting();
+                        } else {
+                            column.toggleSorting(false);
+                        }
+                    }}
+                >
+                    Danh mục
+                    {isSorted === "asc" && <ArrowUp className="ml-2 h-4 w-4" />}
+                    {isSorted === "desc" && <ArrowDown className="ml-2 h-4 w-4" />}
+                    {!isSorted && <ArrowUpDown className="ml-2 h-4 w-4" />}
+                </Button>
+            )
+        },
+        cell: ({ row }) => {
+
+            const category = row.getValue("category") as CategoryType | null | undefined
+            return (
+                <div className="w-[150px] flex flex-wrap gap-1">
+                    <Badge key={category?.id ?? "no-category"}>
+                        {category?.name ?? "Chưa phân loại"}
+                    </Badge>
+                </div>
+            )
+        },
+        filterFn: (row, id, value) => {
+            const category = row.getValue(id) as CategoryType | null | undefined;
+            if (!category || !Array.isArray(value) || value.length === 0) return true;
+
+            return value.includes(String(category.id));
+        },
+        enableGlobalFilter: false
+    },
+    {
         id: "courseType",
         meta: {
             label: "Loại",
@@ -183,10 +210,10 @@ export const getColumns = (
             )
         },
         cell: ({ row }) => {
-            const courseType = row.getValue("courseType") as string
-            const courseTypeBadgeClass = courseType === "FREE" ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300" :
-                courseType === "PAID" ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300" : ""
-            const courseTypeText = courseType === "FREE" ? "Miễn phí" : "Trả phí"
+            const courseType = row.getValue("courseType") as CourseType
+            const courseTypeBadgeClass = courseType === CourseTypeSchema.enum.FREE ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300" :
+                courseType === CourseTypeSchema.enum.PAID ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300" : ""
+            const courseTypeText = courseType === CourseTypeSchema.enum.FREE ? "Miễn phí" : "Trả phí"
             return (
                 <Badge className={`text-xs font-medium px-2 py-1 rounded ${courseTypeBadgeClass}`}>
                     {courseTypeText}
@@ -353,23 +380,9 @@ export const getColumns = (
             )
         },
         cell: ({ row }) => {
-            const status = row.getValue("status") as boolean
-            return (
-                <Badge className={
-                    status ?
-                        "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
-                        :
-                        "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
-                }>
-                    {
-                        status ?
-                            <CircleCheck data-icon="inline-start" className="h-4 w-4" color="green" />
-                            :
-                            <Lock data-icon="inline-start" className="h-4 w-4" color="red" />
-                    }
-                    {status ? "Hoạt động" : "Bị khoá"}
-                </Badge>
-            )
+            const status = row.getValue("status") as CourseStatus
+
+            return <CourseStatusBadge status={status} />
         },
         filterFn: (row, id, filterValue) => {
             if (!filterValue || filterValue.length === 0) return true;

@@ -68,3 +68,18 @@ export const getInitials = (name: string) => {
   }
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 };
+
+export const getYouTubeEmbedUrl = (url: string) => {
+  if (!url) return "";
+  if (url.includes("/embed/")) return url;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11)
+    ? `https://www.youtube.com/embed/${match[2]}`
+    : url;
+};
+
+export const formatter = new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+    })

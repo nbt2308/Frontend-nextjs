@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Star, Globe } from "lucide-react";
+import { Star, Globe, Clock } from "lucide-react";
 import CourseBreadcrumb from "./components/CourseBreadcrumb";
 import CourseWhatYouLearn from "./components/CourseWhatYouLearn";
 import CourseQuickInfo from "./components/CourseQuickInfo";
@@ -13,9 +13,11 @@ import CourseInstructor from "./components/CourseInstructor";
 import CourseReviews from "./components/course-review/CourseReviews";
 import CourseRelated from "./components/CourseRelated";
 import CoursePurchaseCard from "./components/CoursePurchaseCard";
+import CourseStickyTopBar from "./components/CourseStickyTopBar";
 import CoursePreviewModal from "./components/CoursePreviewModal";
 import { useCourseBySlug } from "@/hooks/useCourse";
 import { Loader2 } from "lucide-react";
+import { usePreviewLesson } from "@/hooks/useLession";
 
 
 export default function CourseDetail({ slug }: { slug?: string }) {
@@ -43,12 +45,10 @@ export default function CourseDetail({ slug }: { slug?: string }) {
   if (isLoading) return <div className="flex h-screen items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   if (isError || !course) return <div className="flex h-screen items-center justify-center text-red-500">Không tìm thấy khóa học!</div>;
 
-  const openPreview = (title: string, lessonId: number) => {
-    // We can also fetch the preview video URL here if needed.
 
-    setPreviewTitle(title);
-    setIsVideoModalOpen(true);
-  };
+  //Preview lesson
+  
+  
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -69,44 +69,11 @@ export default function CourseDetail({ slug }: { slug?: string }) {
     <div className="bg-background text-foreground antialiased min-h-screen flex flex-col selection:bg-primary selection:text-primary-foreground">
       
       {/* STICKY TOP BAR */}
-      <div className={`fixed top-16 left-0 right-0 z-40 bg-background border-b border-border shadow-sm transition-all duration-300 ${isStickyVisible ? 'translate-y-0 opacity-100' : 'translate-y-[-100%] opacity-0 pointer-events-none'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-muted text-foreground border border-border">
-                Bestseller
-              </span>
-              <h2 className="text-sm md:text-base font-bold text-foreground truncate">
-                {course.title}
-              </h2>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-              <div className="flex items-center gap-1 text-foreground font-semibold">
-                <span>{course.averageRating || 0}</span>
-                <Star className="w-3.5 h-3.5 fill-current" />
-              </div>
-              <span>•</span>
-              <span>{course.reviewCount || 0} đánh giá</span>
-              <span>•</span>
-              <span>{course.studentCount || 0} học viên</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="hidden lg:flex items-baseline gap-2">
-              <span className="text-lg font-bold text-foreground">
-                {course.courseType === "FREE" ? "Miễn phí" : `${(course.discount > 0 && course.discount < course.price ? course.price - course.discount : course.price).toLocaleString('vi-VN')}đ`}
-              </span>
-              {course.discount > 0 && course.price > 0 && course.courseType !== "FREE" && (
-                <span className="text-xs line-through text-muted-foreground">{course.price.toLocaleString('vi-VN')}đ</span>
-              )}
-            </div>
-            <button onClick={handleEnroll} className="px-4 py-2 text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90 rounded-md shadow-sm transition">
-              Đăng ký ngay
-            </button>
-          </div>
-        </div>
-      </div>
+      <CourseStickyTopBar 
+        isStickyVisible={isStickyVisible}
+        course={course}
+        handleEnroll={handleEnroll}
+      />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -138,8 +105,8 @@ export default function CourseDetail({ slug }: { slug?: string }) {
                 </div>
                 <span className="text-border">|</span>
                 <div className="flex items-center gap-1 text-muted-foreground">
-                  <Globe className="w-4 h-4 text-muted-foreground" />
-                  <span>Tiếng Việt (Có phụ đề)</span>
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <span>Lần cập nhật gần nhất {new Date(course.updatedAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
@@ -155,7 +122,7 @@ export default function CourseDetail({ slug }: { slug?: string }) {
               sections={course.sections}
               totalLessons={course.totalLessons}
               totalDuration={course.totalDuration}
-              openPreview={openPreview}
+              slug={course.slug}
             />
 
             {/* DESCRIPTION */}
@@ -194,12 +161,7 @@ export default function CourseDetail({ slug }: { slug?: string }) {
         </div>
       </main>
 
-      {/* PREVIEW VIDEO MODAL */}
-      <CoursePreviewModal 
-        isVideoModalOpen={isVideoModalOpen}
-        setIsVideoModalOpen={setIsVideoModalOpen}
-        previewTitle={previewTitle}
-      />
+      
 
       {/* TOAST NOTIFICATION - temporarily disabled */}
       {/* {toastMessage && (

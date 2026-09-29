@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateCourseSchema, ICreateCourse } from "@/schemas/course.schema";
-import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
+import { CourseStatusSchema, CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { useCreateCourse } from "@/hooks/useCourse";
 import { cn } from "@/lib/utils";
 
@@ -38,20 +38,56 @@ import { UserType } from "@/types/generated-zod/schemas/models/User.schema";
 import { TagType } from "@/types/generated-zod/schemas/models/Tag.schema";
 import { toast } from "sonner";
 import { CloudinaryService } from "@/services/cloudinary";
+import { CategoryType } from "@/types/generated-zod/schemas/models/Category.schema";
+import { CategoryResponse } from "../categories/categories";
+import { MAX_IMAGE_SIZE } from "@/constants/image.constants";
+
+
 
 interface ModalCreateCourseProps {
     open: boolean;
     closeDialog: () => void;
     tags: TagType[]
     instructors: UserType[]
+    categories: CategoryResponse[]
 }
 
-export default function ModalCreateCourse({ open, closeDialog, tags, instructors }: ModalCreateCourseProps) {
+export default function ModalCreateCourse({ open, closeDialog, tags, instructors, categories }: ModalCreateCourseProps) {
     const CourseType = CourseTypeSchema.enum;
     const Level = LevelSchema.enum;
+    const CourseStatus = CourseStatusSchema.enum;
     const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const flatCategories = useMemo(() => {
+        if (!categories) return [];
+
+        const flat: any[] = [];
+
+        categories.forEach((category) => {
+            // Root
+            flat.push({
+                ...category,
+                level: 0,
+                displayName: `📁 [Gốc] ${category.name}`,
+            });
+
+            // Cấp 1
+            category.children?.forEach((child: any, index: number) => {
+                const isLast = index === category.children.length - 1;
+
+                flat.push({
+                    ...child,
+                    level: 1,
+                    displayName: `${isLast ? "└──" : "├──"} 📂 [Cấp 1] ${child.name}`,
+                });
+            });
+        });
+
+        return flat;
+    }, [categories]);
+
     const form = useForm<ICreateCourse>({
         resolver: zodResolver(CreateCourseSchema),
         defaultValues: {
@@ -64,11 +100,11 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
             level: Level.BEGINNER,
             price: 0,
             discount: 0,
-            status: true,
             instructorId: undefined,
             tags: [],
             thumbnail: "",
             thumbnail_publicID: "",
+            categoryId: undefined
         },
     });
 
@@ -79,7 +115,7 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file && file?.size > 5 * 1024 * 1024) {
+        if (file && file?.size >MAX_IMAGE_SIZE) {
             toast.error("Dung lượng file không được vượt quá 5MB!");
             return;
         }
@@ -296,7 +332,8 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 text-zinc-500">
                                                         <ImagePlus className="w-8 h-8 mb-2" />
                                                         <p className="text-sm font-medium">Nhấn để tải ảnh đại diện lên</p>
-                                                        <p className="text-xs">PNG, JPG hoặc WEBP (Tối đa 5MB)</p>
+                                                        <p className="text-xs">Khuyên dùng ảnh có tỷ lệ 1920x1080</p>
+                                                        <p className="text-xs">Định dạng: PNG, JPG hoặc WEBP (Tối đa 5MB)</p>
                                                     </div>
                                                     <input
                                                         id="thumbnail-upload"
@@ -360,6 +397,77 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                                         </Field>
                                     )}
                                 />
+
+                                <Controller
+                                    name="categoryId"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel>
+                                                Danh mục <span className="text-red-500">*</span>
+                                            </FieldLabel>
+                                            <Select
+                                                value={field.value ? String(field.value) : ""}
+                                                onValueChange={(val) => field.onChange(Number(val))}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Chọn danh mục" />
+                                                </SelectTrigger>
+                                                <SelectContent position="popper">
+                                                    {flatCategories && flatCategories.length > 0 ? (
+                                                        flatCategories.map((cat) => (
+                                                            <SelectItem key={cat.id} value={String(cat.id)}
+                                                            disabled={cat._count?.children > 0}>
+                                                                {cat.displayName}
+                                                            </SelectItem>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-4 text-center text-sm text-muted-foreground">
+                                                            Không có dữ liệu
+                                                        </div>
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                        </Field>
+                                    )}
+                                />
+                                <Controller
+                                    name="instructorId"
+                                    control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel>
+                                                Giảng viên <span className="text-red-500">*</span>
+                                            </FieldLabel>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Chọn giảng viên" />
+                                                </SelectTrigger>
+                                                <SelectContent position="popper">
+                                                    {instructors && instructors.length > 0 ? (
+                                                        instructors.map((instructor) => (
+                                                            <SelectItem key={instructor.id} value={String(instructor.id)}>
+                                                                {instructor.email} - {instructor.name}
+                                                            </SelectItem>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-4 text-center text-sm text-muted-foreground">
+                                                            Không có dữ liệu
+                                                        </div>
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                        </Field>
+                                    )}
+                                />
+
+                            </FieldGroup>
+                            <FieldGroup>
                                 <Controller
                                     name="tags"
                                     control={form.control}
@@ -440,40 +548,8 @@ export default function ModalCreateCourse({ open, closeDialog, tags, instructors
                                         );
                                     }}
                                 />
-                                <Controller
-                                    name="instructorId"
-                                    control={form.control}
-                                    render={({ field, fieldState }) => (
-                                        <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel>
-                                                Giảng viên <span className="text-red-500">*</span>
-                                            </FieldLabel>
-                                            <Select
-                                                value={field.value}
-                                                onValueChange={field.onChange}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Chọn giảng viên" />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper">
-                                                    {instructors && instructors.length > 0 ? (
-                                                        instructors.map((instructor) => (
-                                                            <SelectItem key={instructor.id} value={String(instructor.id)}>
-                                                                {instructor.email} - {instructor.name}
-                                                            </SelectItem>
-                                                        ))
-                                                    ) : (
-                                                        <div className="py-4 text-center text-sm text-muted-foreground">
-                                                            Không có dữ liệu
-                                                        </div>
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                        </Field>
-                                    )}
-                                />
                             </FieldGroup>
+
 
                         </FieldGroup>
 

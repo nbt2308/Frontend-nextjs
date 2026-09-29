@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+
 import {
     ColumnDef,
     SortingState,
@@ -14,7 +15,9 @@ import {
     getFacetedRowModel,
     getFacetedUniqueValues,
     Table as TanstackTable,
-    RowData
+    RowData,
+    ExpandedState,
+    getExpandedRowModel
 } from "@tanstack/react-table"
 import {
     Table,
@@ -35,7 +38,8 @@ interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[],
     isPending: boolean,
-    children?: (table: TanstackTable<TData>) => React.ReactNode
+    children?: (table: TanstackTable<TData>) => React.ReactNode,
+    getSubRows?: (row: TData) => TData[] | undefined
 }
 export interface DataTableFilterConfig {
     columnId: string
@@ -72,12 +76,15 @@ export function DataTable<TData, TValue>({
     columns,
     data,
     isPending,
-    children
+    children,
+    getSubRows
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [rowSelection, setRowSelection] = React.useState({})
     const [globalFilter, setGlobalFilter] = React.useState<any>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+    const [expanded, setExpanded] = React.useState<ExpandedState>({})
+
     const table = useReactTable({
         data,
         columns,
@@ -91,11 +98,17 @@ export function DataTable<TData, TValue>({
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
         getPaginationRowModel: getPaginationRowModel(),
+        ...(getSubRows ? {
+            getSubRows,
+            getExpandedRowModel: getExpandedRowModel(),
+            onExpandedChange: setExpanded,
+        } : {}),
         state: {
             sorting,
             rowSelection,
             globalFilter,
             columnFilters,
+            ...(getSubRows ? { expanded } : {}),
         }
     })
 
@@ -151,7 +164,19 @@ export function DataTable<TData, TValue>({
                                     className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors"
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell 
+                                            key={cell.id} 
+                                            style={
+                                                // Apply left padding based on row depth for the first visible column (usually the name or expander)
+                                                // Assuming the first column after select is the one to indent.
+                                                // Actually, it's better to add the indentation logic in the column definition itself,
+                                                // but since we want to keep it simple, we can add it to the row's first non-checkbox column or similar,
+                                                // or just pass row to the cell. Wait, cell rendering handles it if we use row.depth inside the column definition.
+                                                // Let's just pass `row` to the cell and let the column handle it, but wait, we don't need to change `TableCell` if we do it in `columns.tsx`!
+                                                // Let's remove this thought and keep TableCell clean, I'll do it in columns.tsx.
+                                                {}
+                                            }
+                                        >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}

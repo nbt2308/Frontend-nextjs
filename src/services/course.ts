@@ -111,9 +111,9 @@ export const CourseService = {
             throw new Error(error.message)
         }
     },
-    deleteCourse: async (id: string) => {
+    deleteCourse: async (id: string, deletedReason:string) => {
         try {
-            const response = await axiosClient.delete(`/courses/soft/${id}`);
+            const response = await axiosClient.delete(`/courses/soft/${id}`, { data: { deletedReason } });
             return response.data;
         } catch (error: any) {
             throw new Error(error.message)

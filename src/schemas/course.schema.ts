@@ -1,4 +1,4 @@
-import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
+import { CourseStatusSchema, CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 import { CourseSchema } from "@/types/generated-zod/schemas/models";
 import * as z from "zod";
 
@@ -15,9 +15,16 @@ export const BaseCourseSchema = z.object({
         .min(1, { message: "Vui lòng nhập phần giới thiệu" }),
 
     learningOutcomes: z
-        .string()
-        .trim()
-        .min(1, { message: "Vui lòng nhập nội dung bạn sẽ học được" }),
+    .string()
+    .trim()
+    .min(1, { message: "Vui lòng nhập nội dung bạn sẽ học được" })
+    .refine(
+        (val) => {
+            const lines = val.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+            return lines.length >= 4
+        },
+        { message: "Cần nhập ít nhất 4 mục tiêu (mỗi dòng là một mục tiêu)" }
+    ),
 
     requirements: z
         .string()
@@ -41,7 +48,6 @@ export const BaseCourseSchema = z.object({
 
     courseType: CourseTypeSchema,
     level: LevelSchema,
-    status: z.boolean(),
     instructorId: z
         .string({ message: "Vui lòng chọn người hướng dẫn" })
         .min(1, { message: "Vui lòng chọn người hướng dẫn" }),
@@ -57,8 +63,22 @@ export const BaseCourseSchema = z.object({
     thumbnail_publicID: z
         .string({ message: "Thiếu public_id của ảnh" })
         .min(1, { message: "Thiếu public_id của ảnh" }),
+    status: CourseStatusSchema,
+    categoryId: z
+        .number({ message: "Vui lòng chọn danh mục" })
+        .min(1, { message: "Vui lòng chọn danh mục" }),
 })
 const courseRefineLogic = (data: any, ctx: z.RefinementCtx) => {
+    //Nếu status là reject thì phải có reason
+    if (data.status === CourseStatusSchema.enum.REJECTED) {
+        if (!data.reason_rejected || data.reason_rejected.trim() === "") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Lý do bị từ chối không được để trống",
+                path: ["reason_rejected"],
+            });
+        }
+    }
     // Nếu khóa học FREE
     if (data.courseType === CourseTypeSchema.enum.FREE) {
         if (data.price !== undefined && data.price > 0) {
@@ -93,9 +113,33 @@ const courseRefineLogic = (data: any, ctx: z.RefinementCtx) => {
             path: ["discount"],
         });
     }
+
+    // Validate status transition
+    if (data.originalStatus && data.status && data.originalStatus !== data.status) {
+        const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+            DRAFT: ["PENDING"],
+            PENDING: ["DRAFT", "PUBLISHED", "REJECTED"],
+            REJECTED: ["DRAFT"],
+            PUBLISHED: ["UNPUBLISHED"],
+            UNPUBLISHED: ["PUBLISHED"],
+        };
+
+        const allowed = ALLOWED_TRANSITIONS[data.originalStatus] || [];
+        if (!allowed.includes(data.status)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `Không thể chuyển trạng thái từ "${data.originalStatus}" sang "${data.status}". Vui lòng sử dụng đúng quy trình.`,
+                path: ["status"],
+            });
+        }
+    }
 }
-export const CreateCourseSchema = BaseCourseSchema.superRefine(courseRefineLogic);
+export const CreateCourseSchema = BaseCourseSchema.omit({ status: true }).superRefine(courseRefineLogic);
 export const UpdateCourseSchema = BaseCourseSchema
+    .extend({
+        originalStatus: CourseStatusSchema.optional(),
+        reason_rejected: z.string().optional()
+    })
     .partial()
     .omit({ instructorId: true })
     .superRefine(courseRefineLogic);

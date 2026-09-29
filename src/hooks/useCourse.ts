@@ -203,8 +203,8 @@ export function useBulkDelete() {
 export function useDeleteCourse() {
     const queryClient = useQueryClient();
     const mutationInfo = useMutation({
-        mutationFn: async (id: string) => {
-            const result = await CourseService.deleteCourse(id);
+        mutationFn: async ({ id, deletedReason }: { id: string; deletedReason: string }) => {
+            const result = await CourseService.deleteCourse(id, deletedReason);
             if (result?.error) {
                 throw new Error(result?.error);
             }
