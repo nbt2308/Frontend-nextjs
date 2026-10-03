@@ -24,6 +24,38 @@ export function useCourses(params: FindAllQueryParams) {
     return queryInfo;
 }
 
+export function useModerationKpis() {
+    return useQuery({
+        queryKey: ['courses', 'moderation', 'kpis'],
+        queryFn: async () => {
+            return await CourseService.getModerationKpis();
+        },
+        staleTime: 1000 * 60 * 2,
+    });
+}
+
+export function useModerationList(params: { page: number; limit: number; status?: string }) {
+    return useQuery({
+        queryKey: ['courses', 'moderation', 'list', params],
+        queryFn: async () => {
+            return await CourseService.getModerationList(params);
+        },
+        staleTime: 1000 * 60 * 2,
+    });
+}
+
+export function useModerationReview(id: string | undefined) {
+    return useQuery({
+        queryKey: ['courses', 'moderation', 'review', id],
+        queryFn: async () => {
+            if (!id) return null;
+            return await CourseService.getModerationReview(id);
+        },
+        enabled: !!id,
+        staleTime: 0, // don't cache review details too long, or at least force refetch on open
+    });
+}
+
 
 export function useAllCourses() {
     const queryInfo = useQuery({
@@ -161,25 +193,25 @@ export function useChangeStatus() {
     return handleChangeStatus;
 }
 
-export function useBulkUpdateStatus() {
-    return useMutation({
-        mutationFn: async (data: IBulkStatus) => {
-            const result = await CourseService.bulkUpdateStatus(data);
+// export function useBulkUpdateStatus() {
+//     return useMutation({
+//         mutationFn: async (data: IBulkStatus) => {
+//             const result = await CourseService.bulkUpdateStatus(data);
 
-            if (result?.error) {
-                throw new Error(result?.error);
-            }
+//             if (result?.error) {
+//                 throw new Error(result?.error);
+//             }
 
-            return result;
-        },
-        onSuccess: (result) => {
-            toast.success(`Đổi trạng thái ${result?.count} khoá học thành công`);
-        },
-        onError: (error: any) => {
-            toast.error(`${error?.message}`);
-        }
-    })
-}
+//             return result;
+//         },
+//         onSuccess: (result) => {
+//             toast.success(`Đổi trạng thái ${result?.count} khoá học thành công`);
+//         },
+//         onError: (error: any) => {
+//             toast.error(`${error?.message}`);
+//         }
+//     })
+// }
 export function useBulkDelete() {
     return useMutation({
         mutationFn: async (data: IBulkDelete) => {
@@ -216,6 +248,66 @@ export function useDeleteCourse() {
         },
         onError: (error: any) => {
             toast.error(error.message);
+        },
+    });
+    return mutationInfo;
+}
+
+export function useRejectCourse() {
+    const queryClient = useQueryClient();
+    const mutationInfo = useMutation({
+        mutationFn: async (data: { id: string; reason_rejected: string; sendEmail?: boolean }) => {
+            const result = await CourseService.rejectCourse(data);
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+            return result;
+        },
+        onSuccess: (result) => {
+            queryClient.invalidateQueries({ queryKey: ['courses'] });
+            toast.success(`Từ chối khóa học ${result?.title} thành công`);
+        },
+        onError: (error: any) => {
+            toast.error(error.message);
+        },
+    });
+    return mutationInfo;
+}
+
+export function useSubmitCourseForReview() {
+    const queryClient = useQueryClient();
+    const mutationInfo = useMutation({
+        mutationFn: async (id: string) => {
+            const result = await CourseService.submitCourseForReview(id);
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+            return result;
+        },
+        onSuccess: (result) => {
+            queryClient.invalidateQueries({ queryKey: ['courses'] });
+            toast.success(`Gửi yêu cầu duyệt khóa học ${result?.title} thành công`);
+        },
+        onError: (error: any) => {
+            toast.error(error.message);
+        },
+    });
+    return mutationInfo;
+}
+
+export function useApproveCourse() {
+    const queryClient = useQueryClient();
+    const mutationInfo = useMutation({
+        mutationFn: async (id: string) => {
+            const result = await CourseService.approveCourse(id);
+            if (result?.error) {
+                throw new Error(result?.error);
+            }
+            return result;
+        },
+        onSuccess: (result) => {
+            queryClient.invalidateQueries({ queryKey: ['courses'] });
+            toast.success(`Phê duyệt khóa học ${result?.title} thành công`);
         },
     });
     return mutationInfo;

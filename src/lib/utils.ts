@@ -51,13 +51,13 @@ export const formatDate = (dateString?: string | Date) => {
 };
 
 export const getTokenExpire = (accessToken: string) => {
-    const payload = decodeJwt(accessToken);
+  const payload = decodeJwt(accessToken);
 
-    if (!payload.exp) {
-        throw new Error("Access token không có exp");
-    }
+  if (!payload.exp) {
+    throw new Error("Access token không có exp");
+  }
 
-    return payload.exp * 1000;
+  return payload.exp * 1000;
 };
 
 export const getInitials = (name: string) => {
@@ -80,6 +80,13 @@ export const getYouTubeEmbedUrl = (url: string) => {
 };
 
 export const formatter = new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-    })
+  style: "currency",
+  currency: "VND",
+})
+
+export const formatFileSize = (bytes: number | null | undefined) => {
+  if (!bytes) return "N/A";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};

@@ -8,10 +8,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Edit, Info, Lock, MoreHorizontal, Trash2, Unlock, Layers } from "lucide-react"
+import { Edit, Info, Lock, MoreHorizontal, Trash2, Unlock, Layers, Check, CheckCircle2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useChangeStatus } from "@/hooks/useCourse"
 import { CourseResponse } from "./courses"
+import { CourseStatusSchema } from "@/types/generated-zod/schemas"
 
 
 interface CourseCellActionProps {
@@ -24,7 +25,7 @@ interface CourseCellActionProps {
 
 export const CourseCellAction = ({ course, status, onEdit, onView, onDelete }: CourseCellActionProps) => {
     const router = useRouter()
-    const { mutate: handleChangeStatus, isPending: isChangeStatusPending } = useChangeStatus();
+    const CourseStatus = CourseStatusSchema.enum;
 
     return (
         <DropdownMenu>
@@ -46,7 +47,7 @@ export const CourseCellAction = ({ course, status, onEdit, onView, onDelete }: C
                 <DropdownMenuItem onSelect={() => router.push(`/admin/courses/${course?.id}/curriculum`)}>
                     <Layers className="h-4 w-4 mr-2" /> Quản lý nội dung
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" onSelect={() => onDelete(course)}>
                     <Trash2 /> Xóa khoá học

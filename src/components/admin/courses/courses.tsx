@@ -15,12 +15,12 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator";
-import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2, CircleCheck, ShieldX, Users, UserPen, Book, Gift, Gem, Sprout, Zap, Rocket, Flame, BookPlus, BookOpen, Tag, FileEdit, Clock, XCircle, CheckCircle2, EyeOff, Grid2x2 } from "lucide-react";
+import { House, Download, UserPlus, ShieldUser, UserStar, UserCog, Lock, ShieldCheck, Trash2, CircleCheck, ShieldX, Users, UserPen, Book, Gift, Gem, Sprout, Zap, Rocket, Flame, BookPlus, BookOpen, Tag, FileEdit, Clock, XCircle, CheckCircle2, EyeOff, Grid2x2, Send } from "lucide-react";
 import KpiCard from "@/components/shared/SummaryCard";
 import { DataTableToolbar } from "@/components/shared/data-table-toolbar";
 import { DataTableSelectedToolbar } from "@/components/shared/data-table-selection-toolbar";
 import { toast } from "sonner";
-import { useAllCourses, useBulkDelete, useBulkUpdateStatus, useDeleteCourse } from "@/hooks/useCourse";
+import { useAllCourses, useBulkDelete,  useDeleteCourse ,useSubmitCourseForReview} from "@/hooks/useCourse";
 import ModalCreateCourse from "./modal-create-course";
 import ModalUpdateCourse from "./modal-update-course";
 import ModalViewCourse from "./modal-view-course";
@@ -52,7 +52,6 @@ export default function Course() {
     const Level = LevelSchema.enum;
     const courseStatus = CourseStatusSchema.enum;
     const { data: courses, isPending, isError, error, refetch } = useAllCourses();
-    const { mutate: bulkUpdateStatus } = useBulkUpdateStatus();
     const { mutate: bulkDelete } = useBulkDelete();
     const { data: tags, isLoading: isLoadingTags } = useAllTags();
     const { data: instructors, isLoading: isLoadingInstructors } = useAllInstructors();
@@ -65,7 +64,6 @@ export default function Course() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-
     // Callbacks truyền cho DataTable
     const handleEdit = (course: CourseResponse) => {
         setSelectedCourse(course);
@@ -93,6 +91,8 @@ export default function Course() {
             });
         }
     };
+
+
 
     const tableColumns = useMemo(() => getColumns(handleEdit, handleView, handleDelete), []);
 
@@ -421,6 +421,8 @@ export default function Course() {
                     )}
                     <ConfirmModal
                         isOpen={isDeleteOpen}
+                        Icon = {Trash2}
+                        type = {"delete"}
                         onClose={() => { setIsDeleteOpen(false); setSelectedCourse(null); }}
                         onConfirm={confirmDelete}
                         title="Xóa khoá học?"
@@ -440,6 +442,8 @@ export default function Course() {
                         reasonPlaceholder="Nhập lý do xóa khóa học..."
                         useTextarea={true}
                     />
+
+                    
                 </>
             )}
         </div>

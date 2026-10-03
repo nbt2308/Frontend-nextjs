@@ -7,6 +7,31 @@ import axiosServer from "@/lib/axiosServer";
 
 export const CourseService = {
 
+    getModerationKpis: async () => {
+        try {
+            const response = await axiosClient.get(`/courses/moderation/kpis`);
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message);
+        }
+    },
+    getModerationList: async (params: { page: number; limit: number; status?: string }) => {
+        try {
+            const response = await axiosClient.get(`/courses/moderation/list`, { params });
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message);
+        }
+    },
+    getModerationReview: async (id: string) => {
+        try {
+            const response = await axiosClient.get(`/courses/moderation/${id}/review`);
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message);
+        }
+    },
+
     getAllCoursesWithPagination: async (queryParams: FindAllQueryParams) => {
         try {
             const response = await axiosClient.get(`/courses`, { params: queryParams });
@@ -78,23 +103,40 @@ export const CourseService = {
         }
     },
 
-    // updateUser: async (data: IUpdateUser) => {
-    //     try {
-    //         const response = await axiosClient.patch(`/users`, data);
-    //         return response.data;
-    //     } catch (error: any) {
-    //         throw new Error(error.message)
-    //     }
-    // },
-
-    bulkUpdateStatus: async (data: IBulkStatus) => {
+    rejectCourse: async (data: { id: string; reason_rejected: string; sendEmail?: boolean }) => {
         try {
-            const response = await axiosClient.post(`/courses/bulk-update-status`, data);
+            const response = await axiosClient.post(`/courses/reject`, data);
             return response.data;
         } catch (error: any) {
             throw new Error(error.message)
         }
     },
+
+    submitCourseForReview: async (id: string) => {
+        try {
+            const response = await axiosClient.post(`/courses/submit`, { id });
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message)
+        }
+    },
+    approveCourse: async (id: string) => {
+        try {
+            const response = await axiosClient.post(`/courses/approve`, { id });
+            return response.data;
+        } catch (error: any) {
+            throw new Error(error.message)
+        }
+    },
+
+    // bulkUpdateStatus: async (data: IBulkStatus) => {
+    //     try {
+    //         const response = await axiosClient.post(`/courses/bulk-update-status`, data);
+    //         return response.data;
+    //     } catch (error: any) {
+    //         throw new Error(error.message)
+    //     }
+    // },
     bulkDeleteCourse: async (data: IBulkDelete) => {
         try {
             const response = await axiosClient.post(`/courses/bulk-delete`, data);
@@ -111,7 +153,7 @@ export const CourseService = {
             throw new Error(error.message)
         }
     },
-    deleteCourse: async (id: string, deletedReason:string) => {
+    deleteCourse: async (id: string, deletedReason: string) => {
         try {
             const response = await axiosClient.delete(`/courses/soft/${id}`, { data: { deletedReason } });
             return response.data;

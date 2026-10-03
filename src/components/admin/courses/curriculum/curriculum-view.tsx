@@ -11,7 +11,7 @@ import { useDeleteSection, useSections } from "@/hooks/useSection";
 import { ConfirmModal } from "@/components/shared/data-table-confirm-modal";
 import { Badge } from "@/components/ui/badge";
 import { SheetAddLesson } from "./sheet-add-lesson";
-import { formatLessonDuration } from "@/lib/utils";
+import { formatFileSize, formatLessonDuration } from "@/lib/utils";
 import { useDeleteLesson } from "@/hooks/useLession";
 import { SheetEditLesson } from "./sheet-edit-lesson";
 import { SectionType } from "@/types/generated-zod/schemas/models/Section.schema";
@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { LessonService } from "@/services/lesson";
 import { toast } from "sonner";
 import KpiCard from "@/components/shared/SummaryCard";
+import ModalVideoPreview from "../../../shared/modal-video-preview";
 
 type ResourceType = {
     id: number;
@@ -125,13 +126,7 @@ export default function CurriculumView({ courseId }: { courseId: string }) {
         });
         return { totalSections: sections.length, totalLessons, totalDuration, totalResources };
     }, [sections]);
-
-    const formatFileSize = (bytes: number | null) => {
-        if (!bytes) return "N/A";
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    };
+    
 
     return (
         <div className="p-6 space-y-6">
@@ -425,31 +420,13 @@ export default function CurriculumView({ courseId }: { courseId: string }) {
             </div>
 
             {/* Video Preview Modal */}
-            <Dialog open={showVideoPreview} onOpenChange={setShowVideoPreview}>
-                <DialogContent className="sm:max-w-2xl p-0 overflow-hidden">
-                    <DialogHeader className="p-4 pb-0">
-                        <DialogTitle className="truncate pr-8">{videoPreviewLesson?.title}</DialogTitle>
-                        <DialogDescription>Xem trước video bài giảng</DialogDescription>
-                    </DialogHeader>
-                    <div className="px-4 pb-4">
-                        {videoPreviewLesson?.videoId ? (
-                            <div className="aspect-video rounded-lg overflow-hidden bg-black">
-                                <iframe
-                                    src={`https://www.youtube.com/embed/${videoPreviewLesson.videoId}`}
-                                    title={videoPreviewLesson.title}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    className="w-full h-full"
-                                />
-                            </div>
-                        ) : (
-                            <div className="aspect-video rounded-lg bg-muted flex items-center justify-center">
-                                <p className="text-muted-foreground text-sm">Video chưa sẵn sàng</p>
-                            </div>
-                        )}
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <ModalVideoPreview
+                open={showVideoPreview}
+                onClose={() => setShowVideoPreview(false)}
+                lesson={videoPreviewLesson}
+                courseTitle={`Khóa học ${courseId}`}
+                sectionTitle={sections?.find((s: SectionTypeResponse) => s.lessons.some((l: LessonWithResources) => l.id === videoPreviewLesson?.id))?.title}
+            />
 
             {/* edit section */}
             {
@@ -468,6 +445,7 @@ export default function CurriculumView({ courseId }: { courseId: string }) {
             {/* delete section */}
             <ConfirmModal
                 isOpen={showDeleteSectionAlert}
+                type="delete"
                 onClose={() => setShowDeleteSectionAlert(false)}
                 onConfirm={deleteSectionHandler}
                 title="Xóa chương?"
@@ -505,6 +483,7 @@ export default function CurriculumView({ courseId }: { courseId: string }) {
             {/* delete lesson */}
             <ConfirmModal
                 isOpen={showDeleteLessonAlert}
+                type="delete"
                 onClose={() => setShowDeleteLessonAlert(false)}
                 onConfirm={deleteLessonHandler}
                 title="Xóa bài học?"

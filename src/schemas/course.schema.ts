@@ -63,7 +63,7 @@ export const BaseCourseSchema = z.object({
     thumbnail_publicID: z
         .string({ message: "Thiếu public_id của ảnh" })
         .min(1, { message: "Thiếu public_id của ảnh" }),
-    status: CourseStatusSchema,
+    
     categoryId: z
         .number({ message: "Vui lòng chọn danh mục" })
         .min(1, { message: "Vui lòng chọn danh mục" }),
@@ -114,30 +114,12 @@ const courseRefineLogic = (data: any, ctx: z.RefinementCtx) => {
         });
     }
 
-    // Validate status transition
-    if (data.originalStatus && data.status && data.originalStatus !== data.status) {
-        const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-            DRAFT: ["PENDING"],
-            PENDING: ["DRAFT", "PUBLISHED", "REJECTED"],
-            REJECTED: ["DRAFT"],
-            PUBLISHED: ["UNPUBLISHED"],
-            UNPUBLISHED: ["PUBLISHED"],
-        };
-
-        const allowed = ALLOWED_TRANSITIONS[data.originalStatus] || [];
-        if (!allowed.includes(data.status)) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: `Không thể chuyển trạng thái từ "${data.originalStatus}" sang "${data.status}". Vui lòng sử dụng đúng quy trình.`,
-                path: ["status"],
-            });
-        }
-    }
+    
 }
-export const CreateCourseSchema = BaseCourseSchema.omit({ status: true }).superRefine(courseRefineLogic);
+export const CreateCourseSchema = BaseCourseSchema.superRefine(courseRefineLogic);
 export const UpdateCourseSchema = BaseCourseSchema
     .extend({
-        originalStatus: CourseStatusSchema.optional(),
+        
         reason_rejected: z.string().optional()
     })
     .partial()
@@ -145,6 +127,14 @@ export const UpdateCourseSchema = BaseCourseSchema
     .superRefine(courseRefineLogic);
 
 export const CreateUpdateCourseSchema = CreateCourseSchema;
+
+export const RejectCourseSchema = CourseSchema.pick({
+    id: true,
+}).extend({
+    reason_rejected: z.string().min(1, "Vui lòng nhập lý do từ chối"),
+    sendEmail: z.boolean().default(true),
+})
+export type IRejectCourse = z.input<typeof RejectCourseSchema>;
 
 export const ChangeStatusSchema = CourseSchema.pick({
     id: true,

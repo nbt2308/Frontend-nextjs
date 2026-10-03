@@ -20,7 +20,7 @@ import { CategoryType } from "@/types/generated-zod/schemas/models/Category.sche
 export const getColumns = (
     onEdit: (course: CourseResponse) => void,
     onView: (course: CourseResponse) => void,
-    onDelete: (course: CourseResponse) => void
+    onDelete: (course: CourseResponse) => void,
 ): ColumnDef<CourseResponse>[] => [
     {
         id: "course_info",

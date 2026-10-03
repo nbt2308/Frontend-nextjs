@@ -53,7 +53,7 @@ interface ModalUpdateCourseProps {
 export default function ModalUpdateCourse({ open, closeDialog, tags, course, categories }: ModalUpdateCourseProps) {
     const CourseType = CourseTypeSchema.enum;
     const Level = LevelSchema.enum;
-    const CourseStatus = CourseStatusSchema.enum;
+    
     const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -101,7 +101,6 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course, cat
             tags: [],
             thumbnail: undefined,
             thumbnail_publicID: undefined,
-            status: course.status || CourseStatus.DRAFT,
             categoryId: undefined,
         },
     });
@@ -121,8 +120,6 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course, cat
                 tags: course.tags?.map((t: TagType) => t.id) || [],
                 thumbnail: course.thumbnail || undefined,
                 thumbnail_publicID: course.thumbnail_publicID || undefined,
-                status: course.status || CourseStatus.DRAFT,
-                originalStatus: course.status || CourseStatus.DRAFT,
                 categoryId: course.categoryId || undefined,
             });
             setImagePreview(course.thumbnail || null);
@@ -131,7 +128,6 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course, cat
     }, [course, open, form]);
 
     const watchCourseType = form.watch("courseType");
-    const watchStatus = form.watch("status");
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -187,10 +183,9 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course, cat
             }
             data.requirements = data.requirements?.trim() || undefined;
             data.resources = data.resources?.trim() || undefined;
-            const { originalStatus, ...courseData } = data;
             updateCourse({
                 id: course?.id,
-                courseData: courseData
+                courseData: data
             }, {
                 onSuccess: () => {
                     form.reset();
@@ -469,36 +464,7 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course, cat
                                         </Field>
                                     )}
                                 />
-                                <Controller
-                                    name="status"
-                                    control={form.control}
-                                    render={({ field, fieldState }) => (
-                                        <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel>
-                                                Trạng thái <span className="text-red-500">*</span>
-                                            </FieldLabel>
-                                            <Select value={field.value?.toString()} onValueChange={(v) => field.onChange(v)}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Chọn trạng thái" />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper">
-                                                    <SelectItem value={CourseStatus.DRAFT}>Bản nháp (Draft)</SelectItem>
-                                                    <SelectItem value={CourseStatus.PENDING}>Chờ duyệt (Pending)</SelectItem>
-                                                    <SelectItem value={CourseStatus.PUBLISHED}>Đã xuất bản (Published)</SelectItem>
-                                                    <SelectItem value={CourseStatus.UNPUBLISHED}>Tạm ẩn (Unpublished)</SelectItem>
-                                                    <SelectItem value={CourseStatus.REJECTED}>Từ chối (Rejected)</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                        </Field>
-                                    )}
-                                />
-
-
-
-                            </FieldGroup>
-                            <FieldGroup className="grid grid-cols-1 sm:grid-cols-1 gap-4">
-                                <Controller
+                                 <Controller
                                     name="tags"
                                     control={form.control}
                                     render={({ field, fieldState }) => {
@@ -578,29 +544,12 @@ export default function ModalUpdateCourse({ open, closeDialog, tags, course, cat
                                         );
                                     }}
                                 />
+
+
+
                             </FieldGroup>
-                            <FieldGroup className="grid grid-cols-1 sm:grid-cols-1 gap-4">
-                                {/* Reason for rejection, only when REJECTED */}
-                                {watchStatus === CourseStatus.REJECTED && (
-                                    <Controller
-                                        name="reason_rejected"
-                                        control={form.control}
-                                        render={({ field, fieldState }) => (
-                                            <Field data-invalid={fieldState.invalid}>
-                                                <FieldLabel>
-                                                    Lý do từ chối <span className="text-red-500">*</span>
-                                                </FieldLabel>
-                                                <Textarea
-                                                    {...field}
-                                                    placeholder="Nhập lý do từ chối..."
-                                                    className="w-full min-h-[100px]"
-                                                />
-                                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                            </Field>
-                                        )}
-                                    />
-                                )}
-                            </FieldGroup>
+                            
+                            
 
                         </FieldGroup>
 
