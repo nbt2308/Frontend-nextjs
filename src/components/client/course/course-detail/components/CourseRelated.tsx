@@ -6,7 +6,7 @@ import CardCourse from "@/components/shared/cardCourse";
 export default function CourseRelated({slug}: {slug: string}) {
 
   const {data: relatedCourses} = useRelatedCourses(slug)
-
+  if(!relatedCourses || relatedCourses.length === 0) return null;
   return (
     <div className="space-y-4 pt-6 border-t border-border">
       <div className="flex items-center justify-between">

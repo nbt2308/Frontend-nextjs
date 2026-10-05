@@ -23,7 +23,9 @@ export default function CourseStickyTopBar({
   handleEnroll,
 }: CourseStickyTopBarProps) {
   const CourseType = CourseTypeSchema.enum;
-  const finalPrice = course.discount > 0 && course.discount < course.price ? course.discount : course.price;
+  const originalPrice = Number(course.price) || 0
+  const salePrice = Number(course.discount) || 0
+  const hasDiscount = course.courseType === CourseType.PAID && salePrice > 0 && salePrice < originalPrice
   return (
     <div
       className={`fixed top-16 left-0 right-0 z-40 bg-background border-b border-border shadow-sm transition-all duration-300 ${isStickyVisible
@@ -54,18 +56,22 @@ export default function CourseStickyTopBar({
 
         <div className="flex items-center gap-3 shrink-0">
           <div className="hidden lg:flex items-baseline gap-2">
-            <span className="text-lg font-bold text-foreground">
-              {course.courseType === CourseType.FREE
-                ? "Miễn phí"
-                : `${formatter.format(finalPrice)}`}
-            </span>
-            {course.discount > 0 &&
-              course.price > 0 &&
-              course.courseType !== CourseType.FREE && (
-                <span className="text-xs line-through text-muted-foreground">
-                  {formatter.format(course.price)}
-                </span>
-              )}
+            {course.courseType === CourseType.FREE ? (
+              <div className="text-xl font-bold text-emerald-600">Miễn phí</div>
+            ) : (
+              <div className="flex">
+                {hasDiscount && (
+                  <span className="text-2xl mr-2 font-black text-primary tracking-tight">
+                    {formatter.format(salePrice)}
+                  </span>
+                )}
+                {hasDiscount && (
+                  <span className="text-muted-foreground font-medium line-through text-sm mt-0.5 flex items-center gap-2">
+                    {formatter.format(originalPrice)}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <button
             onClick={handleEnroll}

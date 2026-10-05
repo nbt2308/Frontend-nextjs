@@ -115,7 +115,7 @@ export default function TabInfo({
                                 Giá
                             </div>
                             <div className="text-foreground">
-                                {course.courseType === "FREE" ? (
+                                {course.courseType === CourseType.FREE? (
                                     <div className="text-xl font-bold text-emerald-600">0đ (Miễn phí)</div>
                                 ) : (
                                     <div className="flex flex-col">

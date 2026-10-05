@@ -18,6 +18,9 @@ import CoursePreviewModal from "./components/CoursePreviewModal";
 import { useCourseBySlug } from "@/hooks/useCourse";
 import { Loader2 } from "lucide-react";
 import { usePreviewLesson } from "@/hooks/useLession";
+import { useCreateOrder } from "@/hooks/useOrder";
+import { useRouter } from "next/navigation";
+import { useCreatePayment } from "@/hooks/usePayment";
 
 
 export default function CourseDetail({ slug }: { slug?: string }) {
@@ -27,7 +30,9 @@ export default function CourseDetail({ slug }: { slug?: string }) {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [previewTitle, setPreviewTitle] = useState("");
   const [toastMessage, setToastMessage] = useState("");
-    
+  const { mutateAsync: createOrder } = useCreateOrder();
+  const {mutateAsync:createPayment}=useCreatePayment();
+  const router = useRouter();
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,6 +47,9 @@ export default function CourseDetail({ slug }: { slug?: string }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  
+
+
   if (isLoading) return <div className="flex h-screen items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   if (isError || !course) return <div className="flex h-screen items-center justify-center text-red-500">Không tìm thấy khóa học!</div>;
 
@@ -55,7 +63,19 @@ export default function CourseDetail({ slug }: { slug?: string }) {
     setTimeout(() => setToastMessage(""), 3000);
   };
 
-  const handleEnroll = () => showToast('Đang chuyển hướng đến trang thanh toán...');
+  const handleEnroll = async () => {
+    const order = await createOrder(course.id);
+
+    if(order){
+      const payment = await createPayment(order.id);
+      if(payment){
+        router.push(`/payment/${order.orderNumber}`);
+      }
+    }
+    
+  };
+
+
   const addToCart = () => showToast('Đã thêm khóa học vào giỏ hàng thành công!');
   const shareCourse = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -156,6 +176,7 @@ export default function CourseDetail({ slug }: { slug?: string }) {
             handleEnroll={handleEnroll}
             addToCart={addToCart}
             shareCourse={shareCourse}
+            isEnrolled={course.isEnrolled}
           />
 
         </div>

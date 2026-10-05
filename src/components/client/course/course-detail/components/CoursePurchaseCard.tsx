@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, ArrowRight, ShoppingCart, Video, FileCode, Infinity as InfinityIcon, Smartphone, Award, Share2 } from "lucide-react";
+import { Clock, ArrowRight, ShoppingCart, Video, FileCode, Infinity as InfinityIcon, Smartphone, Award, Share2, CheckCircle } from "lucide-react";
 import { formatSectionDuration, formatter } from "@/lib/utils";
 import { CourseTypeSchema, LevelSchema } from "@/types/generated-zod/schemas";
 
@@ -13,6 +13,7 @@ interface CoursePurchaseCardProps {
   handleEnroll: () => void;
   addToCart: () => void;
   shareCourse: () => void;
+  isEnrolled: boolean;
 }
 
 export default function CoursePurchaseCard({
@@ -24,10 +25,21 @@ export default function CoursePurchaseCard({
   totalDuration,
   handleEnroll,
   addToCart,
-  shareCourse
+  shareCourse,
+  isEnrolled
 }: CoursePurchaseCardProps) {
   const CourseType = CourseTypeSchema.enum;
-  const finalPrice = discount > 0 && discount < price ? discount : price;
+  // const finalPrice = discount > 0 && discount < price ? discount : price;
+  const originalPrice = Number(price) || 0
+  const salePrice = Number(discount) || 0
+  const hasDiscount = courseType === CourseTypeSchema.enum.PAID && salePrice > 0 && salePrice < originalPrice
+  let discountPercent = 0;
+  if (hasDiscount) {
+    discountPercent = Math.round(
+      ((price - discount) / price) * 100
+    );
+  }
+
   return (
     <div className={`lg:col-span-4 sticky z-30 transition-all duration-300 ${isStickyVisible ? 'top-36' : 'top-20'}`}>
       <div className="border border-border rounded-2xl bg-card p-5 shadow-lg space-y-5">
@@ -37,42 +49,76 @@ export default function CoursePurchaseCard({
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-muted text-foreground border border-border">
-              Loại khóa học: {courseType === CourseType.FREE ? "Miễn phí" : "Trả phí"}
-            </span>
-            {discount > 0 && price > 0 && (
-              <span className="text-xs font-bold text-primary-foreground bg-primary px-2 py-0.5 rounded">
-                Giảm {Math.round(((price - discount) / price) * 100)}%
-              </span>
-            )}
+          <div className={`flex items-center  ${isEnrolled ? '' : 'justify-between'}`}>
+
+            {
+              isEnrolled ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                    <span className="text-xs font-semibold">Bạn đã đăng ký khóa học này</span>
+                  </div>
+                </>
+              ) : <>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-muted text-foreground border border-border">
+                  Loại khóa học: {courseType === CourseType.FREE ? "Miễn phí" : "Trả phí"}
+                </span>
+                {discount > 0 && price > 0 && (
+                  <span className="text-xs font-bold text-primary-foreground bg-primary px-2 py-0.5 rounded">
+                    Giảm {discountPercent}%
+                  </span>
+                )}
+
+              </>
+            }
+
           </div>
 
           <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-extrabold text-foreground tracking-tight">
-              {courseType === CourseType.FREE ? "Miễn phí" : `${formatter.format(finalPrice)}`}
-            </span>
-            {discount > 0 && price > 0 && courseType !== CourseType.FREE && (
-              <span className="text-sm line-through text-muted-foreground font-medium">
-                {formatter.format(price)}
-              </span>
+            {courseType === CourseType.FREE ? (
+              <div className="text-xl font-bold text-emerald-600">Miễn phí</div>
+            ) : (
+              <div className="flex">
+                {hasDiscount && (
+                  <span className="text-2xl mr-2 font-black text-primary tracking-tight">
+                    {formatter.format(discount)}
+                  </span>
+                )}
+                {hasDiscount && (
+                  <span className="text-muted-foreground font-medium line-through text-sm mt-0.5 flex items-center gap-2">
+                    {formatter.format(price)}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </div>
+        {isEnrolled ? (
+          <>
+            <div className="space-y-2.5 pt-1">
+              <button onClick={handleEnroll} className="w-full py-3 px-4 rounded-xl text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 active:scale-[0.99] transition shadow-md flex items-center justify-center gap-2">
+                <span>Xem khóa học</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </>
+        ) :
+          (<>
+            <div className="space-y-2.5 pt-1">
+              <button onClick={handleEnroll} className="w-full py-3 px-4 rounded-xl text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 active:scale-[0.99] transition shadow-md flex items-center justify-center gap-2">
+                <span>Đăng ký ngay</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
 
-        <div className="space-y-2.5 pt-1">
-          <button onClick={handleEnroll} className="w-full py-3 px-4 rounded-xl text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 active:scale-[0.99] transition shadow-md flex items-center justify-center gap-2">
-            <span>Đăng ký ngay</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-
-          {courseType !== CourseType.FREE && (
-            <button onClick={addToCart} className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-foreground border border-input hover:bg-accent transition flex items-center justify-center gap-2">
-              <ShoppingCart className="w-4 h-4" />
-              Thêm vào giỏ hàng
-            </button>
-          )}
-        </div>
+              {courseType !== CourseType.FREE && (
+                <button onClick={addToCart} className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-foreground border border-input hover:bg-accent transition flex items-center justify-center gap-2">
+                  <ShoppingCart className="w-4 h-4" />
+                  Thêm vào giỏ hàng
+                </button>
+              )}
+            </div>
+          </>)
+        }
 
         <div className="pt-4 border-t border-border space-y-3">
           <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Khóa học bao gồm:</h4>
@@ -97,7 +143,7 @@ export default function CoursePurchaseCard({
             <Share2 className="w-3.5 h-3.5" />
             Chia sẻ khóa học
           </button>
-          
+
         </div>
 
       </div>
