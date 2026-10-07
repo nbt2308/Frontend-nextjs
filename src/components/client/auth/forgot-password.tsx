@@ -20,17 +20,77 @@ import {
     AlertDescription,
     AlertTitle,
 } from "@/components/ui/alert"
-import { useState } from "react";
-import { useCountdown } from "@/hooks/useCountdown";
+import { useEffect, useState } from "react";
 interface ForgotPasswordProps {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 }
 
+
 export function ForgotPassword({ open, onOpenChange }: ForgotPasswordProps) {
-    const { isActive: isCountdownActive, formatted: countdownFormatted, start: startCountdown } = useCountdown(120);
+    const [targetTime, setTargetTime] = useState<string | null>(null);
+    const [remainingSeconds, setRemainingSeconds] = useState(0);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const { step, sendForgotPasswordOtp, verifyForgotPasswordOtp, resetPassword, prevStep, isPending, error, email } = useForgotPassword();
+    //helper for resend otp
+    const startResendCountdown = (targetEmail: string, data?: any) => {
+        const resendTime =
+            data?.resendTime ??
+            new Date(Date.now() + 120 * 1000).toISOString(); // fallback 120s
+
+        localStorage.setItem(`resendTime_forgot_${targetEmail}`, resendTime);
+        setTargetTime(resendTime);
+    };
+
+    // Lấy thời gian từ localStorage khi mount hoặc khi email thay đổi
+    useEffect(() => {
+        if (!email) return;
+        const storedTime = localStorage.getItem(`resendTime_forgot_${email}`);
+        if (storedTime) {
+            setTargetTime(storedTime);
+        }
+    }, [email]);
+
+    // Xử lý đếm ngược
+    useEffect(() => {
+        if (!targetTime) {
+            setRemainingSeconds(0);
+            return;
+        }
+
+        const expiresAt = new Date(targetTime).getTime();
+        if (expiresAt <= Date.now()) {
+            setRemainingSeconds(0);
+            if (email) localStorage.removeItem(`resendTime_forgot_${email}`);
+            setTargetTime(null);
+            return;
+        }
+
+        const updateRemaining = () => {
+            const remaining = Math.max(
+                0,
+                Math.ceil((expiresAt - Date.now()) / 1000)
+            );
+            setRemainingSeconds(remaining);
+            if (remaining === 0) {
+                if (email) localStorage.removeItem(`resendTime_forgot_${email}`);
+                setTargetTime(null);
+            }
+        };
+
+        updateRemaining();
+        const timer = setInterval(updateRemaining, 1000);
+
+        return () => clearInterval(timer);
+    }, [targetTime, email]);
+
+    const isCountdownActive = remainingSeconds > 0;
+    const countdownFormatted = `${Math.floor(remainingSeconds / 60)
+        .toString()
+        .padStart(2, "0")}:${(remainingSeconds % 60).toString().padStart(2, "0")}`;
+
     const togglePassword = () => {
         setShowPassword(!showPassword);
         const passwordInput = document.getElementById('password') as HTMLInputElement;
@@ -64,24 +124,34 @@ export function ForgotPassword({ open, onOpenChange }: ForgotPasswordProps) {
             confirmPassword: "",
         },
     })
-    const { step, sendForgotPasswordOtp, verifyForgotPasswordOtp, resetPassword, prevStep, isPending, error, email } = useForgotPassword();
     const handleSubmitStep1 = (data: IForgotPasswordStep1) => {
-        sendForgotPasswordOtp(data.email);
+        sendForgotPasswordOtp(data.email, {
+            // dùng data.email chứ không dùng state `email`, vì lúc này state chưa kịp cập nhật
+            onSuccess: (result: any) => startResendCountdown(data.email, result),
+        });
 
     };
 
     const handleSubmitStep2 = (data: IForgotPasswordStep2) => {
-        verifyForgotPasswordOtp(data.codeId);
+        verifyForgotPasswordOtp(data.codeId, {
+            onSuccess: () => {
+                if (email) localStorage.removeItem(`resendTime_forgot_${email}`);
+            }
+        });
     };
 
     const handleSubmitStep3 = (data: IForgotPasswordStep3) => {
-        resetPassword(data.password);
+        resetPassword(data.password, {
+            onSuccess: () => {
+                if (email) localStorage.removeItem(`resendTime_forgot_${email}`);
+            }
+        });
     };
 
     const handleResendOTP = () => {
         sendForgotPasswordOtp(email, {
-            onSuccess: () => {
-                startCountdown();
+            onSuccess: (result: any) => {
+                startResendCountdown(email, result);
             }
         });
     }

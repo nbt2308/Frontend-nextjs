@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidParameters, UnauthorizedError } from "@/types/errors";
+import { ApiError, ConflictAccountError, CustomAuthError, InActiveAccountError, InvalidParameters, UnauthorizedError } from "@/types/errors";
 import { IRegister, ISignIn, IVerifyOtp } from '@/schemas/auth.schema';
 
 const authAxios = axios.create({
@@ -79,7 +79,10 @@ export const authService = {
 
             return res.data;
         } catch (error: any) {
-            throw new Error(error?.response?.data?.message || error.message);
+           throw new ApiError(
+            error?.response?.data?.message || error.message,
+            error?.response?.status,
+        );
         }
     },
     sendForgotPasswordOtp: async (email: string) => {

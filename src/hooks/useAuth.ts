@@ -5,6 +5,7 @@ import { authService } from '@/services/auth';
 import { IRegister, ISignIn, IVerifyOtp } from '@/schemas/auth.schema';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { ApiError } from '@/types/errors';
 export const useLogin = () => {
     const router = useRouter();
     return useMutation({
@@ -82,6 +83,7 @@ export const useVerifyOtp = () => {
 }
 
 export const useResendOtp = () => {
+    const router = useRouter();
     return useMutation({
         mutationFn: async (verifyToken: string) => {
             const result = await authService.resendOtp(verifyToken);
@@ -97,6 +99,9 @@ export const useResendOtp = () => {
         },
         onError: (error) => {
             toast.error(error.message);
+            if (error instanceof ApiError && (error.status === 401 || error.status === 404)) {
+                router.replace("/auth/login");
+            }
         }
     })
 }

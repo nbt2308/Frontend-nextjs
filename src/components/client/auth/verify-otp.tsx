@@ -1,4 +1,5 @@
 "use client"
+import { useEffect, useState } from "react";
 import Logo from "@/components/ui/logo";
 import {
     Field,
@@ -18,7 +19,7 @@ import { useForm, Controller } from "react-hook-form";
 import { IVerifyOtp, verifyOtpSchema } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useResendOtp, useVerifyOtp } from "@/hooks/useAuth";
-import { useCountdown } from "@/hooks/useCountdown";
+
 export default function VerifyOtp({ token }: { token: string }) {
     const form = useForm<IVerifyOtp>({
         resolver: zodResolver(verifyOtpSchema),
@@ -29,19 +30,74 @@ export default function VerifyOtp({ token }: { token: string }) {
     })
     const { mutate: verifyMutate, isPending: verifyIsPending, error: verifyError } = useVerifyOtp();
     const handleSubmit = (data: IVerifyOtp) => {
-        verifyMutate(data);
+        verifyMutate(data, {
+            onSuccess: () => {
+                localStorage.removeItem(`resendTime_${token}`);
+            }
+        });
     };
 
-
-
     const { mutate: resendMutate, isPending: resendIsPending, error: resendError } = useResendOtp();
-    const { isActive: isCountdownActive, formatted: countdownFormatted, start: startCountdown } = useCountdown(120);
-    const handleResendOTP = () => {
-        resendMutate(token);
-        if (!resendError) {
-            startCountdown();
+    
+    const [targetTime, setTargetTime] = useState<string | null>(null);
+    const [remainingSeconds, setRemainingSeconds] = useState(0);
+
+    // Lấy thời gian từ localStorage khi mount
+    useEffect(() => {
+        const storedTime = localStorage.getItem(`resendTime_${token}`);
+        if (storedTime) {
+            setTargetTime(storedTime);
         }
+    }, [token]);
+
+    // Xử lý đếm ngược
+    useEffect(() => {
+        if (!targetTime) {
+            setRemainingSeconds(0);
+            return;
+        }
+
+        const expiresAt = new Date(targetTime).getTime();
+        if (expiresAt <= Date.now()) {
+            setRemainingSeconds(0);
+            localStorage.removeItem(`resendTime_${token}`);
+            setTargetTime(null);
+            return;
+        }
+
+        const updateRemaining = () => {
+            const remaining = Math.max(
+                0,
+                Math.ceil((expiresAt - Date.now()) / 1000)
+            );
+            setRemainingSeconds(remaining);
+            if (remaining === 0) {
+                localStorage.removeItem(`resendTime_${token}`);
+                setTargetTime(null);
+            }
+        };
+
+        updateRemaining();
+        const timer = setInterval(updateRemaining, 1000);
+
+        return () => clearInterval(timer);
+    }, [targetTime, token]);
+
+    const handleResendOTP = () => {
+        resendMutate(token, {
+            onSuccess: (data: any) => {
+                // BE trả về resendTime, hoặc mặc định 120s nếu không có
+                const resendTime = data?.resendTime || data?.data?.resendTime || new Date(Date.now() + 120 * 1000).toISOString();
+                localStorage.setItem(`resendTime_${token}`, resendTime);
+                setTargetTime(resendTime);
+            }
+        });
     }
+
+    const isCountdownActive = remainingSeconds > 0;
+    const formattedCountdown = `${Math.floor(remainingSeconds / 60)
+        .toString()
+        .padStart(2, "0")}:${(remainingSeconds % 60).toString().padStart(2, "0")}`;
 
     const errorMessage = verifyError?.message || resendError?.message;
 
@@ -105,7 +161,7 @@ export default function VerifyOtp({ token }: { token: string }) {
                                 <div className="flex items-center justify-between">
                                     <FieldLabel className="text-slate-600 dark:text-slate-400">Bạn chưa nhận được mã OTP?</FieldLabel>
                                     <Button type="button" variant="link" onClick={handleResendOTP} disabled={resendIsPending || isCountdownActive}>
-                                        {resendIsPending ? "Đang gửi..." : isCountdownActive ? `Gửi lại sau ${countdownFormatted}` : "Gửi lại mã OTP"}
+                                        {resendIsPending ? "Đang gửi..." : isCountdownActive ? `Gửi lại sau ${formattedCountdown}` : "Gửi lại mã OTP"}
                                     </Button>
                                 </div>
                             </Field>
