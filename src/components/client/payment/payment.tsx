@@ -58,7 +58,7 @@ export default function Payment({ orderNumber, onSuccess }: PaymentProps) {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center p-8 bg-card text-card-foreground min-h-[400px]">
+            <div className="flex flex-col items-center justify-center min-h-[400px]">
                 <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
                 <p className="text-muted-foreground animate-pulse">Đang tải thông tin thanh toán...</p>
             </div>
@@ -67,7 +67,7 @@ export default function Payment({ orderNumber, onSuccess }: PaymentProps) {
 
     if (isError) {
         return (
-            <div className="flex flex-col items-center justify-center p-8 bg-card text-card-foreground rounded-2xl shadow-sm border border-destructive/20 min-h-[400px]">
+            <div className="flex flex-col items-center justify-center text-card-foreground min-h-[400px]">
                 <AlertCircle className="w-16 h-16 text-destructive mb-4" />
                 <h3 className="text-xl font-semibold text-foreground mb-2">Đã xảy ra lỗi</h3>
                 <p className="text-muted-foreground text-center">{error?.message || 'Lỗi khi lấy thông tin thanh toán'}</p>
@@ -83,23 +83,23 @@ export default function Payment({ orderNumber, onSuccess }: PaymentProps) {
     const minutes = Math.floor(remainingSeconds / 60);
     const seconds = remainingSeconds % 60;
     return (
-        <div className="max-w-md mx-auto rounded-3xl shadow-xl overflow-hidden border border-border bg-card text-card-foreground">
+        <div className="max-w-md mx-auto rounded-3xl shadow-xl overflow-hidden border border-border ">
             {/* Header */}
-            <div className={`p-6 text-center ${isSuccess ? 'bg-green-500 dark:bg-green-600' : isFailed ? 'bg-destructive' : 'bg-primary'} text-white transition-colors duration-500`}>
+            <div className={`p-6 text-center ${isSuccess ? 'bg-green-500 dark:bg-green-600' : isFailed ? 'bg-destructive' : 'bg-muted text-foreground'} transition-colors duration-500`}>
                 {isSuccess ? (
-                    <CheckCircle className="w-16 h-16 mx-auto mb-3 text-white" />
+                    <CheckCircle className="w-16 h-16 mx-auto mb-3" />
                 ) : isFailed ? (
-                    <XCircle className="w-16 h-16 mx-auto mb-3 text-white" />
+                    <XCircle className="w-16 h-16 mx-auto mb-3e" />
                 ) : (
                     <div className="relative w-16 h-16 mx-auto mb-3">
-                        <div className="absolute inset-0 border-4 border-white/30 rounded-full"></div>
-                        <div className="absolute inset-0 border-4 border-white rounded-full border-t-transparent animate-spin"></div>
+                        <div className="absolute inset-0 border-4 border-muted rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
                     </div>
                 )}
                 <h2 className="text-2xl font-bold">
                     {isSuccess ? 'Thanh toán thành công' : isFailed ? 'Thanh toán thất bại' : 'Đang chờ thanh toán'}
                 </h2>
-                <p className="text-white/80 mt-1 text-sm">
+                <p className=" mt-1 text-sm">
                     {isSuccess ? 'Cảm ơn bạn đã mua khóa học!' : isFailed ? 'Đơn hàng đã hết hạn hoặc bị lỗi.' : 'Vui lòng hoàn tất thanh toán để nhận khóa học'}
                 </p>
             </div>

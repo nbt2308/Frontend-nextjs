@@ -78,7 +78,7 @@ export function useCourseBySlug(slug: string | undefined) {
             return result;
         },
         enabled: !!slug,
-        staleTime: 1000 * 60 * 5,
+        staleTime: 1000 * 60 * 1,
     });
 }
 

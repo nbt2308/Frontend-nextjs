@@ -14,7 +14,11 @@ export function usePaymentPolling(orderNumber: string) {
         queryFn: () => PaymentService.getPaymentByOrderNumber(orderNumber),
         enabled: !!orderNumber,
         refetchInterval: (query) => {
+            if (query.state.status === 'error') {
+                return false;
+            }
             const status = query.state.data?.status;
+
             // Dừng polling khi status đã ở trạng thái cuối
             if (status === PaymentStatus.PAID || status === PaymentStatus.FAILED || status === PaymentStatus.EXPIRED || status === PaymentStatus.REFUNDED) {
                 return false;
